@@ -6,6 +6,20 @@ import ChessBoard from './ChessBoard';
 import { botLevels } from '@/lib/trainingData';
 import { getBotMove, uciToMove } from '@/lib/engine';
 
+type PromotionPiece = 'q' | 'r' | 'b' | 'n';
+
+type PendingPromotion = {
+  from: Square;
+  to: Square;
+} | null;
+
+const promotionChoices: { piece: PromotionPiece; label: string; symbol: string }[] = [
+  { piece: 'q', label: 'Queen', symbol: '♕' },
+  { piece: 'r', label: 'Rook', symbol: '♖' },
+  { piece: 'b', label: 'Bishop', symbol: '♗' },
+  { piece: 'n', label: 'Knight', symbol: '♘' },
+];
+
 function gameStatus(game: Chess): string {
   if (game.history().length === 0) return 'White starts the game.';
   if (game.isCheckmate()) return game.turn() === 'w' ? 'Checkmate — Black wins.' : 'Checkmate — White wins.';
@@ -55,6 +69,7 @@ export default function PlayTrainer() {
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
   const [levelId, setLevelId] = useState(botLevels[1].id);
   const [isThinking, setIsThinking] = useState(false);
+  const [pendingPromotion, setPendingPromotion] = useState<PendingPromotion>(null);
   const [coachNote, setCoachNote] = useState('White starts every game. You play as White — focus on development, centre control, and king safety.');
 
   const level = useMemo(() => botLevels.find((bot) => bot.id === levelId) ?? botLevels[1], [levelId]);
@@ -68,10 +83,18 @@ export default function PlayTrainer() {
     setGame(new Chess());
     setSelectedSquare(null);
     setLastMove(null);
+    setPendingPromotion(null);
     setCoachNote('New game. Aim for safety first: centre, development, king safety.');
   };
 
   const undoPair = () => {
+    if (pendingPromotion) {
+      setPendingPromotion(null);
+      setSelectedSquare(null);
+      setCoachNote('Promotion choice cleared. Choose a move when you are ready.');
+      return;
+    }
+
     const copy = copyGame(game);
     copy.undo();
     copy.undo();
@@ -81,14 +104,15 @@ export default function PlayTrainer() {
     setCoachNote('Move pair undone. Now replay with one clearer thought.');
   };
 
-  const makePlayerMove = (from: Square, to: Square) => {
+  const applyPlayerMove = (from: Square, to: Square, promotion?: PromotionPiece) => {
     const copy = copyGame(game);
     try {
-      const move = copy.move({ from, to, promotion: 'q' });
+      const move = copy.move(promotion ? { from, to, promotion } : { from, to });
       if (!move) return false;
       setGame(copy);
       setLastMove({ from: move.from, to: move.to });
       setSelectedSquare(null);
+      setPendingPromotion(null);
       const stateMsg = coachMessageFromGameState(copy);
       if (stateMsg) {
         setCoachNote(stateMsg);
@@ -101,8 +125,28 @@ export default function PlayTrainer() {
     }
   };
 
+  const requiresPromotionChoice = (from: Square, to: Square) => {
+    const piece = game.get(from);
+    if (piece?.type !== 'p') return false;
+
+    const promotionRank = piece.color === 'w' ? '8' : '1';
+    if (!to.endsWith(promotionRank)) return false;
+
+    return game.moves({ square: from, verbose: true }).some((move) => move.to === to && Boolean(move.promotion));
+  };
+
+  const completePromotion = (promotion: PromotionPiece) => {
+    if (!pendingPromotion || isThinking || game.isGameOver()) return;
+
+    const moved = applyPlayerMove(pendingPromotion.from, pendingPromotion.to, promotion);
+    if (!moved) {
+      setPendingPromotion(null);
+      setCoachNote('That promotion could not be completed. The board is unchanged, so please try the move again.');
+    }
+  };
+
   const onSquareClick = (square: Square) => {
-    if (isThinking || game.isGameOver() || game.turn() !== 'w') return;
+    if (isThinking || pendingPromotion || game.isGameOver() || game.turn() !== 'w') return;
 
     const piece = game.get(square);
     if (!selectedSquare) {
@@ -120,7 +164,14 @@ export default function PlayTrainer() {
       return;
     }
 
-    const ok = makePlayerMove(selectedSquare, square);
+    if (requiresPromotionChoice(selectedSquare, square)) {
+      setPendingPromotion({ from: selectedSquare, to: square });
+      setSelectedSquare(null);
+      setCoachNote('Your pawn reached the end of the board. Choose what it becomes.');
+      return;
+    }
+
+    const ok = applyPlayerMove(selectedSquare, square);
     if (!ok) setCoachNote('Illegal move. Slow down and check how that piece moves.');
   };
 
@@ -166,7 +217,7 @@ export default function PlayTrainer() {
           </div>
           <div className="hidden sm:flex gap-2">
             <button onClick={resetGame} className="rounded-xl bg-teal-400 px-4 py-2 font-bold text-slate-950 hover:bg-teal-300">New game</button>
-            <button disabled={isThinking || game.history().length === 0} onClick={undoPair} className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm text-slate-100 hover:bg-slate-700/50 disabled:cursor-not-allowed disabled:opacity-40">Undo pair</button>
+            <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion)} onClick={undoPair} className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm text-slate-100 hover:bg-slate-700/50 disabled:cursor-not-allowed disabled:opacity-40">Undo pair</button>
           </div>
         </div>
 
@@ -187,15 +238,36 @@ export default function PlayTrainer() {
           </div>
         )}
 
+        {pendingPromotion && (
+          <div role="dialog" aria-labelledby="promotion-title" className="mb-4 rounded-2xl border-2 border-yellow-300/60 bg-slate-950 p-4 shadow-2xl">
+            <h3 id="promotion-title" className="text-lg font-bold text-yellow-100">Choose your promotion</h3>
+            <p className="mt-1 text-sm text-slate-100">Your pawn reached the end of the board. Choose what it becomes.</p>
+            <p className="mt-1 text-xs text-slate-400">Most of the time, choose Queen. Sometimes Knight is useful for a surprise check.</p>
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {promotionChoices.map((choice) => (
+                <button
+                  key={choice.piece}
+                  type="button"
+                  onClick={() => completePromotion(choice.piece)}
+                  className="min-h-16 rounded-xl border border-slate-600 bg-slate-800 px-3 py-3 text-center font-bold text-white transition hover:border-yellow-200 hover:bg-slate-700 focus-visible:border-yellow-200"
+                >
+                  <span aria-hidden="true" className="mr-2 text-2xl">{choice.symbol}</span>
+                  {choice.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Black bot</p>
-        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} disabled={isThinking || game.isGameOver()} onSquareClick={onSquareClick} />
+        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} disabled={isThinking || Boolean(pendingPromotion) || game.isGameOver()} onSquareClick={onSquareClick} />
         <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">You · White</p>
 
         {/* Mobile action bar */}
         <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
           <button onClick={resetGame} className="flex-1 rounded-2xl bg-teal-400 py-3 text-center font-bold text-slate-950">New</button>
-          <button disabled={isThinking || game.history().length === 0} onClick={undoPair} className="flex-1 rounded-2xl border border-slate-600 py-3 text-center text-sm text-slate-100 disabled:cursor-not-allowed disabled:opacity-40">Undo</button>
-          <button disabled={game.isGameOver()} onClick={() => setCoachNote('Hint: Look for checks, captures, threats before each move.')} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100 disabled:cursor-not-allowed disabled:opacity-40">Hint</button>
+          <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion)} onClick={undoPair} className="flex-1 rounded-2xl border border-slate-600 py-3 text-center text-sm text-slate-100 disabled:cursor-not-allowed disabled:opacity-40">Undo</button>
+          <button disabled={Boolean(pendingPromotion) || game.isGameOver()} onClick={() => setCoachNote('Hint: Look for checks, captures, threats before each move.')} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100 disabled:cursor-not-allowed disabled:opacity-40">Hint</button>
         </div>
       </div>
 
