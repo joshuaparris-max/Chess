@@ -8,6 +8,8 @@ export type BotLevel = {
   depth: number;
   noise: number;
   blunderChance: number;
+  stockfishSkill: number;
+  moveTimeMs: number;
   description: string;
 };
 

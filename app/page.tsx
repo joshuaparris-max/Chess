@@ -121,7 +121,7 @@ export default function Home() {
       {modeContent(mode)}
 
       <footer className="py-8 text-center text-sm text-slate-500">
-        Built for Vercel. Alpha engine is a local minimax trainer; Stockfish NNUE, accounts, cloud saves and multiplayer are planned next slices.
+        Built for Vercel. Stockfish powers computer play, with an Alpha Bot fallback if the engine cannot load.
       </footer>
     </main>
   );

@@ -5,7 +5,7 @@ export default function WatchRoom() {
     <section className="space-y-5">
       <div className="glass-panel rounded-3xl p-5">
         <h2 className="text-2xl font-bold">Watch room</h2>
-        <p className="mt-2 max-w-3xl text-slate-300">This alpha uses model-game study cards rather than full video. The beta version can attach YouTube embeds, PGN viewers, and engine annotations. The training purpose is to watch elite ideas and then practise the same idea in Play or Puzzles.</p>
+        <p className="mt-2 max-w-3xl text-slate-300">This alpha uses model-game study cards rather than full video. A later version can add videos, interactive game viewers, and guided analysis. The training purpose is to watch elite ideas and then practise the same idea in Play or Puzzles.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

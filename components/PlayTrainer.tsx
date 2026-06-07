@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Chess, type Square } from 'chess.js';
 import ChessBoard from './ChessBoard';
 import { botLevels } from '@/lib/trainingData';
 import { getBotMove, uciToMove } from '@/lib/engine';
+import { cancelStockfishMove, getStockfishMove } from '@/lib/stockfishClient';
 
 type PromotionPiece = 'q' | 'r' | 'b' | 'n';
 
@@ -70,7 +71,9 @@ export default function PlayTrainer() {
   const [levelId, setLevelId] = useState(botLevels[1].id);
   const [isThinking, setIsThinking] = useState(false);
   const [pendingPromotion, setPendingPromotion] = useState<PendingPromotion>(null);
+  const [engineNotice, setEngineNotice] = useState<string | null>(null);
   const [coachNote, setCoachNote] = useState('White starts every game. You play as White — focus on development, centre control, and king safety.');
+  const engineRequestId = useRef(0);
 
   const level = useMemo(() => botLevels.find((bot) => bot.id === levelId) ?? botLevels[1], [levelId]);
 
@@ -80,7 +83,10 @@ export default function PlayTrainer() {
   }, [game, selectedSquare]);
 
   const resetGame = () => {
+    engineRequestId.current += 1;
+    cancelStockfishMove();
     setGame(new Chess());
+    setIsThinking(false);
     setSelectedSquare(null);
     setLastMove(null);
     setPendingPromotion(null);
@@ -88,6 +94,10 @@ export default function PlayTrainer() {
   };
 
   const undoPair = () => {
+    engineRequestId.current += 1;
+    cancelStockfishMove();
+    setIsThinking(false);
+
     if (pendingPromotion) {
       setPendingPromotion(null);
       setSelectedSquare(null);
@@ -178,13 +188,24 @@ export default function PlayTrainer() {
   useEffect(() => {
     if (game.turn() !== 'b' || game.isGameOver()) return;
 
+    const requestId = engineRequestId.current + 1;
+    engineRequestId.current = requestId;
     setIsThinking(true);
-    const timer = window.setTimeout(() => {
-      const uci = getBotMove(game.fen(), level);
-      if (!uci) {
-        setIsThinking(false);
-        return;
+    const timer = window.setTimeout(async () => {
+      let uci: string | null = null;
+      let usedFallback = false;
+
+      try {
+        uci = await getStockfishMove(game.fen(), level);
+        if (engineRequestId.current === requestId) setEngineNotice(null);
+      } catch {
+        if (engineRequestId.current !== requestId) return;
+        usedFallback = true;
+        uci = getBotMove(game.fen(), level);
+        setEngineNotice('Engine failed to load. Falling back to Alpha Bot.');
       }
+
+      if (engineRequestId.current !== requestId || !uci) return;
 
       const copy = copyGame(game);
       try {
@@ -194,17 +215,25 @@ export default function PlayTrainer() {
         const stateMsg = coachMessageFromGameState(copy);
         if (stateMsg) {
           setCoachNote(stateMsg);
+        } else if (usedFallback) {
+          setCoachNote('Engine failed to load. Falling back to Alpha Bot.');
         } else {
           setCoachNote(level.elo >= 2000 ? 'The bot reduced your easy options. Find your worst piece and improve it.' : 'Bot moved. Look for checks, captures and loose pieces.');
         }
       } catch {
         setCoachNote('The alpha engine produced an invalid move. Resetting is safe if this repeats.');
       } finally {
-        setIsThinking(false);
+        if (engineRequestId.current === requestId) setIsThinking(false);
       }
     }, 450);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+      if (engineRequestId.current === requestId) {
+        engineRequestId.current += 1;
+        cancelStockfishMove();
+      }
+    };
   }, [game, level]);
 
   return (
@@ -212,8 +241,8 @@ export default function PlayTrainer() {
       <div className="glass-panel min-w-0 rounded-3xl p-2 sm:p-6">
         <div className="mb-2 flex items-center justify-between sm:mb-4">
           <div>
-            <h2 className="text-lg font-bold sm:text-2xl">Play vs Alpha Bot</h2>
-            <p className="text-xs text-slate-300 sm:text-sm">Local minimax trainer. You play White; bands are unmeasured practice targets.</p>
+            <h2 className="text-lg font-bold sm:text-2xl">Play vs Computer</h2>
+            <p className="text-xs text-slate-300 sm:text-sm">Choose a training level. You play White, and these are practice levels rather than official ratings.</p>
           </div>
           <div className="hidden sm:flex gap-2">
             <button onClick={resetGame} className="rounded-xl bg-teal-400 px-4 py-2 font-bold text-slate-950 hover:bg-teal-300">New game</button>
@@ -223,8 +252,10 @@ export default function PlayTrainer() {
 
         <div className="mobile-coach mb-3 sm:mb-4">
           <p className="text-sm font-semibold text-yellow-200">Coach</p>
-          <p className="text-sm text-slate-100">{coachNote}</p>
+          <p className="text-sm text-slate-100">{isThinking ? 'Bot is thinking…' : coachNote}</p>
         </div>
+
+        {engineNotice && <p className="mb-4 rounded-xl border border-yellow-300/40 bg-yellow-950/30 p-3 text-sm text-yellow-100">{engineNotice}</p>}
 
         {game.isGameOver() && (
           <div className={`mb-4 rounded-2xl border-2 p-4 text-center font-bold ${
@@ -276,9 +307,10 @@ export default function PlayTrainer() {
           <label className="mb-2 block text-sm font-semibold text-slate-300" htmlFor="bot-level">Bot difficulty</label>
           <select id="bot-level" value={levelId} onChange={(event) => setLevelId(event.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
             {botLevels.map((bot) => (
-              <option key={bot.id} value={bot.id}>{bot.label} — training band {bot.elo}</option>
+              <option key={bot.id} value={bot.id}>{bot.label}</option>
             ))}
           </select>
+          <p className="mt-2 text-xs text-slate-400">These are practice levels, not official ratings.</p>
           <div className="mt-4 rounded-2xl bg-slate-950/60 p-4">
             <p className="text-lg font-bold text-yellow-200">{level.label}</p>
             <p className="text-sm text-slate-300">{level.style}</p>

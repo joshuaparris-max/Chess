@@ -7,21 +7,19 @@ This is **not yet a full grandmaster engine platform**. It is an alpha foundatio
 ## What is included now
 
 - Next.js + TypeScript + Tailwind app
-- Play room: human as White vs adjustable local chess bots
+- Play room: human as White vs adjustable Stockfish training levels
 - Puzzle room: tactical and principle-based training positions
 - Learn room: short lessons based on peak-Elo player research
 - Watch room: model-game study cards for Carlsen, Kasparov, Caruana, Aronian and So
 - Roadmap: beginner-to-master training bands
 - Local progress: daily goal and streak saved in browser local storage
 - Legal move validation with `chess.js`
-- Lightweight alpha engine with material, centre, mobility, king-safety and alpha-beta search
+- Browser Web Worker Stockfish engine with a lightweight Alpha Bot fallback
+- Human promotion choice for Queen, Rook, Bishop, or Knight
 
 ## Important alpha limitation
 
-The current computer opponent is a browser-safe minimax trainer, not real Stockfish NNUE yet.
-Its displayed Elo bands are practice targets, not measured bot ratings.
-
-The code is structured so a later slice can replace `lib/engine.ts` with a Stockfish Web Worker / WASM adapter.
+The computer opponent uses the lite single-threaded Stockfish browser engine. Its displayed levels are practice targets, not measured bot ratings. If the worker cannot load, the app falls back to the lightweight local trainer.
 
 ## Run locally
 
@@ -63,19 +61,6 @@ git push -u origin main
 5. Deploy.
 
 ## Suggested next slices
-
-### Slice 2 — Real Stockfish
-
-- Add a `public/stockfish/` folder or install a maintained Stockfish WASM package.
-- Run the engine inside a Web Worker.
-- Add UCI commands:
-  - `uci`
-  - `isready`
-  - `ucinewgame`
-  - `setoption name Skill Level value X`
-  - `position fen ...`
-  - `go depth ...` or `go movetime ...`
-- Keep the existing bot-level UI but map each level to Stockfish skill, depth, and move time.
 
 ### Slice 3 — Accounts and saved progress
 
@@ -126,6 +111,9 @@ components/
   WatchRoom.tsx
 lib/
   engine.ts
+  stockfishClient.ts
   trainingData.ts
   types.ts
+public/
+  stockfish/
 ```
