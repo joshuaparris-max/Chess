@@ -47,33 +47,35 @@ export default function PostGameReview({ gameData, autoRequest = false }: { game
   }, [autoRequest]);
 
   return (
-    <div style={{ maxWidth: 680 }}>
+    <div style={{ maxWidth: 680, width: '100%' }}>
       <div style={{ marginBottom: 8 }}>
-        <button onClick={() => requestReview(false)} disabled={loading} style={{ marginRight: 8 }}>
+        <button onClick={() => requestReview(false)} disabled={loading} style={{ marginRight: 8, padding: '8px 12px', borderRadius: 8 }}>
           {loading ? 'Coach is reviewing your game…' : 'Review my game'}
         </button>
-        <span style={{ marginLeft: 12, fontSize: 12, color: '#666' }}>For review, the app sends this game's moves and basic game details. No personal information is sent.</span>
+        <span style={{ marginLeft: 12, fontSize: 12, color: '#9ca3af' }}>For review, the app sends this game's moves and basic game details. No personal information is sent.</span>
       </div>
 
       {error && <div style={{ color: 'crimson' }}>{error}</div>}
 
       {summary && (
-        <div style={{ border: '1px solid #ddd', padding: 12, borderRadius: 8, background: '#fff' }}>
-          <div style={{ fontWeight: 600, marginBottom: 8 }}>Quick Review</div>
-          <div style={{ whiteSpace: 'pre-wrap' }}>{summary}</div>
-          <div style={{ marginTop: 8 }}>
+        <div style={{ background: '#0f172a', color: '#e5e7eb', border: '1px solid rgba(148, 163, 184, 0.35)', borderRadius: 16, padding: 16 }}>
+          <div style={{ fontWeight: 700, marginBottom: 8, color: '#2dd4bf' }}>Quick Review</div>
+          <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>{summary}</div>
+          <div style={{ marginTop: 12 }}>
             <button onClick={() => {
               if (detail) setDetail(null);
               else requestReview(true);
-            }} disabled={loading}>
-              {detail ? 'Hide move-by-move review' : 'Show move-by-move review'}
+            }} disabled={loading} style={{ padding: '8px 12px', borderRadius: 8 }}>
+              {detail ? 'Hide key moments' : 'Show key moments'}
             </button>
           </div>
         </div>
       )}
 
       {detail && (
-        <div style={{ marginTop: 12, whiteSpace: 'pre-wrap', borderLeft: '3px solid #eee', paddingLeft: 12 }}>{detail}</div>
+        <div style={{ marginTop: 12, whiteSpace: 'pre-wrap', background: '#071020', color: '#e6eef0', border: '1px solid rgba(148, 163, 184, 0.18)', padding: 12, borderRadius: 12 }}>
+          {detail}
+        </div>
       )}
 
       {summary && <div style={{ marginTop: 12 }}><GameReviewChat gameData={gameData} baseSummary={summary} /></div>}

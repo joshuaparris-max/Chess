@@ -78,21 +78,28 @@ export async function POST(req: Request) {
 
         const json = await res.json();
         // Extract text from OpenAI-compatible response
-        const content = json?.choices?.[0]?.message?.content;
+        let content = json?.choices?.[0]?.message?.content;
         if (!content || typeof content !== 'string') {
           console.log(`Groq key index ${i} returned unexpected response shape`);
           lastError = { status: 500, text: 'Unexpected response shape' };
           continue;
         }
 
-        const text = content.slice(0, 10000);
+        // Basic sanitization: strip Markdown markers and accidental debug tokens
+        content = content.replace(/\*\*/g, '');
+        content = content.replace(/```[\s\S]*?```/g, '');
+        content = content.replace(/detail=true/g, '');
+
+        const text = content.slice(0, 10000).trim();
 
         // Return appropriate response based on mode
         if (isDetailMode) {
           const response: ReviewResponse = { detail: text };
           return NextResponse.json(response);
         } else {
-          const response: ReviewResponse = { summary: text };
+          // Ensure summary is short — trim to first 1200 characters as a safeguard
+          const short = text.length > 1200 ? text.slice(0, 1200).trim() : text;
+          const response: ReviewResponse = { summary: short };
           return NextResponse.json(response);
         }
       } catch (e) {

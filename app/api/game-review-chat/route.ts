@@ -57,7 +57,8 @@ export async function POST(req: Request) {
     }
 
     const coaches = buildCoachPrompt(body.gameData, false);
-    const userPrompt = `${coaches.user}\n\nUser question: ${body.question.trim()}`;
+    // Instruct the model to answer the user's question directly and succinctly.
+    const userPrompt = `${coaches.user}\n\nAnswer instructions: Reply in plain text only. Answer the user's question directly and succinctly. Do not repeat the full review. If the user asks about checkmate, explain the final position: name the attacking piece, why the king has no escape, and why capture/block/interpose are impossible, in beginner terms.\n\nUser question: ${body.question.trim()}`;
     const messages = [
       { role: 'system' as const, content: coaches.system },
       { role: 'user' as const, content: userPrompt },
@@ -79,13 +80,17 @@ export async function POST(req: Request) {
           continue;
         }
         const json = await res.json();
-        const content = json?.choices?.[0]?.message?.content;
+        let content = json?.choices?.[0]?.message?.content;
         if (!content || typeof content !== 'string') {
           console.log(`Groq key index ${i} returned unexpected response shape`);
           lastError = { status: 500, text: 'Unexpected response shape' };
           continue;
         }
-        const response: ChatResponse = { answer: content.slice(0, 10000) };
+        // Sanitise markdown and debug tokens
+        content = content.replace(/\*\*/g, '');
+        content = content.replace(/```[\s\S]*?```/g, '');
+        content = content.replace(/detail=true/g, '');
+        const response: ChatResponse = { answer: content.slice(0, 10000).trim() };
         return NextResponse.json(response);
       } catch (e) {
         lastError = e;
