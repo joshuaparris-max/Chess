@@ -19,6 +19,7 @@ This is **not yet a full grandmaster engine platform**. It is an alpha foundatio
 ## Important alpha limitation
 
 The current computer opponent is a browser-safe minimax trainer, not real Stockfish NNUE yet.
+Its displayed Elo bands are practice targets, not measured bot ratings.
 
 The code is structured so a later slice can replace `lib/engine.ts` with a Stockfish Web Worker / WASM adapter.
 

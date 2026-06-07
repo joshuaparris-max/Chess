@@ -65,7 +65,7 @@ export default function PuzzleTrainer() {
       }
 
       if (attempted !== expected && `${selectedSquare}${square}q` !== expected) {
-        setMessage('Legal, but not the training move. Reset the position and look for the forcing idea.');
+        setMessage('Legal, but not the training move. The position is unchanged, so look for a more forcing idea.');
         setSelectedSquare(null);
         return;
       }

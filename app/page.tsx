@@ -13,8 +13,15 @@ const modes: { id: AppMode; label: string; tagline: string }[] = [
   { id: 'puzzles', label: 'Puzzles', tagline: 'Build pattern recognition' },
   { id: 'learn', label: 'Learn', tagline: 'Micro-lessons from elite traits' },
   { id: 'watch', label: 'Watch', tagline: 'Model-game ideas' },
-  { id: 'roadmap', label: 'Roadmap', tagline: 'Beginner to mastery path' },
+  { id: 'roadmap', label: 'Roadmap', tagline: 'Beginner to advanced path' },
 ];
+
+function localDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 function modeContent(mode: AppMode) {
   switch (mode) {
@@ -35,20 +42,40 @@ export default function Home() {
   const [mode, setMode] = useState<AppMode>('play');
   const [studyStreak, setStudyStreak] = useState(0);
   const [dailyGoal, setDailyGoal] = useState(20);
+  const [lastTrained, setLastTrained] = useState<string | null>(null);
+  const [progressLoaded, setProgressLoaded] = useState(false);
 
   useEffect(() => {
     const savedStreak = window.localStorage.getItem('gm-alpha-streak');
     const savedGoal = window.localStorage.getItem('gm-alpha-goal');
-    if (savedStreak) setStudyStreak(Number(savedStreak));
-    if (savedGoal) setDailyGoal(Number(savedGoal));
+    const savedLastTrained = window.localStorage.getItem('gm-alpha-last-trained');
+    const parsedStreak = Number(savedStreak);
+    const parsedGoal = Number(savedGoal);
+    if (Number.isFinite(parsedStreak) && parsedStreak >= 0) setStudyStreak(parsedStreak);
+    if ([10, 20, 30, 45].includes(parsedGoal)) setDailyGoal(parsedGoal);
+    if (savedLastTrained) setLastTrained(savedLastTrained);
+    setProgressLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!progressLoaded) return;
     window.localStorage.setItem('gm-alpha-streak', String(studyStreak));
     window.localStorage.setItem('gm-alpha-goal', String(dailyGoal));
-  }, [studyStreak, dailyGoal]);
+    if (lastTrained) window.localStorage.setItem('gm-alpha-last-trained', lastTrained);
+  }, [dailyGoal, lastTrained, progressLoaded, studyStreak]);
+
+  const markTodayTrained = () => {
+    const today = localDateKey();
+    if (lastTrained === today) return;
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    setStudyStreak(lastTrained === localDateKey(yesterday) ? (value) => value + 1 : 1);
+    setLastTrained(today);
+  };
 
   const active = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode]);
+  const trainedToday = lastTrained === localDateKey();
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
@@ -57,7 +84,7 @@ export default function Home() {
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-yellow-200">Alpha first slice</p>
             <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-6xl">Grandmaster Path</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">A Chess.com-style training app foundation: play bots, solve puzzles, learn in tiny modules, study elite-player patterns, and follow a beginner-to-master roadmap.</p>
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">A Chess.com-style training app foundation: play bots, solve puzzles, learn in tiny modules, study elite-player patterns, and follow a beginner-to-advanced roadmap.</p>
           </div>
           <div className="grid min-w-72 gap-3 rounded-3xl bg-slate-950/60 p-4">
             <div className="flex items-center justify-between gap-4">
@@ -73,7 +100,7 @@ export default function Home() {
                 <option value={45}>45 min</option>
               </select>
             </div>
-            <button onClick={() => setStudyStreak((value) => value + 1)} className="rounded-xl bg-yellow-200 px-4 py-2 font-bold text-slate-950 hover:bg-yellow-100">Mark today trained</button>
+            <button disabled={trainedToday} onClick={markTodayTrained} className="rounded-xl bg-yellow-200 px-4 py-2 font-bold text-slate-950 hover:bg-yellow-100 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300">{trainedToday ? 'Today complete' : 'Mark today trained'}</button>
           </div>
         </div>
       </header>

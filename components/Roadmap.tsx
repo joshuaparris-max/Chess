@@ -4,8 +4,8 @@ export default function Roadmap() {
   return (
     <section className="space-y-5">
       <div className="glass-panel rounded-3xl p-5">
-        <h2 className="text-2xl font-bold">Beginner to Grandmaster roadmap</h2>
-        <p className="mt-2 max-w-4xl text-slate-300">This is the training spine for the app. The first alpha slice includes local play, puzzles, lessons, watch cards, and milestone tracking. Later versions should add accounts, spaced repetition, Stockfish NNUE, PGN import, rating estimates, and coach-style reports.</p>
+        <h2 className="text-2xl font-bold">Beginner to advanced roadmap</h2>
+        <p className="mt-2 max-w-4xl text-slate-300">This is a practical training path, not a promise of a title or rating. The alpha includes local play, puzzles, lessons, watch cards, and milestone tracking. Later versions can add accounts, spaced repetition, Stockfish NNUE, PGN import, rating estimates, and coach-style reports.</p>
       </div>
 
       <div className="space-y-4">

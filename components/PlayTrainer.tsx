@@ -20,6 +20,12 @@ function moveSanList(game: Chess): string[] {
   return game.history();
 }
 
+function copyGame(game: Chess): Chess {
+  const copy = new Chess();
+  copy.loadPgn(game.pgn());
+  return copy;
+}
+
 export default function PlayTrainer() {
   const [game, setGame] = useState(() => new Chess());
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
@@ -43,8 +49,7 @@ export default function PlayTrainer() {
   };
 
   const undoPair = () => {
-    const copy = new Chess();
-    copy.loadPgn(game.pgn());
+    const copy = copyGame(game);
     copy.undo();
     copy.undo();
     setGame(copy);
@@ -54,7 +59,7 @@ export default function PlayTrainer() {
   };
 
   const makePlayerMove = (from: Square, to: Square) => {
-    const copy = new Chess(game.fen());
+    const copy = copyGame(game);
     try {
       const move = copy.move({ from, to, promotion: 'q' });
       if (!move) return false;
@@ -102,7 +107,7 @@ export default function PlayTrainer() {
         return;
       }
 
-      const copy = new Chess(game.fen());
+      const copy = copyGame(game);
       try {
         const move = copy.move(uciToMove(uci));
         setGame(copy);
@@ -120,15 +125,15 @@ export default function PlayTrainer() {
 
   return (
     <section className="grid gap-5 lg:grid-cols-[minmax(0,620px)_minmax(320px,1fr)]">
-      <div className="glass-panel rounded-3xl p-2 sm:p-6">
+      <div className="glass-panel min-w-0 rounded-3xl p-2 sm:p-6">
         <div className="mb-2 flex items-center justify-between sm:mb-4">
           <div>
             <h2 className="text-lg font-bold sm:text-2xl">Play vs Alpha Bot</h2>
-            <p className="text-xs text-slate-300 sm:text-sm">Alpha trainer — you play as White, and White always moves first.</p>
+            <p className="text-xs text-slate-300 sm:text-sm">Local minimax trainer. You play White; bands are unmeasured practice targets.</p>
           </div>
           <div className="hidden sm:flex gap-2">
             <button onClick={resetGame} className="rounded-xl bg-teal-400 px-4 py-2 font-bold text-slate-950 hover:bg-teal-300">New game</button>
-            <button onClick={undoPair} className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm text-slate-100 hover:bg-slate-700/50">Undo pair</button>
+            <button disabled={isThinking || game.history().length === 0} onClick={undoPair} className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm text-slate-100 hover:bg-slate-700/50 disabled:cursor-not-allowed disabled:opacity-40">Undo pair</button>
           </div>
         </div>
 
@@ -137,22 +142,22 @@ export default function PlayTrainer() {
           <p className="text-sm text-slate-100">{coachNote}</p>
         </div>
 
-        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} onSquareClick={onSquareClick} />
+        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} disabled={isThinking} onSquareClick={onSquareClick} />
 
         {/* Mobile action bar */}
         <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
           <button onClick={resetGame} className="flex-1 rounded-2xl bg-teal-400 py-3 text-center font-bold text-slate-950">New</button>
-          <button onClick={undoPair} className="flex-1 rounded-2xl border border-slate-600 py-3 text-center text-sm text-slate-100">Undo</button>
+          <button disabled={isThinking || game.history().length === 0} onClick={undoPair} className="flex-1 rounded-2xl border border-slate-600 py-3 text-center text-sm text-slate-100 disabled:cursor-not-allowed disabled:opacity-40">Undo</button>
           <button onClick={() => setCoachNote('Hint: Look for checks, captures, threats before each move.')} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100">Hint</button>
         </div>
       </div>
 
-      <aside className="space-y-4">
+      <aside className="min-w-0 space-y-4">
         <div className="glass-panel rounded-3xl p-5">
           <label className="mb-2 block text-sm font-semibold text-slate-300" htmlFor="bot-level">Bot difficulty</label>
           <select id="bot-level" value={levelId} onChange={(event) => setLevelId(event.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
             {botLevels.map((bot) => (
-              <option key={bot.id} value={bot.id}>{bot.label} — approx {bot.elo}</option>
+              <option key={bot.id} value={bot.id}>{bot.label} — training band {bot.elo}</option>
             ))}
           </select>
           <div className="mt-4 rounded-2xl bg-slate-950/60 p-4">
