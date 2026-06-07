@@ -26,7 +26,7 @@ export default function PlayTrainer() {
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
   const [levelId, setLevelId] = useState(botLevels[1].id);
   const [isThinking, setIsThinking] = useState(false);
-  const [coachNote, setCoachNote] = useState('Start with the research habit: checks, captures, threats — then move.');
+  const [coachNote, setCoachNote] = useState('White starts every game. You play as White — focus on development, centre control, and king safety.');
 
   const level = useMemo(() => botLevels.find((bot) => bot.id === levelId) ?? botLevels[1], [levelId]);
 
@@ -124,7 +124,7 @@ export default function PlayTrainer() {
         <div className="mb-2 flex items-center justify-between sm:mb-4">
           <div>
             <h2 className="text-lg font-bold sm:text-2xl">Play vs Alpha Bot</h2>
-            <p className="text-xs text-slate-300 sm:text-sm">Alpha trainer — Stockfish planned next</p>
+            <p className="text-xs text-slate-300 sm:text-sm">Alpha trainer — you play as White, and White always moves first.</p>
           </div>
           <div className="hidden sm:flex gap-2">
             <button onClick={resetGame} className="rounded-xl bg-teal-400 px-4 py-2 font-bold text-slate-950 hover:bg-teal-300">New game</button>
