@@ -1,3 +1,31 @@
+# Post-game AI review (feature branch)
+
+This feature adds a simple post-game coaching UI and server-side Next.js API routes that call Groq. It is implemented as a separate feature branch and is intended to be kept isolated from the Stockfish QA work until Codex finishes.
+
+Environment variables (see `.env.example`):
+
+- `GROQ_API_KEYS` — comma-separated Groq API key(s). The server will try keys in order and rotate if one returns 401/429.
+- `GROQ_MODEL` — the Groq model to call.
+
+Files added (high level):
+
+- `components/PostGameReview.tsx` — client component that requests a short review and optionally a move-by-move review.
+- `components/GameReviewChat.tsx` — a small chat UI to ask follow-up questions.
+- `lib/gameReviewPrompts.ts` — builds the system and user prompt for Groq.
+- `lib/gameReviewTypes.ts` — TypeScript types for the feature.
+- `app/api/game-review/route.ts` — server API route that returns a concise review.
+- `app/api/game-review-chat/route.ts` — server API route that answers chat questions.
+- `.env.example` — example env file.
+
+Usage notes:
+
+- The client components call the local Next.js API routes; API keys must be configured server-side only.
+- The UI intentionally avoids exposing raw FEN/PGN to beginners; internal prompts use move lists but the UI shows friendly text.
+
+Testing:
+
+1. Set `GROQ_API_KEYS` and `GROQ_MODEL` in your deployment or local `.env`.
+2. Run the app and finish a game. Click "Review my game" near your game-over banner.
 # Grandmaster Path Alpha
 
 A first playable slice of a Chess.com-style training platform designed to take a learner from complete beginner toward serious chess strength.
