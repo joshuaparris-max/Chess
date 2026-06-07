@@ -17,6 +17,28 @@ function gameStatus(game: Chess): string {
   return `${game.turn() === 'w' ? 'White' : 'Black'} to move.`;
 }
 
+function coachMessageFromGameState(game: Chess): string | null {
+  if (game.isCheckmate()) {
+    const playerWon = game.turn() === 'b';
+    if (playerWon) {
+      return 'Checkmate — you win! ♔ Brilliant! The enemy king has no legal escape. Checkmate means the king is attacked and has no way to avoid capture.';
+    }
+    return 'Checkmate — the bot wins. Your king has no legal escape. That is checkmate. Every chess player gets checkmated while learning — use this to study defensive ideas.';
+  }
+  if (game.isStalemate()) return 'Stalemate — draw. The side to move has no legal move, but the king is not in check.';
+  if (game.isThreefoldRepetition()) return 'Draw by threefold repetition. The same position occurred three times.';
+  if (game.isInsufficientMaterial()) return 'Draw by insufficient material. Neither side has enough pieces to checkmate.';
+  if (game.isDraw()) return 'Draw. The game is over, but neither player won.';
+  if (game.inCheck()) {
+    const playerInCheck = game.turn() === 'w';
+    if (playerInCheck) {
+      return 'You are in check. Your king is under attack. You must respond by moving your king, blocking, or capturing the attacking piece.';
+    }
+    return 'Check! The bot king is under attack. The bot must respond to the check.';
+  }
+  return null;
+}
+
 function moveSanList(game: Chess): string[] {
   return game.history();
 }
@@ -67,7 +89,12 @@ export default function PlayTrainer() {
       setGame(copy);
       setLastMove({ from: move.from, to: move.to });
       setSelectedSquare(null);
-      setCoachNote(move.captured ? 'Good: you won material. Now ask whether your piece is safe.' : 'Move made. Before the bot replies, notice what changed.');
+      const stateMsg = coachMessageFromGameState(copy);
+      if (stateMsg) {
+        setCoachNote(stateMsg);
+      } else {
+        setCoachNote(move.captured ? 'Good: you won material. Now ask whether your piece is safe.' : 'Move made. Before the bot replies, notice what changed.');
+      }
       return true;
     } catch {
       return false;
@@ -113,7 +140,12 @@ export default function PlayTrainer() {
         const move = copy.move(uciToMove(uci));
         setGame(copy);
         if (move) setLastMove({ from: move.from, to: move.to });
-        setCoachNote(level.elo >= 2000 ? 'The bot reduced your easy options. Find your worst piece and improve it.' : 'Bot moved. Look for checks, captures and loose pieces.');
+        const stateMsg = coachMessageFromGameState(copy);
+        if (stateMsg) {
+          setCoachNote(stateMsg);
+        } else {
+          setCoachNote(level.elo >= 2000 ? 'The bot reduced your easy options. Find your worst piece and improve it.' : 'Bot moved. Look for checks, captures and loose pieces.');
+        }
       } catch {
         setCoachNote('The alpha engine produced an invalid move. Resetting is safe if this repeats.');
       } finally {
@@ -143,15 +175,27 @@ export default function PlayTrainer() {
           <p className="text-sm text-slate-100">{coachNote}</p>
         </div>
 
+        {game.isGameOver() && (
+          <div className={`mb-4 rounded-2xl border-2 p-4 text-center font-bold ${
+            game.isCheckmate() && game.turn() === 'b'
+              ? 'border-green-400/50 bg-green-950/40 text-green-200'
+              : game.isCheckmate()
+              ? 'border-red-400/50 bg-red-950/40 text-red-200'
+              : 'border-yellow-400/50 bg-yellow-950/40 text-yellow-200'
+          }`}>
+            {gameStatus(game)}
+          </div>
+        )}
+
         <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Black bot</p>
-        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} disabled={isThinking} onSquareClick={onSquareClick} />
+        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} disabled={isThinking || game.isGameOver()} onSquareClick={onSquareClick} />
         <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">You · White</p>
 
         {/* Mobile action bar */}
         <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
           <button onClick={resetGame} className="flex-1 rounded-2xl bg-teal-400 py-3 text-center font-bold text-slate-950">New</button>
           <button disabled={isThinking || game.history().length === 0} onClick={undoPair} className="flex-1 rounded-2xl border border-slate-600 py-3 text-center text-sm text-slate-100 disabled:cursor-not-allowed disabled:opacity-40">Undo</button>
-          <button onClick={() => setCoachNote('Hint: Look for checks, captures, threats before each move.')} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100">Hint</button>
+          <button disabled={game.isGameOver()} onClick={() => setCoachNote('Hint: Look for checks, captures, threats before each move.')} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100 disabled:cursor-not-allowed disabled:opacity-40">Hint</button>
         </div>
       </div>
 
@@ -173,7 +217,22 @@ export default function PlayTrainer() {
         <div className="glass-panel rounded-3xl p-5">
           <h3 className="font-bold text-teal-200">Coach note</h3>
           <p className="mt-2 text-slate-100">{isThinking ? 'Bot is thinking…' : coachNote}</p>
-          <p className="mt-4 text-sm text-slate-400">Status: {gameStatus(game)}</p>
+          <div className="mt-4">
+            <p className="text-xs font-bold uppercase text-slate-400">Game status</p>
+            <p className={`mt-1 text-sm font-semibold ${
+              game.isGameOver()
+                ? game.isCheckmate() && game.turn() === 'b'
+                  ? 'text-green-300'
+                  : game.isCheckmate()
+                  ? 'text-red-300'
+                  : 'text-yellow-300'
+                : game.inCheck()
+                ? 'text-orange-300'
+                : 'text-slate-400'
+            }`}>
+              {gameStatus(game)}
+            </p>
+          </div>
         </div>
 
         <div className="glass-panel max-h-80 overflow-auto rounded-3xl p-5">
