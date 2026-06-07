@@ -30,7 +30,7 @@ export default function ChessBoard({ game, selectedSquare, legalTargets, lastMov
   const board = game.board();
 
   return (
-    <div className="board-shadow overflow-hidden rounded-2xl border border-slate-500/30 bg-slate-950">
+    <div className="board-shadow overflow-hidden rounded-2xl border border-slate-500/30 bg-slate-950 mx-auto" style={{ width: 'min(100vw - 24px, 560px)' }}>
       <div className="grid aspect-square w-full grid-cols-8">
         {board.flatMap((row, rowIndex) =>
           row.map((piece, fileIndex) => {
@@ -47,12 +47,12 @@ export default function ChessBoard({ game, selectedSquare, legalTargets, lastMov
                 aria-label={`${square}${piece ? ` ${piece.color === 'w' ? 'white' : 'black'} ${piece.type}` : ''}`}
                 disabled={disabled}
                 onClick={() => onSquareClick(square)}
-                className={`relative flex items-center justify-center text-3xl sm:text-5xl md:text-6xl transition ${isLight ? 'bg-[#eee6cf]' : 'bg-[#6f8f72]'} ${disabled ? 'cursor-not-allowed opacity-90' : 'cursor-pointer hover:brightness-110'} ${isSelected ? 'ring-4 ring-yellow-300 ring-inset' : ''}`}
+                className={`relative flex items-center justify-center transition ${isLight ? 'bg-[#eee6cf]' : 'bg-[#6f8f72]'} ${disabled ? 'cursor-not-allowed opacity-90' : 'cursor-pointer hover:brightness-110'} ${isSelected ? 'ring-4 ring-yellow-300 ring-inset' : ''}`}
               >
                 {isLastMove && <span className="absolute inset-0 bg-yellow-300/25" />}
                 {isLegalTarget && <span className="absolute h-4 w-4 rounded-full bg-slate-950/35 sm:h-5 sm:w-5" />}
-                <span className={`relative z-10 select-none drop-shadow ${piece?.color === 'w' ? 'text-slate-950' : 'text-white'}`}>{piece ? PIECES[pieceKey] : ''}</span>
-                <span className="absolute bottom-1 right-1 text-[10px] font-bold text-slate-900/40">{square}</span>
+                <span className={`relative z-10 select-none drop-shadow chess-piece ${piece ? (piece.color === 'w' ? 'white-piece' : 'black-piece') : ''}`}>{piece ? PIECES[pieceKey] : ''}</span>
+                <span className="absolute bottom-1 right-1 coord">{square}</span>
               </button>
             );
           }),

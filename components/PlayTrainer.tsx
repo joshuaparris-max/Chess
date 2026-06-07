@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useMemo, useState } from 'react';
 import { Chess, type Square } from 'chess.js';
@@ -120,19 +120,31 @@ export default function PlayTrainer() {
 
   return (
     <section className="grid gap-5 lg:grid-cols-[minmax(0,620px)_minmax(320px,1fr)]">
-      <div className="glass-panel rounded-3xl p-4 sm:p-6">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="glass-panel rounded-3xl p-2 sm:p-6">
+        <div className="mb-2 flex items-center justify-between sm:mb-4">
           <div>
-            <h2 className="text-2xl font-bold">Play vs computer</h2>
-            <p className="text-sm text-slate-300">Alpha engine now. Stockfish-ready architecture next.</p>
+            <h2 className="text-lg font-bold sm:text-2xl">Play vs Alpha Bot</h2>
+            <p className="text-xs text-slate-300 sm:text-sm">Alpha trainer — Stockfish planned next</p>
           </div>
-          <div className="flex gap-2">
+          <div className="hidden sm:flex gap-2">
             <button onClick={resetGame} className="rounded-xl bg-teal-400 px-4 py-2 font-bold text-slate-950 hover:bg-teal-300">New game</button>
             <button onClick={undoPair} className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm text-slate-100 hover:bg-slate-700/50">Undo pair</button>
           </div>
         </div>
 
-        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} disabled={isThinking} onSquareClick={onSquareClick} />
+        <div className="mobile-coach mb-3 sm:mb-4">
+          <p className="text-sm font-semibold text-yellow-200">Coach</p>
+          <p className="text-sm text-slate-100">{coachNote}</p>
+        </div>
+
+        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} onSquareClick={onSquareClick} />
+
+        {/* Mobile action bar */}
+        <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
+          <button onClick={resetGame} className="flex-1 rounded-2xl bg-teal-400 py-3 text-center font-bold text-slate-950">New</button>
+          <button onClick={undoPair} className="flex-1 rounded-2xl border border-slate-600 py-3 text-center text-sm text-slate-100">Undo</button>
+          <button onClick={() => setCoachNote('Hint: Look for checks, captures, threats before each move.')} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100">Hint</button>
+        </div>
       </div>
 
       <aside className="space-y-4">

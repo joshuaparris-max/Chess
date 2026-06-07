@@ -50,3 +50,52 @@ select:focus-visible {
   border: 1px solid var(--line);
   backdrop-filter: blur(18px);
 }
+
+/* Chess-specific mobile styles */
+.chess-piece {
+  font-size: clamp(2rem, 9.5vw, 4rem);
+  line-height: 1;
+  user-select: none;
+}
+
+.white-piece {
+  color: #111827; /* dark on light squares */
+  text-shadow: 0 1px 0 rgba(255,255,255,0.03);
+}
+
+.black-piece {
+  color: #ffffff; /* light on dark squares */
+  text-shadow: 0 1px 0 rgba(0,0,0,0.12);
+}
+
+.coord {
+  font-size: clamp(0.55rem, 2vw, 0.75rem);
+  opacity: 0.45;
+  font-weight: 700;
+  color: rgba(17,24,39,0.6);
+}
+
+/* Mobile coach and action bar */
+.mobile-coach p:first-child {
+  margin-bottom: 4px;
+}
+
+@media (max-width: 640px) {
+  .board-shadow {
+    border-radius: 16px;
+  }
+
+  .glass-panel {
+    padding: 10px; /* reduce card padding on mobile for board-first layout */
+  }
+
+  .mobile-action-bar {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    gap: 8px;
+    z-index: 60;
+  }
+}
