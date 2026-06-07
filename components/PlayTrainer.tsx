@@ -263,6 +263,7 @@ export default function PlayTrainer() {
 
     return {
       playerColor: 'white',
+      botColor: 'black',
       result,
       moves,
       finalFEN: game.fen(),
