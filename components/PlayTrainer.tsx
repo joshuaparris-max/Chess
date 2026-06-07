@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Chess, type Square } from 'chess.js';
 import ChessBoard from './ChessBoard';
+import PostGameReview from './PostGameReview';
+import type { GameData } from '@/lib/gameReviewTypes';
 import { botLevels } from '@/lib/trainingData';
 import { getBotMove, uciToMove } from '@/lib/engine';
 import { cancelStockfishMove, getStockfishMove } from '@/lib/stockfishClient';
@@ -91,6 +93,8 @@ export default function PlayTrainer() {
     setLastMove(null);
     setPendingPromotion(null);
     setCoachNote('New game. Aim for safety first: centre, development, king safety.');
+    setShowReview(false);
+    setReviewContext(null);
   };
 
   const undoPair = () => {
@@ -112,6 +116,10 @@ export default function PlayTrainer() {
     setSelectedSquare(null);
     setLastMove(null);
     setCoachNote('Move pair undone. Now replay with one clearer thought.');
+    if (!copy.isGameOver()) {
+      setShowReview(false);
+      setReviewContext(null);
+    }
   };
 
   const applyPlayerMove = (from: Square, to: Square, promotion?: PromotionPiece) => {
@@ -236,6 +244,40 @@ export default function PlayTrainer() {
     };
   }, [game, level]);
 
+  // Post-game review state
+  const [showReview, setShowReview] = useState(false);
+  const [reviewContext, setReviewContext] = useState<GameData | null>(null);
+
+  function buildGameReviewContext(game: Chess, botLabel: string): GameData {
+    const moves = moveSanList(game);
+    let result: GameData['result'] = 'draw';
+    if (game.isCheckmate()) {
+      // player is White in this UI
+      const playerWon = game.turn() === 'b';
+      result = playerWon ? 'win' : 'loss';
+    } else if (game.isStalemate() || game.isThreefoldRepetition() || game.isInsufficientMaterial() || game.isDraw()) {
+      result = 'draw';
+    }
+
+    return {
+      playerColor: 'white',
+      result,
+      moves,
+      finalFEN: game.fen(),
+      moveCount: moves.length,
+      botLevel: typeof botLabel === 'string' ? botLabel : undefined,
+      endBy: game.isCheckmate() ? 'checkmate' : undefined,
+    };
+  }
+
+  // Hide review automatically when game is no longer over
+  useEffect(() => {
+    if (!game.isGameOver()) {
+      setShowReview(false);
+      setReviewContext(null);
+    }
+  }, [game]);
+
   return (
     <section className="grid gap-5 lg:grid-cols-[minmax(0,620px)_minmax(320px,1fr)]">
       <div className="glass-panel min-w-0 rounded-3xl p-2 sm:p-6">
@@ -266,6 +308,24 @@ export default function PlayTrainer() {
               : 'border-yellow-400/50 bg-yellow-950/40 text-yellow-200'
           }`}>
             {gameStatus(game)}
+          </div>
+        )}
+
+        {game.isGameOver() && (
+          <div className="mb-4 flex flex-col items-center gap-3">
+            {!showReview ? (
+              <button
+                onClick={() => {
+                  setReviewContext(buildGameReviewContext(game, level.label));
+                  setShowReview(true);
+                }}
+                className="min-h-[48px] w-full max-w-sm rounded-2xl bg-slate-800/70 px-4 py-3 text-sm font-bold text-slate-100 hover:bg-slate-700"
+              >
+                Review my game
+              </button>
+            ) : (
+              reviewContext && <PostGameReview gameData={reviewContext} />
+            )}
           </div>
         )}
 
