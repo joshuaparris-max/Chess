@@ -1,9 +1,9 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GameData, ReviewResponse } from '../lib/gameReviewTypes';
 import GameReviewChat from './GameReviewChat';
 
-export default function PostGameReview({ gameData }: { gameData: GameData }) {
+export default function PostGameReview({ gameData, autoRequest = false }: { gameData: GameData; autoRequest?: boolean }) {
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
@@ -31,6 +31,11 @@ export default function PostGameReview({ gameData }: { gameData: GameData }) {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (autoRequest) requestReview(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRequest]);
 
   return (
     <div style={{ maxWidth: 680 }}>

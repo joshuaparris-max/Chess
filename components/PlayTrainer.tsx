@@ -95,6 +95,7 @@ export default function PlayTrainer() {
     setCoachNote('New game. Aim for safety first: centre, development, king safety.');
     setShowReview(false);
     setReviewContext(null);
+    setReviewAutoRequest(false);
   };
 
   const undoPair = () => {
@@ -119,6 +120,7 @@ export default function PlayTrainer() {
     if (!copy.isGameOver()) {
       setShowReview(false);
       setReviewContext(null);
+      setReviewAutoRequest(false);
     }
   };
 
@@ -247,6 +249,7 @@ export default function PlayTrainer() {
   // Post-game review state
   const [showReview, setShowReview] = useState(false);
   const [reviewContext, setReviewContext] = useState<GameData | null>(null);
+  const [reviewAutoRequest, setReviewAutoRequest] = useState(false);
 
   function buildGameReviewContext(game: Chess, botLabelOrLevel: any): GameData {
     const moves = moveSanList(game);
@@ -320,6 +323,7 @@ export default function PlayTrainer() {
               <button
                 onClick={() => {
                   setReviewContext(buildGameReviewContext(game, level));
+                  setReviewAutoRequest(true);
                   setShowReview(true);
                 }}
                 className="min-h-[48px] w-full max-w-sm rounded-2xl bg-slate-800/70 px-4 py-3 text-sm font-bold text-slate-100 hover:bg-slate-700"
@@ -327,7 +331,7 @@ export default function PlayTrainer() {
                 Review my game
               </button>
             ) : (
-              reviewContext && <PostGameReview gameData={reviewContext} />
+              reviewContext && <PostGameReview gameData={reviewContext} autoRequest={reviewAutoRequest} />
             )}
           </div>
         )}
