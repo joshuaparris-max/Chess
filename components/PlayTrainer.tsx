@@ -248,7 +248,7 @@ export default function PlayTrainer() {
   const [showReview, setShowReview] = useState(false);
   const [reviewContext, setReviewContext] = useState<GameData | null>(null);
 
-  function buildGameReviewContext(game: Chess, botLabel: string): GameData {
+  function buildGameReviewContext(game: Chess, botLabelOrLevel: any): GameData {
     const moves = moveSanList(game);
     let result: GameData['result'] = 'draw';
     if (game.isCheckmate()) {
@@ -259,13 +259,15 @@ export default function PlayTrainer() {
       result = 'draw';
     }
 
+    const botLevelValue = typeof botLabelOrLevel === 'object' && botLabelOrLevel?.elo ? botLabelOrLevel.elo : undefined;
+
     return {
       playerColor: 'white',
       result,
       moves,
       finalFEN: game.fen(),
       moveCount: moves.length,
-      botLevel: typeof botLabel === 'string' ? botLabel : undefined,
+      botLevel: botLevelValue,
       endBy: game.isCheckmate() ? 'checkmate' : undefined,
     };
   }
@@ -316,7 +318,7 @@ export default function PlayTrainer() {
             {!showReview ? (
               <button
                 onClick={() => {
-                  setReviewContext(buildGameReviewContext(game, level.label));
+                  setReviewContext(buildGameReviewContext(game, level));
                   setShowReview(true);
                 }}
                 className="min-h-[48px] w-full max-w-sm rounded-2xl bg-slate-800/70 px-4 py-3 text-sm font-bold text-slate-100 hover:bg-slate-700"
