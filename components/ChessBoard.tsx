@@ -51,7 +51,7 @@ export default function ChessBoard({ game, selectedSquare, legalTargets, lastMov
               >
                 {isLastMove && <span className="absolute inset-0 bg-yellow-300/25" />}
                 {isLegalTarget && <span className="absolute h-4 w-4 rounded-full bg-slate-950/35 sm:h-5 sm:w-5" />}
-                <span className={`relative z-10 select-none drop-shadow ${piece?.color === 'w' ? 'text-white' : 'text-slate-950'}`}>{piece ? PIECES[pieceKey] : ''}</span>
+                <span className={`relative z-10 select-none drop-shadow ${piece?.color === 'w' ? 'text-slate-950' : 'text-white'}`}>{piece ? PIECES[pieceKey] : ''}</span>
                 <span className="absolute bottom-1 right-1 text-[10px] font-bold text-slate-900/40">{square}</span>
               </button>
             );
