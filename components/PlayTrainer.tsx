@@ -7,6 +7,7 @@ import { botLevels } from '@/lib/trainingData';
 import { getBotMove, uciToMove } from '@/lib/engine';
 
 function gameStatus(game: Chess): string {
+  if (game.history().length === 0) return 'White starts the game.';
   if (game.isCheckmate()) return game.turn() === 'w' ? 'Checkmate — Black wins.' : 'Checkmate — White wins.';
   if (game.isStalemate()) return 'Draw by stalemate.';
   if (game.isThreefoldRepetition()) return 'Draw by repetition.';
@@ -142,7 +143,9 @@ export default function PlayTrainer() {
           <p className="text-sm text-slate-100">{coachNote}</p>
         </div>
 
+        <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Black bot</p>
         <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} disabled={isThinking} onSquareClick={onSquareClick} />
+        <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">You · White</p>
 
         {/* Mobile action bar */}
         <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">

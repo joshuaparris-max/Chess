@@ -80,13 +80,21 @@ select:focus-visible {
 }
 
 .white-piece {
-  color: #111827; /* dark on light squares */
-  text-shadow: 0 1px 0 rgba(255,255,255,0.03);
+  color: #ffffff;
+  text-shadow:
+    -1px -1px 0 #111827,
+    1px -1px 0 #111827,
+    -1px 1px 0 #111827,
+    1px 1px 0 #111827;
 }
 
 .black-piece {
-  color: #ffffff; /* light on dark squares */
-  text-shadow: 0 1px 0 rgba(0,0,0,0.12);
+  color: #111827;
+  text-shadow:
+    -1px -1px 0 rgba(255, 255, 255, 0.7),
+    1px -1px 0 rgba(255, 255, 255, 0.7),
+    -1px 1px 0 rgba(255, 255, 255, 0.7),
+    1px 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .coord {
