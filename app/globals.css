@@ -52,9 +52,30 @@ select:focus-visible {
 }
 
 /* Chess-specific mobile styles */
+.chess-board {
+  width: min(calc(100vw - 24px), 560px);
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+.chess-square {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
 .chess-piece {
   font-size: clamp(2rem, 9.5vw, 4rem);
   line-height: 1;
+  display: block;
+  transform: translateY(-1px);
+  pointer-events: none;
   user-select: none;
 }
 
@@ -69,9 +90,14 @@ select:focus-visible {
 }
 
 .coord {
-  font-size: clamp(0.55rem, 2vw, 0.75rem);
+  position: absolute;
+  right: 4px;
+  bottom: 3px;
+  font-size: clamp(0.55rem, 1.6vw, 0.75rem);
+  line-height: 1;
   opacity: 0.45;
   font-weight: 700;
+  pointer-events: none;
   color: rgba(17,24,39,0.6);
 }
 
