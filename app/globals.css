@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0b1120;
+  --foreground: #edf4ff;
+  --panel: rgba(15, 23, 42, 0.76);
+  --panel-solid: #111827;
+  --line: rgba(148, 163, 184, 0.22);
+  --gold: #f7d76d;
+  --teal: #2dd4bf;
+  --green: #22c55e;
+  --danger: #fb7185;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(45, 212, 191, 0.15), transparent 34rem),
+    radial-gradient(circle at top right, rgba(247, 215, 109, 0.12), transparent 34rem),
+    linear-gradient(135deg, #07111f 0%, #0b1120 52%, #111827 100%);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button, input, select {
+  font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(45, 212, 191, 0.75);
+  outline-offset: 2px;
+}
+
+.board-shadow {
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.42);
+}
+
+.glass-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(18px);
+}
