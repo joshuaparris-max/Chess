@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { ReviewRequest, ReviewResponse } from '../../../lib/gameReviewTypes';
 import { buildCoachPrompt } from '../../../lib/gameReviewPrompts';
+import { Chess } from 'chess.js';
 import { validateGameData, validateRequestSize } from '../../../lib/validation';
 import { getClientIP, checkRateLimit } from '../../../lib/rateLimiter';
 
@@ -53,10 +54,38 @@ export async function POST(req: Request) {
     }
 
     const isDetailMode = !!body.detail;
+
+    // Reconstruct game with chess.js to produce deterministic checkmate facts
+    let checkmateFact = '';
+    try {
+      const chess = new Chess();
+      if (body.gameData.moves && body.gameData.moves.length > 0) {
+        for (const m of body.gameData.moves) {
+          // ignore invalid individual moves
+          try { chess.move(m); } catch (e) { /* continue */ }
+        }
+      } else if (body.gameData.finalFEN) {
+        chess.load(body.gameData.finalFEN as string);
+      }
+
+      const finalMove = body.gameData.finalMove || (body.gameData.moves && body.gameData.moves.slice(-1)[0]) || '';
+      const sideToMove = chess.turn();
+      const isMate = chess.isCheckmate();
+      if (isMate) {
+        const sideText = sideToMove === 'w' ? 'White' : 'Black';
+        const winner = sideToMove === 'w' ? 'black' : 'white';
+        checkmateFact = `Confirmed by chess.js: The game ended by checkmate. Side to move after the final move: ${sideText}. The ${sideText} king is under attack and has no legal moves. In checkmate, the defender cannot: 1) move the king to safety; 2) capture the attacking piece; 3) block the attack. Final move: ${finalMove}. Winner: ${winner}.`;
+      }
+
+    } catch (err) {
+      console.log('Error constructing deterministic checkmate fact', err);
+    }
+
     const { system, user } = buildCoachPrompt(body.gameData, isDetailMode);
+    const userContent = checkmateFact ? `${user}\n\n${checkmateFact}\n\nPrompt rule: Use the confirmed chess.js game result as ground truth. Do not contradict it.` : user;
     const messages = [
       { role: 'system' as const, content: system },
-      { role: 'user' as const, content: user },
+      { role: 'user' as const, content: userContent },
     ];
 
     // Try keys in order
