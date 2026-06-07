@@ -6,6 +6,10 @@ export interface GameData {
   result: GameResult;
   moves: string[]; // SAN or simple move list for internal use
   finalFEN?: string;
+  finalMove?: string;
+  isCheckmate?: boolean;
+  winner?: 'white' | 'black' | null;
+  sideToMoveAfterGame?: 'white' | 'black';
   moveCount: number;
   botLevel?: number;
   endBy?: string; // e.g. 'checkmate', 'resignation'
