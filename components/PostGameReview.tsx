@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { GameData, ReviewResponse } from '../lib/gameReviewTypes';
 import GameReviewChat from './GameReviewChat';
 
@@ -8,6 +8,7 @@ export default function PostGameReview({ gameData, autoRequest = false }: { game
   const [summary, setSummary] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const hasAutoRequestedRef = useRef(false);
 
   async function requestReview(detailed = false) {
     setLoading(true);
@@ -20,10 +21,13 @@ export default function PostGameReview({ gameData, autoRequest = false }: { game
       });
       const data: ReviewResponse | { error: string } = await res.json();
       if (!res.ok) {
-        setError((data as any).error || 'The AI review could not load.');
+        setError((data as any).error || 'The AI coach could not understand the response. Please try again.');
       } else {
-        setSummary((data as ReviewResponse).summary);
-        if (detailed && (data as ReviewResponse).detail) setDetail((data as ReviewResponse).detail!);
+        if (detailed) {
+          setDetail((data as ReviewResponse).detail || null);
+        } else {
+          setSummary((data as ReviewResponse).summary || null);
+        }
       }
     } catch (e) {
       setError('The AI review could not load, but your game was saved locally for this session.');
@@ -33,8 +37,13 @@ export default function PostGameReview({ gameData, autoRequest = false }: { game
   }
 
   useEffect(() => {
-    if (autoRequest) requestReview(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!autoRequest) {
+      hasAutoRequestedRef.current = false;
+      return;
+    }
+    if (hasAutoRequestedRef.current) return;
+    hasAutoRequestedRef.current = true;
+    requestReview(false);
   }, [autoRequest]);
 
   return (
@@ -43,7 +52,7 @@ export default function PostGameReview({ gameData, autoRequest = false }: { game
         <button onClick={() => requestReview(false)} disabled={loading} style={{ marginRight: 8 }}>
           {loading ? 'Coach is reviewing your game…' : 'Review my game'}
         </button>
-        <span style={{ marginLeft: 12, fontSize: 12, color: '#666' }}>Only the moves from this game are sent for review.</span>
+        <span style={{ marginLeft: 12, fontSize: 12, color: '#666' }}>For review, the app sends this game's moves and basic game details. No personal information is sent.</span>
       </div>
 
       {error && <div style={{ color: 'crimson' }}>{error}</div>}

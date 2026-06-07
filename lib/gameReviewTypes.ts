@@ -17,7 +17,7 @@ export interface ReviewRequest {
 }
 
 export interface ReviewResponse {
-  summary: string;
+  summary?: string;
   detail?: string;
 }
 
