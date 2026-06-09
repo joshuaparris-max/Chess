@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { ChatRequest, ChatResponse } from '../../../lib/gameReviewTypes';
 import { buildCoachPrompt } from '../../../lib/gameReviewPrompts';
-import { Chess } from 'chess.js';
+import { buildGameSpecificFacts, isCheckmateQuestion, isImprovementQuestion } from '../../../lib/gameReviewFacts';
 import { validateGameData, validateQuestion, validateRequestSize } from '../../../lib/validation';
 import { getClientIP, checkRateLimit } from '../../../lib/rateLimiter';
 
@@ -57,32 +57,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: sizeValidation.error }, { status: 400 });
     }
 
-    // Build deterministic checkmate facts with chess.js and append to prompt when present
-    let checkmateFact = '';
-    try {
-      const chess = new Chess();
-      if (body.gameData.moves && body.gameData.moves.length > 0) {
-        for (const m of body.gameData.moves) {
-          try { chess.move(m); } catch (e) { /* ignore invalid moves */ }
-        }
-      } else if (body.gameData.finalFEN) {
-        chess.load(body.gameData.finalFEN as string);
-      }
-      const finalMove = body.gameData.finalMove || (body.gameData.moves && body.gameData.moves.slice(-1)[0]) || '';
-      if (chess.isCheckmate()) {
-        const sideToMove = chess.turn();
-        const sideText = sideToMove === 'w' ? 'White' : 'Black';
-        const winner = sideToMove === 'w' ? 'black' : 'white';
-        checkmateFact = `Confirmed by chess.js: The game ended by checkmate. Side to move after the final move: ${sideText}. The ${sideText} king is under attack and has no legal moves. In checkmate, the defender cannot: 1) move the king to safety; 2) capture the attacking piece; 3) block the attack. Final move: ${finalMove}. Winner: ${winner}.`;
-      }
-    } catch (err) {
-      console.log('Error building checkmate fact', err);
+    const gameFacts = buildGameSpecificFacts(body.gameData);
+    const question = body.question.trim();
+
+    if (gameFacts.checkmateFact && isCheckmateQuestion(question)) {
+      const response: ChatResponse = {
+        answer: `You won because ${gameFacts.finalMove} gave checkmate. The bot's king was attacked and had no legal escape. In checkmate, the defender cannot move the king to safety, capture the attacking piece, or block the attack. The main theme was ${gameFacts.mainTheme}.`,
+      };
+      return NextResponse.json(response);
     }
 
     const coaches = buildCoachPrompt(body.gameData, false);
     // Instruct the model to answer the user's question directly and succinctly.
     const userBase = coaches.user;
-    const userPrompt = `${userBase}${checkmateFact ? '\n\n' + checkmateFact + '\n\nPrompt rule: Use the confirmed chess.js game result as ground truth. Do not contradict it.' : ''}\n\nAnswer instructions: Reply in plain text only. Answer the user's question directly and succinctly. Do not repeat the full review. If the user asks about checkmate, explain the final position: name the attacking piece, why the king has no escape, and why capture/block/interpose are impossible, in beginner terms.\n\nUser question: ${body.question.trim()}`;
+    const improvementRule = isImprovementQuestion(question)
+      ? '\nFor this improvement question, give 2 or 3 concrete points from the game. Reference actual moves or phases when possible. Keep it short and do not give a giant paragraph.'
+      : '';
+    const userPrompt = `${userBase}\n\n${gameFacts.factBlock}\n\nPrompt rule: Use the confirmed chess.js game result as ground truth. Do not contradict it.${improvementRule}\n\nAnswer instructions: Reply in plain text only. Answer the user's question directly and succinctly. Do not repeat the full review. If the user asks about checkmate, explain the final position using the deterministic facts.\n\nUser question: ${question}`;
     const messages = [
       { role: 'system' as const, content: coaches.system },
       { role: 'user' as const, content: userPrompt },
