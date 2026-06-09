@@ -57,9 +57,11 @@ export async function POST(req: Request) {
 
     const gameFacts = buildGameSpecificFacts(body.gameData);
     const { system, user } = buildCoachPrompt(body.gameData, isDetailMode);
+    const systemGuard =
+      'Do not invent facts or contradict the supplied chess.js game result. Keep this review grounded in the provided game facts only, and answer questions directly if the user asks one.';
     const userContent = `${user}\n\n${gameFacts.factBlock}\n\nPrompt rule: Use the confirmed chess.js game result as ground truth. Do not contradict it. Quick Review must mention the final move and main winning theme.`;
     const messages = [
-      { role: 'system' as const, content: system },
+      { role: 'system' as const, content: `${systemGuard}\n\n${system}` },
       { role: 'user' as const, content: userContent },
     ];
 
