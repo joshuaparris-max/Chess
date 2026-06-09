@@ -165,6 +165,28 @@ export default function PlayTrainer() {
     }
   };
 
+  const showHint = () => {
+    if (isThinking || game.isGameOver()) {
+      setCoachNote('Hint unavailable while the game is over or the bot is thinking.');
+      return;
+    }
+
+    const copy = copyGame(game);
+    const uci = getBotMove(game.fen(), level);
+    if (!uci) {
+      setCoachNote('No hint is available for this position.');
+      return;
+    }
+
+    const move = copy.move(uciToMove(uci));
+    if (!move) {
+      setCoachNote('Hint generator had trouble parsing the recommended move.');
+      return;
+    }
+
+    setCoachNote(`Hint: ${move.san}. Try it if it keeps your position safe.`);
+  };
+
   const onSquareClick = (square: Square) => {
     if (isThinking || pendingPromotion || game.isGameOver() || game.turn() !== 'w') return;
 
@@ -299,6 +321,7 @@ export default function PlayTrainer() {
           <div className="hidden sm:flex gap-2">
             <button onClick={resetGame} className="rounded-xl bg-teal-400 px-4 py-2 font-bold text-slate-950 hover:bg-teal-300">New game</button>
             <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion)} onClick={undoPair} className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm text-slate-100 hover:bg-slate-700/50 disabled:cursor-not-allowed disabled:opacity-40">Undo pair</button>
+            <button disabled={Boolean(pendingPromotion) || game.isGameOver()} onClick={showHint} className="rounded-xl border border-yellow-300/70 bg-yellow-200/10 px-4 py-2 text-sm text-yellow-100 hover:bg-yellow-200/20 disabled:cursor-not-allowed disabled:opacity-40">Hint</button>
           </div>
         </div>
 
@@ -362,6 +385,10 @@ export default function PlayTrainer() {
         )}
 
         <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Black bot</p>
+        <div className="mb-4 rounded-2xl border border-teal-300/30 bg-slate-950/70 p-3 text-sm text-teal-100">
+          White starts first in every game. You control White, and Black moves only after your first move.
+        </div>
+
         <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} disabled={isThinking || Boolean(pendingPromotion) || game.isGameOver()} onSquareClick={onSquareClick} />
         <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">You · White</p>
 
@@ -369,7 +396,7 @@ export default function PlayTrainer() {
         <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
           <button onClick={resetGame} className="flex-1 rounded-2xl bg-teal-400 py-3 text-center font-bold text-slate-950">New</button>
           <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion)} onClick={undoPair} className="flex-1 rounded-2xl border border-slate-600 py-3 text-center text-sm text-slate-100 disabled:cursor-not-allowed disabled:opacity-40">Undo</button>
-          <button disabled={Boolean(pendingPromotion) || game.isGameOver()} onClick={() => setCoachNote('Hint: Look for checks, captures, threats before each move.')} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100 disabled:cursor-not-allowed disabled:opacity-40">Hint</button>
+          <button disabled={Boolean(pendingPromotion) || game.isGameOver()} onClick={showHint} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100 disabled:cursor-not-allowed disabled:opacity-40">Hint</button>
         </div>
       </div>
 
