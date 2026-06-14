@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     }
 
     const questionValidation = validateQuestion(body.question);
-    if (!questionValidation.valid) {
+    if (!questionValidation.valid || typeof body.question !== 'string') {
       return NextResponse.json({ error: questionValidation.error }, { status: 400 });
     }
     const question = body.question.trim();
