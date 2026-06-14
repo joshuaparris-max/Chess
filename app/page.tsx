@@ -50,22 +50,31 @@ export default function Home() {
   const [progressLoaded, setProgressLoaded] = useState(false);
 
   useEffect(() => {
-    const savedStreak = window.localStorage.getItem('gm-alpha-streak');
-    const savedGoal = window.localStorage.getItem('gm-alpha-goal');
-    const savedLastTrained = window.localStorage.getItem('gm-alpha-last-trained');
-    const parsedStreak = Number(savedStreak);
-    const parsedGoal = Number(savedGoal);
-    if (Number.isFinite(parsedStreak) && parsedStreak >= 0) setStudyStreak(parsedStreak);
-    if ([10, 20, 30, 45].includes(parsedGoal)) setDailyGoal(parsedGoal);
-    if (savedLastTrained) setLastTrained(savedLastTrained);
-    setProgressLoaded(true);
+    try {
+      const savedStreak = window.localStorage.getItem('gm-alpha-streak');
+      const savedGoal = window.localStorage.getItem('gm-alpha-goal');
+      const savedLastTrained = window.localStorage.getItem('gm-alpha-last-trained');
+      const parsedStreak = Number(savedStreak);
+      const parsedGoal = Number(savedGoal);
+      if (Number.isFinite(parsedStreak) && parsedStreak >= 0) setStudyStreak(parsedStreak);
+      if ([10, 20, 30, 45].includes(parsedGoal)) setDailyGoal(parsedGoal);
+      if (savedLastTrained) setLastTrained(savedLastTrained);
+    } catch {
+      // The app remains usable when browser storage is unavailable.
+    } finally {
+      setProgressLoaded(true);
+    }
   }, []);
 
   useEffect(() => {
     if (!progressLoaded) return;
-    window.localStorage.setItem('gm-alpha-streak', String(studyStreak));
-    window.localStorage.setItem('gm-alpha-goal', String(dailyGoal));
-    if (lastTrained) window.localStorage.setItem('gm-alpha-last-trained', lastTrained);
+    try {
+      window.localStorage.setItem('gm-alpha-streak', String(studyStreak));
+      window.localStorage.setItem('gm-alpha-goal', String(dailyGoal));
+      if (lastTrained) window.localStorage.setItem('gm-alpha-last-trained', lastTrained);
+    } catch {
+      // The current session still works even if persistence is blocked.
+    }
   }, [dailyGoal, lastTrained, progressLoaded, studyStreak]);
 
   const markTodayTrained = () => {

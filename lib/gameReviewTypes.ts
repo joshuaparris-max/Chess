@@ -3,6 +3,7 @@ export type GameResult = 'win' | 'loss' | 'draw' | 'stalemate' | 'resignation' |
 export interface GameData {
   playerColor: 'white' | 'black';
   botColor?: 'white' | 'black';
+  opponentType?: 'bot' | 'human';
   result: GameResult;
   moves: string[]; // SAN or simple move list for internal use
   finalFEN?: string;

@@ -35,7 +35,17 @@ function gameStatus(game: Chess): string {
   return `${game.turn() === 'w' ? 'White' : 'Black'} to move.`;
 }
 
-function coachMessageFromGameState(game: Chess): string | null {
+function coachMessageFromGameState(game: Chess, gameMode: GameMode): string | null {
+  if (gameMode === 'two-player') {
+    if (game.isCheckmate()) return `Checkmate — ${game.turn() === 'w' ? 'Black' : 'White'} wins!`;
+    if (game.isStalemate()) return 'Stalemate — draw. The side to move has no legal move, but the king is not in check.';
+    if (game.isThreefoldRepetition()) return 'Draw by threefold repetition. The same position occurred three times.';
+    if (game.isInsufficientMaterial()) return 'Draw by insufficient material. Neither side has enough pieces to checkmate.';
+    if (game.isDraw()) return 'Draw. The game is over, but neither player won.';
+    if (game.inCheck()) return `${game.turn() === 'w' ? 'White' : 'Black'} is in check. Find a move that keeps the king safe.`;
+    return null;
+  }
+
   if (game.isCheckmate()) {
     const playerWon = game.turn() === 'b';
     if (playerWon) {
@@ -101,6 +111,7 @@ export default function PlayTrainer() {
     setSelectedSquare(null);
     setLastMove(null);
     setPendingPromotion(null);
+    setEngineNotice(null);
     setCoachNote('New game. Aim for safety first: centre, development, king safety.');
     setShowReview(false);
     setReviewContext(null);
@@ -142,9 +153,12 @@ export default function PlayTrainer() {
       setLastMove({ from: move.from, to: move.to });
       setSelectedSquare(null);
       setPendingPromotion(null);
-      const stateMsg = coachMessageFromGameState(copy);
+      const stateMsg = coachMessageFromGameState(copy, gameMode);
       if (stateMsg) {
         setCoachNote(stateMsg);
+      } else if (gameMode === 'two-player') {
+        const nextPlayer = copy.turn() === 'w' ? 'White' : 'Black';
+        setCoachNote(move.captured ? `${nextPlayer} to move. A capture was made — check whether the capturing piece is safe.` : `${nextPlayer} to move. Look for checks, captures, and threats.`);
       } else {
         setCoachNote(move.captured ? 'Good: you won material. Now ask whether your piece is safe.' : 'Move made. Before the bot replies, notice what changed.');
       }
@@ -256,7 +270,7 @@ export default function PlayTrainer() {
         const move = copy.move(uciToMove(uci));
         setGame(copy);
         if (move) setLastMove({ from: move.from, to: move.to });
-        const stateMsg = coachMessageFromGameState(copy);
+        const stateMsg = coachMessageFromGameState(copy, 'vs-computer');
         if (stateMsg) {
           setCoachNote(stateMsg);
         } else if (usedFallback) {
@@ -300,7 +314,8 @@ export default function PlayTrainer() {
 
     return {
       playerColor: 'white',
-      botColor: 'black',
+      botColor: twoPlayer ? undefined : 'black',
+      opponentType: twoPlayer ? 'human' : 'bot',
       result,
       moves,
       finalFEN: game.fen(),
@@ -309,7 +324,7 @@ export default function PlayTrainer() {
       sideToMoveAfterGame: game.turn() === 'w' ? 'white' : 'black',
       winner: game.isCheckmate() ? (game.turn() === 'b' ? 'white' : 'black') : null,
       moveCount: moves.length,
-      botLevel: botLevelValue,
+      botLevel: twoPlayer ? undefined : botLevelValue,
       endBy: game.isCheckmate() ? 'checkmate' : undefined,
     };
   }
@@ -366,7 +381,9 @@ export default function PlayTrainer() {
 
         {game.isGameOver() && (
           <div className={`mb-4 rounded-2xl border-2 p-4 text-center font-bold ${
-            game.isCheckmate() && game.turn() === 'b'
+            twoPlayer && game.isCheckmate()
+              ? 'border-yellow-400/50 bg-yellow-950/40 text-yellow-200'
+              : game.isCheckmate() && game.turn() === 'b'
               ? 'border-green-400/50 bg-green-950/40 text-green-200'
               : game.isCheckmate()
               ? 'border-red-400/50 bg-red-950/40 text-red-200'
@@ -434,20 +451,22 @@ export default function PlayTrainer() {
       </div>
 
       <aside className="min-w-0 space-y-4">
-        <div className="glass-panel rounded-3xl p-5">
-          <label className="mb-2 block text-sm font-semibold text-slate-300" htmlFor="bot-level">Bot difficulty</label>
-          <select id="bot-level" value={levelId} onChange={(event) => setLevelId(event.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
-            {botLevels.map((bot) => (
-              <option key={bot.id} value={bot.id}>{bot.label}</option>
-            ))}
-          </select>
-          <p className="mt-2 text-xs text-slate-400">These are practice levels, not official ratings.</p>
-          <div className="mt-4 rounded-2xl bg-slate-950/60 p-4">
-            <p className="text-lg font-bold text-yellow-200">{level.label}</p>
-            <p className="text-sm text-slate-300">{level.style}</p>
-            <p className="mt-2 text-sm text-slate-400">{level.description}</p>
+        {!twoPlayer && (
+          <div className="glass-panel rounded-3xl p-5">
+            <label className="mb-2 block text-sm font-semibold text-slate-300" htmlFor="bot-level">Bot difficulty</label>
+            <select id="bot-level" value={levelId} onChange={(event) => setLevelId(event.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
+              {botLevels.map((bot) => (
+                <option key={bot.id} value={bot.id}>{bot.label}</option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-slate-400">These are practice levels, not official ratings.</p>
+            <div className="mt-4 rounded-2xl bg-slate-950/60 p-4">
+              <p className="text-lg font-bold text-yellow-200">{level.label}</p>
+              <p className="text-sm text-slate-300">{level.style}</p>
+              <p className="mt-2 text-sm text-slate-400">{level.description}</p>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="glass-panel rounded-3xl p-5">
           <h3 className="font-bold text-teal-200">Coach note</h3>

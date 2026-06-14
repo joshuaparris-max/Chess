@@ -19,7 +19,7 @@ const LESSONS = [
 ];
 
 const PUZZLE_COUNT = 10;
-const MAX_PUZZLE_STARS = 3; // per puzzle
+const TOTAL_PUZZLE_STARS = 24;
 
 export default function FamilyProgressView() {
   const { progress, resetProgress } = useLocalProgress();
@@ -28,7 +28,7 @@ export default function FamilyProgressView() {
   const adventuresDone = ADVENTURES.filter(a => progress.adventuresDone.includes(a.id)).length;
   const lessonsDone    = LESSONS.filter(l => progress.lessonsDone.includes(l.id)).length;
   const totalStars     = Object.values(progress.puzzleStars).reduce((s, v) => s + v, 0);
-  const maxStars       = PUZZLE_COUNT * MAX_PUZZLE_STARS;
+  const maxStars       = TOTAL_PUZZLE_STARS;
   const puzzlesDone    = Object.values(progress.puzzleStars).filter(s => s > 0).length;
 
   const totalScore = adventuresDone * 10 + lessonsDone * 5 + totalStars;
@@ -88,7 +88,7 @@ export default function FamilyProgressView() {
             aria-label={`${totalStars} of ${maxStars} puzzle stars earned`}
           />
         </div>
-        <p className="text-xs text-slate-400">{puzzlesDone} of {PUZZLE_COUNT} puzzles attempted · earn up to 3 stars each</p>
+        <p className="text-xs text-slate-400">{puzzlesDone} of {PUZZLE_COUNT} puzzles attempted · earn up to {TOTAL_PUZZLE_STARS} stars total</p>
       </div>
 
       {/* Lessons */}

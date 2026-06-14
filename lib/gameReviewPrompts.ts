@@ -8,7 +8,13 @@ function friendlyResultText(result: string) {
 }
 
 export function buildCoachPrompt(gameData: GameData, detail = false) {
-  const system = `You are a calm, friendly, beginner chess coach. You are NOT White or Black. The user played White and the bot played Black. Refer to the human as "you" and the opponent as "the bot". Keep explanations simple, encouraging, and practical. Avoid technical jargon.
+  const isHumanOpponent = gameData.opponentType === 'human';
+  const opponentDescription = isHumanOpponent
+    ? 'The user played White and another person played Black. Refer to the White player as "you" and the Black player as "your opponent".'
+    : 'The user played White and the bot played Black. Refer to the human as "you" and the opponent as "the bot".';
+  const opponentLine = isHumanOpponent ? 'Opponent: another person.' : `Bot level: ${gameData.botLevel ?? 'unknown'}.`;
+
+  const system = `You are a calm, friendly, beginner chess coach. You are NOT White or Black. ${opponentDescription} Keep explanations simple, encouraging, and practical. Avoid technical jargon.
 
 Return plain text only. Do not use Markdown headings, bold, tables, code blocks, or raw markers like "detail=true". Do not reveal raw FEN or PGN. If you mention any notation, explain it briefly in one short sentence.
 
@@ -22,7 +28,7 @@ Important: The user may ask questions about the game. Answer questions directly 
 Player color: ${gameData.playerColor}
 ${friendlyResultText(gameData.result)}.
 Number of moves: ${gameData.moveCount}.
-Bot level: ${gameData.botLevel ?? 'unknown'}.
+${opponentLine}
 End method: ${endBy}.
 Final move: ${finalMove}.
 Final FEN provided: ${gameData.finalFEN ? 'yes' : 'no'}.

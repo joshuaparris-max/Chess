@@ -13,14 +13,17 @@ const MAX_QUESTION_LENGTH = 1000;
 const MAX_MOVE_STRING_LENGTH = 10000; // total moves as string
 const MAX_JSON_SIZE = 100000; // bytes
 
-export function validateGameData(moves: string[], moveCount: number): ValidationResult {
-  if (!moves || !Array.isArray(moves)) {
+export function validateGameData(moves: unknown, moveCount: unknown): ValidationResult {
+  if (!Array.isArray(moves) || !moves.every(move => typeof move === 'string')) {
     return { valid: false, error: 'Invalid moves.' };
+  }
+  if (!Number.isInteger(moveCount) || (moveCount as number) < 0) {
+    return { valid: false, error: 'Invalid move count.' };
   }
   if (moves.length > MAX_MOVES) {
     return { valid: false, error: `Game is too long (max ${MAX_MOVES} half-moves).` };
   }
-  if (moveCount > MAX_MOVES) {
+  if ((moveCount as number) > MAX_MOVES) {
     return { valid: false, error: `Move count exceeds limit.` };
   }
   const movesStr = moves.join(' ');
@@ -30,7 +33,7 @@ export function validateGameData(moves: string[], moveCount: number): Validation
   return { valid: true };
 }
 
-export function validateQuestion(question: string): ValidationResult {
+export function validateQuestion(question: unknown): ValidationResult {
   if (!question || typeof question !== 'string') {
     return { valid: false, error: 'Please ask a question.' };
   }
@@ -43,10 +46,14 @@ export function validateQuestion(question: string): ValidationResult {
   return { valid: true };
 }
 
-export function validateRequestSize(data: any): ValidationResult {
-  const jsonStr = JSON.stringify(data);
-  if (jsonStr.length > MAX_JSON_SIZE) {
-    return { valid: false, error: 'Request is too large.' };
+export function validateRequestSize(data: unknown): ValidationResult {
+  try {
+    const jsonStr = JSON.stringify(data);
+    if (!jsonStr || jsonStr.length > MAX_JSON_SIZE) {
+      return { valid: false, error: 'Request is too large.' };
+    }
+    return { valid: true };
+  } catch {
+    return { valid: false, error: 'Invalid request.' };
   }
-  return { valid: true };
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Square } from 'chess.js';
 import AdventureBoard from './AdventureBoard';
 import CelebrationOverlay from './CelebrationOverlay';
@@ -43,6 +43,10 @@ export default function BishopDiagonalTrail({ onComplete }: { onComplete?: () =>
   const [done, setDone] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
 
   // Show blocker only in stage 0 when it blocks the active path
   const activeBlockers = step === 0 ? [BLOCKER] : [];

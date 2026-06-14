@@ -29,17 +29,17 @@ const PUZZLES: Puzzle[] = [
   },
   {
     id: 'fp02', label: "Rook's Finish", theme: 'Checkmate', maxStars: 3,
-    fen: '7k/8/6K1/8/8/8/8/6R1 w - - 0 1',
+    fen: '7k/8/4B3/8/8/3B4/8/K5R1 w - - 0 1',
     from: 'g1', to: 'g8',
     hint: 'Zoom the rook straight up the g-file!',
     celebrate: "Checkmate! The rook zoomed all the way up and trapped the king.",
   },
   {
     id: 'fp03', label: "Pawn's Checkmate", theme: 'Promotion + Mate', maxStars: 3,
-    fen: 'k7/1P6/8/8/8/K7/8/8 w - - 0 1',
-    from: 'b7', to: 'b8',
-    hint: 'March the pawn one step forward to b8 — it becomes a queen AND gives checkmate!',
-    celebrate: "Amazing! The pawn promoted to a queen right next to the king — instant checkmate!",
+    fen: 'k7/2P5/1K6/8/8/8/8/8 w - - 0 1',
+    from: 'c7', to: 'c8',
+    hint: 'March the pawn one step forward to c8 — it becomes a queen AND gives checkmate!',
+    celebrate: "Amazing! The pawn promoted to a queen on c8 — instant checkmate!",
     isPromotion: true,
   },
   {
@@ -100,10 +100,9 @@ const PIECE_SYMBOLS: Record<string, string> = {
 };
 const FILES = 'abcdefgh'.split('');
 
-function calcStars(attempts: number, hintUsed: boolean): number {
-  if (attempts === 0 && !hintUsed) return 3;
-  if (attempts <= 1) return 2;
-  return 1;
+function calcStars(attempts: number, hintUsed: boolean, maxStars: number): number {
+  const earned = attempts === 0 && !hintUsed ? 3 : attempts <= 1 ? 2 : 1;
+  return Math.min(earned, maxStars);
 }
 
 export default function FamilyPuzzles() {
@@ -170,7 +169,7 @@ export default function FamilyPuzzles() {
       try {
         copy.move(puzzle.isPromotion ? { from: selected, to: sq, promotion: 'q' } : { from: selected, to: sq });
         setGame(copy);
-        const stars = calcStars(attempts, hintUsed);
+        const stars = calcStars(attempts, hintUsed, puzzle.maxStars);
         setEarnedStars(stars);
         setSolved(true);
         setSelected(null);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Square } from 'chess.js';
 import AdventureBoard from './AdventureBoard';
 import CelebrationOverlay from './CelebrationOverlay';
@@ -42,6 +42,10 @@ export default function RookRace({ onComplete }: { onComplete?: () => void }) {
   const [done, setDone] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
 
   // Blocker is only relevant in stage 0 (when rook is on a-file)
   const activeBlockers = step === 0 ? [BLOCKER] : [];

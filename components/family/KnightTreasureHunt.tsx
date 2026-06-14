@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Square } from 'chess.js';
 import AdventureBoard from './AdventureBoard';
 import CelebrationOverlay from './CelebrationOverlay';
@@ -33,6 +33,10 @@ export default function KnightTreasureHunt({ onComplete }: { onComplete?: () => 
   const [done, setDone] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
 
   const legal = knightMoves(pos);
   const target = STARS[step];

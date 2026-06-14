@@ -5,12 +5,13 @@ import { Chess, type Square } from 'chess.js';
 import CelebrationOverlay from './CelebrationOverlay';
 import ReadAloudButton from './ReadAloudButton';
 
-// Position: White King e1, Black King e8, White Pawn d5, Black Pawn e6
-// FEN: 4k3/8/4p3/3P4/8/8/8/4K3 w - - 0 1
+// Position: White King e1, Black King h8 (clear of promotion square), White Pawn d5, Black Pawn e7
+// FEN: 7k/4p3/8/3P4/8/8/8/4K3 w - - 0 1
 // Stage 1: d5→d6 (forward)
-// Stage 2: d6→e7 (diagonal capture of black pawn)
-// Stage 3: e7→e8 (promotion!)
-const INITIAL_FEN = '4k3/8/4p3/3P4/8/8/8/4K3 w - - 0 1';
+// Stage 2: d6→e7 (diagonal capture of black pawn on e7)
+// Stage 3: e7→e8 (promotion! e8 now empty)
+const INITIAL_FEN = '7k/4p3/8/3P4/8/8/8/4K3 w - - 0 1';
+const TARGETS: Square[] = ['d6', 'e7', 'e8'];
 
 const STEPS = [
   { instruction: 'Pawns march forward, one square at a time. Move the pawn from d5 forward to d6!', prompt: 'Move pawn forward' },
@@ -31,10 +32,6 @@ const PIECE_SYMBOLS: Record<string, string> = {
   wk:'♔',wq:'♕',wr:'♖',wb:'♗',wn:'♘',wp:'♙',
   bk:'♚',bq:'♛',br:'♜',bb:'♝',bn:'♞',bp:'♟',
 };
-
-function copyGame(g: Chess): Chess {
-  const c = new Chess(); c.loadPgn(g.pgn()); return c;
-}
 
 export default function PawnToQueen({ onComplete }: { onComplete?: () => void }) {
   const [game, setGame] = useState(() => new Chess(INITIAL_FEN));
@@ -64,7 +61,7 @@ export default function PawnToQueen({ onComplete }: { onComplete?: () => void })
 
   const handlePromotion = (piece: PromotionPiece) => {
     if (!pendingFrom || !pendingTo) return;
-    const copy = copyGame(game);
+    const copy = new Chess(game.fen());
     try {
       copy.move({ from: pendingFrom, to: pendingTo, promotion: piece });
       setGame(copy);
@@ -96,6 +93,12 @@ export default function PawnToQueen({ onComplete }: { onComplete?: () => void })
       return;
     }
 
+    if (sq !== TARGETS[step]) {
+      setFeedback('That is a legal pawn move, but follow the lesson one star at a time.');
+      setSelected(null);
+      return;
+    }
+
     // Check if this is a promotion move
     const movingPiece = game.get(selected);
     if (movingPiece?.type === 'p' && sq[1] === '8') {
@@ -106,9 +109,10 @@ export default function PawnToQueen({ onComplete }: { onComplete?: () => void })
       return;
     }
 
-    const copy = copyGame(game);
+    const copy = new Chess(game.fen());
     try {
       copy.move({ from: selected, to: sq });
+      copy.setTurn('w');
       setGame(copy);
       setSelected(null);
       setFeedback(null);

@@ -30,15 +30,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'The AI coach is busy. Try again in a moment.' }, { status: 429 });
     }
 
-    const body: ChatRequest = await req.json();
-    const keysRaw = process.env.GROQ_API_KEYS || '';
-    const model = process.env.GROQ_MODEL;
-    if (!keysRaw || !model) {
-      return NextResponse.json({ error: 'AI review is not set up yet. Add a Groq API key to enable post-game coaching.' }, { status: 400 });
+    let body: Partial<ChatRequest>;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid request.' }, { status: 400 });
     }
-    const keys = keysRaw.split(',').map(k => k.trim()).filter(Boolean);
-    if (keys.length === 0) {
-      return NextResponse.json({ error: 'AI review is not set up yet. Add a Groq API key to enable post-game coaching.' }, { status: 400 });
+
+    if (!body.gameData) {
+      return NextResponse.json({ error: 'Invalid game data.' }, { status: 400 });
     }
 
     // Validate request payload
@@ -51,10 +51,21 @@ export async function POST(req: Request) {
     if (!questionValidation.valid) {
       return NextResponse.json({ error: questionValidation.error }, { status: 400 });
     }
+    const question = body.question as string;
 
     const sizeValidation = validateRequestSize(body);
     if (!sizeValidation.valid) {
       return NextResponse.json({ error: sizeValidation.error }, { status: 400 });
+    }
+
+    const keysRaw = process.env.GROQ_API_KEYS || '';
+    const model = process.env.GROQ_MODEL;
+    if (!keysRaw || !model) {
+      return NextResponse.json({ error: 'AI review is not set up yet. Add a Groq API key to enable post-game coaching.' }, { status: 400 });
+    }
+    const keys = keysRaw.split(',').map(k => k.trim()).filter(Boolean);
+    if (keys.length === 0) {
+      return NextResponse.json({ error: 'AI review is not set up yet. Add a Groq API key to enable post-game coaching.' }, { status: 400 });
     }
 
     // Build deterministic checkmate facts with chess.js and append to prompt when present
@@ -82,7 +93,7 @@ export async function POST(req: Request) {
     const coaches = buildCoachPrompt(body.gameData, false);
     // Instruct the model to answer the user's question directly and succinctly.
     const userBase = coaches.user;
-    const userPrompt = `${userBase}${checkmateFact ? '\n\n' + checkmateFact + '\n\nPrompt rule: Use the confirmed chess.js game result as ground truth. Do not contradict it.' : ''}\n\nAnswer instructions: Reply in plain text only. Answer the user's question directly and succinctly. Do not repeat the full review. If the user asks about checkmate, explain the final position: name the attacking piece, why the king has no escape, and why capture/block/interpose are impossible, in beginner terms.\n\nUser question: ${body.question.trim()}`;
+    const userPrompt = `${userBase}${checkmateFact ? '\n\n' + checkmateFact + '\n\nPrompt rule: Use the confirmed chess.js game result as ground truth. Do not contradict it.' : ''}\n\nAnswer instructions: Reply in plain text only. Answer the user's question directly and succinctly. Do not repeat the full review. If the user asks about checkmate, explain the final position: name the attacking piece, why the king has no escape, and why capture/block/interpose are impossible, in beginner terms.\n\nUser question: ${question.trim()}`;
     const messages = [
       { role: 'system' as const, content: coaches.system },
       { role: 'user' as const, content: userPrompt },

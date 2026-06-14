@@ -25,21 +25,20 @@ async function callGroq(messages: any[], key: string, model: string) {
 export async function POST(req: Request) {
   try {
     const ip = getClientIP(req);
-    const { allowed, remaining } = checkRateLimit(ip);
+    const { allowed } = checkRateLimit(ip);
     if (!allowed) {
       return NextResponse.json({ error: 'The AI coach is busy. Try again in a moment.' }, { status: 429 });
     }
 
-    const body: ReviewRequest = await req.json();
-    const keysRaw = process.env.GROQ_API_KEYS || '';
-    const model = process.env.GROQ_MODEL;
-    if (!keysRaw || !model) {
-      return NextResponse.json({ error: 'AI review is not set up yet. Add a Groq API key to enable post-game coaching.' }, { status: 400 });
+    let body: Partial<ReviewRequest>;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid request.' }, { status: 400 });
     }
 
-    const keys = keysRaw.split(',').map(k => k.trim()).filter(Boolean);
-    if (keys.length === 0) {
-      return NextResponse.json({ error: 'AI review is not set up yet. Add a Groq API key to enable post-game coaching.' }, { status: 400 });
+    if (!body.gameData) {
+      return NextResponse.json({ error: 'Invalid game data.' }, { status: 400 });
     }
 
     // Validate request payload
@@ -51,6 +50,17 @@ export async function POST(req: Request) {
     const sizeValidation = validateRequestSize(body);
     if (!sizeValidation.valid) {
       return NextResponse.json({ error: sizeValidation.error }, { status: 400 });
+    }
+
+    const keysRaw = process.env.GROQ_API_KEYS || '';
+    const model = process.env.GROQ_MODEL;
+    if (!keysRaw || !model) {
+      return NextResponse.json({ error: 'AI review is not set up yet. Add a Groq API key to enable post-game coaching.' }, { status: 400 });
+    }
+
+    const keys = keysRaw.split(',').map(k => k.trim()).filter(Boolean);
+    if (keys.length === 0) {
+      return NextResponse.json({ error: 'AI review is not set up yet. Add a Groq API key to enable post-game coaching.' }, { status: 400 });
     }
 
     const isDetailMode = !!body.detail;
