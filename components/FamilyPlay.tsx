@@ -69,6 +69,7 @@ export default function FamilyPlay() {
   // White = Sylvie by default; swapped = White is Dad, Black is Sylvie
   const [swapped, setSwapped] = useState(false);
   const [showQuestions, setShowQuestions] = useState(true);
+  const [flipped, setFlipped] = useState(false);
 
   const whiteName = swapped ? 'Dad' : 'Sylvie';
   const blackName = swapped ? 'Sylvie' : 'Dad';
@@ -242,6 +243,13 @@ export default function FamilyPlay() {
         >
           Questions {showQuestions ? 'on' : 'off'}
         </button>
+        <button
+          onClick={() => setFlipped((v) => !v)}
+          className="min-h-[48px] flex-1 rounded-2xl border border-slate-500/50 px-4 py-3 font-bold text-slate-100 hover:bg-slate-700/50 active:scale-95"
+          title="Flip board so Black's side is at the bottom"
+        >
+          Flip board
+        </button>
       </div>
 
       {/* Friendly question */}
@@ -281,6 +289,7 @@ export default function FamilyPlay() {
         captureSquares={captureSquares}
         lastMove={lastMove}
         disabled={isOver || Boolean(pendingPromotion)}
+        flipped={flipped}
         onSquareClick={onSquareClick}
       />
       <p className="mt-1 text-xs font-bold uppercase tracking-widest text-teal-200">{whiteName} · White</p>

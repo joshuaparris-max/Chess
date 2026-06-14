@@ -6,8 +6,7 @@ import PuzzleTrainer from '@/components/PuzzleTrainer';
 import LearnPath from '@/components/LearnPath';
 import WatchRoom from '@/components/WatchRoom';
 import Roadmap from '@/components/Roadmap';
-import FamilyPlay from '@/components/FamilyPlay';
-import KnightTreasureHunt from '@/components/KnightTreasureHunt';
+import FamilyHub from '@/components/FamilyHub';
 import type { AppMode } from '@/lib/types';
 
 const modes: { id: AppMode; label: string; tagline: string }[] = [
@@ -16,8 +15,7 @@ const modes: { id: AppMode; label: string; tagline: string }[] = [
   { id: 'learn', label: 'Learn', tagline: 'Micro-lessons from elite traits' },
   { id: 'watch', label: 'Watch', tagline: 'Model-game ideas' },
   { id: 'roadmap', label: 'Roadmap', tagline: 'Beginner to advanced path' },
-  { id: 'family', label: 'Josh & Sylvie — Play Together', tagline: 'Take turns on one device' },
-  { id: 'adventure', label: "Sylvie's Chess Adventure", tagline: 'Knight Treasure Hunt' },
+  { id: 'family', label: 'Family Chess', tagline: 'Play, learn & explore together' },
 ];
 
 function localDateKey(date = new Date()) {
@@ -40,9 +38,7 @@ function modeContent(mode: AppMode) {
     case 'roadmap':
       return <Roadmap />;
     case 'family':
-      return <FamilyPlay />;
-    case 'adventure':
-      return <KnightTreasureHunt />;
+      return <FamilyHub />;
   }
 }
 
@@ -113,7 +109,7 @@ export default function Home() {
         </div>
       </header>
 
-      <nav className="my-5 grid gap-3 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7" aria-label="Training modes">
+      <nav className="my-5 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6" aria-label="Training modes">
         {modes.map((item) => (
           <button key={item.id} onClick={() => setMode(item.id)} className={`rounded-3xl border p-4 text-left transition ${mode === item.id ? 'border-teal-300 bg-teal-300 text-slate-950' : 'border-slate-600/50 bg-slate-900/70 text-slate-100 hover:border-teal-200/70 hover:bg-slate-800'}`}>
             <span className="block text-lg font-black">{item.label}</span>

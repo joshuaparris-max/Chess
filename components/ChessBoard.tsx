@@ -24,17 +24,31 @@ type ChessBoardProps = {
   captureSquares?: string[];
   lastMove: { from: string; to: string } | null;
   disabled?: boolean;
+  flipped?: boolean;
   onSquareClick: (square: Square) => void;
 };
 
-export default function ChessBoard({ game, selectedSquare, legalTargets, captureSquares = [], lastMove, disabled = false, onSquareClick }: ChessBoardProps) {
+export default function ChessBoard({
+  game,
+  selectedSquare,
+  legalTargets,
+  captureSquares = [],
+  lastMove,
+  disabled = false,
+  flipped = false,
+  onSquareClick,
+}: ChessBoardProps) {
   const board = game.board();
+  const displayRows = flipped ? [...board].reverse() : board;
 
   return (
     <div className="chess-board board-shadow rounded-2xl border border-slate-500/30 bg-slate-950 mx-auto">
-      {board.flatMap((row, rowIndex) =>
-        row.map((piece, fileIndex) => {
-          const square = `${'abcdefgh'[fileIndex]}${8 - rowIndex}` as Square;
+      {displayRows.flatMap((row, rowIndex) => {
+        const displayCells = flipped ? [...row].reverse() : row;
+        const rankNum = flipped ? rowIndex + 1 : 8 - rowIndex;
+        return displayCells.map((piece, fileIndex) => {
+          const fileChar = flipped ? 'hgfedcba'[fileIndex] : 'abcdefgh'[fileIndex];
+          const square = `${fileChar}${rankNum}` as Square;
           const isLight = (rowIndex + fileIndex) % 2 === 0;
           const isSelected = selectedSquare === square;
           const isLegalTarget = legalTargets.includes(square);
@@ -57,12 +71,14 @@ export default function ChessBoard({ game, selectedSquare, legalTargets, capture
               {isCapture && (
                 <span className="absolute inset-0.5 rounded-sm ring-4 ring-red-500/70 sm:ring-[5px]" />
               )}
-              <span className={`chess-piece ${piece ? (piece.color === 'w' ? 'white-piece' : 'black-piece') : ''}`}>{piece ? PIECES[pieceKey] : ''}</span>
+              <span className={`chess-piece ${piece ? (piece.color === 'w' ? 'white-piece' : 'black-piece') : ''}`}>
+                {piece ? PIECES[pieceKey] : ''}
+              </span>
               <span className="coord">{square}</span>
             </button>
           );
-        }),
-      )}
+        });
+      })}
     </div>
   );
 }
