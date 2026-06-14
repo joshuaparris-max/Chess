@@ -10,6 +10,7 @@ import { getBotMove, uciToMove } from '@/lib/engine';
 import { cancelStockfishMove, getStockfishMove } from '@/lib/stockfishClient';
 
 type PromotionPiece = 'q' | 'r' | 'b' | 'n';
+type GameMode = 'vs-computer' | 'two-player';
 
 type PendingPromotion = {
   from: Square;
@@ -74,6 +75,7 @@ export default function PlayTrainer() {
   const [isThinking, setIsThinking] = useState(false);
   const [pendingPromotion, setPendingPromotion] = useState<PendingPromotion>(null);
   const [engineNotice, setEngineNotice] = useState<string | null>(null);
+  const [gameMode, setGameMode] = useState<GameMode>('vs-computer');
   const [coachNote, setCoachNote] = useState('White starts every game. You play as White — focus on development, centre control, and king safety.');
   const engineRequestId = useRef(0);
 
@@ -82,6 +84,13 @@ export default function PlayTrainer() {
   const legalTargets = useMemo(() => {
     if (!selectedSquare) return [];
     return game.moves({ square: selectedSquare, verbose: true }).map((move) => move.to);
+  }, [game, selectedSquare]);
+
+  const captureSquares = useMemo(() => {
+    if (!selectedSquare) return [];
+    return game.moves({ square: selectedSquare, verbose: true })
+      .filter((move) => Boolean(move.captured))
+      .map((move) => move.to);
   }, [game, selectedSquare]);
 
   const resetGame = () => {
@@ -112,11 +121,11 @@ export default function PlayTrainer() {
 
     const copy = copyGame(game);
     copy.undo();
-    copy.undo();
+    if (gameMode === 'vs-computer') copy.undo();
     setGame(copy);
     setSelectedSquare(null);
     setLastMove(null);
-    setCoachNote('Move pair undone. Now replay with one clearer thought.');
+    setCoachNote(gameMode === 'two-player' ? 'Move undone. Try again.' : 'Move pair undone. Now replay with one clearer thought.');
     if (!copy.isGameOver()) {
       setShowReview(false);
       setReviewContext(null);
@@ -188,11 +197,14 @@ export default function PlayTrainer() {
   };
 
   const onSquareClick = (square: Square) => {
-    if (isThinking || pendingPromotion || game.isGameOver() || game.turn() !== 'w') return;
+    if (isThinking || pendingPromotion || game.isGameOver()) return;
+    if (gameMode === 'vs-computer' && game.turn() !== 'w') return;
 
+    const currentTurn = game.turn();
     const piece = game.get(square);
+
     if (!selectedSquare) {
-      if (piece?.color === 'w') setSelectedSquare(square);
+      if (piece?.color === currentTurn) setSelectedSquare(square);
       return;
     }
 
@@ -201,7 +213,7 @@ export default function PlayTrainer() {
       return;
     }
 
-    if (piece?.color === 'w') {
+    if (piece?.color === currentTurn) {
       setSelectedSquare(square);
       return;
     }
@@ -218,7 +230,7 @@ export default function PlayTrainer() {
   };
 
   useEffect(() => {
-    if (game.turn() !== 'b' || game.isGameOver()) return;
+    if (gameMode === 'two-player' || game.turn() !== 'b' || game.isGameOver()) return;
 
     const requestId = engineRequestId.current + 1;
     engineRequestId.current = requestId;
@@ -266,7 +278,7 @@ export default function PlayTrainer() {
         cancelStockfishMove();
       }
     };
-  }, [game, level]);
+  }, [game, level, gameMode]);
 
   // Post-game review state
   const [showReview, setShowReview] = useState(false);
@@ -310,24 +322,44 @@ export default function PlayTrainer() {
     }
   }, [game]);
 
+  const twoPlayer = gameMode === 'two-player';
+
   return (
     <section className="grid gap-5 lg:grid-cols-[minmax(0,620px)_minmax(320px,1fr)]">
       <div className="glass-panel min-w-0 rounded-3xl p-2 sm:p-6">
-        <div className="mb-2 flex items-center justify-between sm:mb-4">
-          <div>
-            <h2 className="text-lg font-bold sm:text-2xl">Play vs Computer</h2>
-            <p className="text-xs text-slate-300 sm:text-sm">Choose a training level. You play White, and these are practice levels rather than official ratings.</p>
+        <div className="mb-3 sm:mb-4">
+          <div className="mb-3 flex rounded-2xl border border-slate-600 bg-slate-950/60 p-1">
+            <button
+              onClick={() => { setGameMode('vs-computer'); resetGame(); }}
+              className={`flex-1 rounded-xl py-2 text-sm font-bold transition ${!twoPlayer ? 'bg-teal-500 text-slate-950' : 'text-slate-300 hover:text-white'}`}
+            >
+              vs Computer
+            </button>
+            <button
+              onClick={() => { setGameMode('two-player'); resetGame(); }}
+              className={`flex-1 rounded-xl py-2 text-sm font-bold transition ${twoPlayer ? 'bg-teal-500 text-slate-950' : 'text-slate-300 hover:text-white'}`}
+            >
+              2 Players (pass &amp; play)
+            </button>
           </div>
-          <div className="hidden sm:flex gap-2">
-            <button onClick={resetGame} className="rounded-xl bg-teal-400 px-4 py-2 font-bold text-slate-950 hover:bg-teal-300">New game</button>
-            <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion)} onClick={undoPair} className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm text-slate-100 hover:bg-slate-700/50 disabled:cursor-not-allowed disabled:opacity-40">Undo pair</button>
-            <button disabled={Boolean(pendingPromotion) || game.isGameOver()} onClick={showHint} className="rounded-xl border border-yellow-300/70 bg-yellow-200/10 px-4 py-2 text-sm text-yellow-100 hover:bg-yellow-200/20 disabled:cursor-not-allowed disabled:opacity-40">Hint</button>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold sm:text-2xl">{twoPlayer ? '2 Players — Pass & Play' : 'Play vs Computer'}</h2>
+              <p className="text-xs text-slate-300 sm:text-sm">
+                {twoPlayer ? 'Both players take turns on this device.' : 'Choose a training level. You play White, and these are practice levels rather than official ratings.'}
+              </p>
+            </div>
+            <div className="hidden sm:flex gap-2">
+              <button onClick={resetGame} className="rounded-xl bg-teal-400 px-4 py-2 font-bold text-slate-950 hover:bg-teal-300">New game</button>
+              <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion)} onClick={undoPair} className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm text-slate-100 hover:bg-slate-700/50 disabled:cursor-not-allowed disabled:opacity-40">{twoPlayer ? 'Undo' : 'Undo pair'}</button>
+              {!twoPlayer && <button disabled={Boolean(pendingPromotion) || game.isGameOver()} onClick={showHint} className="rounded-xl border border-yellow-300/70 bg-yellow-200/10 px-4 py-2 text-sm text-yellow-100 hover:bg-yellow-200/20 disabled:cursor-not-allowed disabled:opacity-40">Hint</button>}
+            </div>
           </div>
         </div>
 
         <div className="mobile-coach mb-3 sm:mb-4">
           <p className="text-sm font-semibold text-yellow-200">Coach</p>
-          <p className="text-sm text-slate-100">{isThinking ? 'Bot is thinking…' : coachNote}</p>
+          <p className="text-sm text-slate-100">{isThinking && !twoPlayer ? 'Bot is thinking…' : coachNote}</p>
         </div>
 
         {engineNotice && <p className="mb-4 rounded-xl border border-yellow-300/40 bg-yellow-950/30 p-3 text-sm text-yellow-100">{engineNotice}</p>}
@@ -384,19 +416,20 @@ export default function PlayTrainer() {
           </div>
         )}
 
-        <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Black bot</p>
-        <div className="mb-4 rounded-2xl border border-teal-300/30 bg-slate-950/70 p-3 text-sm text-teal-100">
-          White starts first in every game. You control White, and Black moves only after your first move.
-        </div>
-
-        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} disabled={isThinking || Boolean(pendingPromotion) || game.isGameOver()} onSquareClick={onSquareClick} />
-        <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">You · White</p>
+        <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{twoPlayer ? 'Black' : 'Black bot'}</p>
+        {!twoPlayer && (
+          <div className="mb-4 rounded-2xl border border-teal-300/30 bg-slate-950/70 p-3 text-sm text-teal-100">
+            White starts first in every game. You control White, and Black moves only after your first move.
+          </div>
+        )}
+        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} captureSquares={captureSquares} lastMove={lastMove} disabled={isThinking || Boolean(pendingPromotion) || game.isGameOver()} onSquareClick={onSquareClick} />
+        <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">{twoPlayer ? 'White' : 'You · White'}</p>
 
         {/* Mobile action bar */}
         <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
           <button onClick={resetGame} className="flex-1 rounded-2xl bg-teal-400 py-3 text-center font-bold text-slate-950">New</button>
           <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion)} onClick={undoPair} className="flex-1 rounded-2xl border border-slate-600 py-3 text-center text-sm text-slate-100 disabled:cursor-not-allowed disabled:opacity-40">Undo</button>
-          <button disabled={Boolean(pendingPromotion) || game.isGameOver()} onClick={showHint} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100 disabled:cursor-not-allowed disabled:opacity-40">Hint</button>
+          <button disabled={Boolean(pendingPromotion) || game.isGameOver()} onClick={twoPlayer ? () => setCoachNote('Hint: Look for checks, captures, and threats before each move.') : showHint} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100 disabled:cursor-not-allowed disabled:opacity-40">Hint</button>
         </div>
       </div>
 
@@ -418,7 +451,7 @@ export default function PlayTrainer() {
 
         <div className="glass-panel rounded-3xl p-5">
           <h3 className="font-bold text-teal-200">Coach note</h3>
-          <p className="mt-2 text-slate-100">{isThinking ? 'Bot is thinking…' : coachNote}</p>
+          <p className="mt-2 text-slate-100">{isThinking && !twoPlayer ? 'Bot is thinking…' : coachNote}</p>
           <div className="mt-4">
             <p className="text-xs font-bold uppercase text-slate-400">Game status</p>
             <p className={`mt-1 text-sm font-semibold ${
