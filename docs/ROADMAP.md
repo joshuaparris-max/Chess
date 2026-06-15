@@ -46,7 +46,7 @@ Goal: the app teaches more than "play a bot" and starts forming a real improveme
 - [x] Import or curate a larger legal puzzle dataset with license/attribution notes (117 generated-and-verified adult puzzles + `docs/PUZZLE_SOURCES.md`)
 - [x] Add puzzle tags, difficulty estimates, and attempt history (themes/phase tags, five difficulty bands, local attempt/solved tracking)
 - [x] Add multi-move puzzle sequences with opponent auto-reply and three-level hints
-- [ ] Add puzzle streaks and spaced repetition
+- [x] Add puzzle streaks and spaced repetition
 - [ ] Add engine-backed review categories: blunder, mistake, missed tactic, good move
 - [ ] Add retry-mistakes flow after review
 - [x] Add opening recognition from a small curated opening table

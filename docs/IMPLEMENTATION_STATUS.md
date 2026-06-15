@@ -19,6 +19,7 @@ Updated: 2026-06-15
 - First-game beginner onboarding, persistent Play settings, keyboard board navigation, richer screen-reader square labels, and read-aloud lesson/coach/model-game content
 - Advanced local puzzle filters for theme, phase, side to move, and line length
 - Model-game prediction prompts and direct handoff into Play or Puzzles
+- Local puzzle solve streaks and spaced-repetition review scheduling with backward-compatible progress migration
 - **Lichess puzzle integration (NEW):**
   - Live Daily Puzzle tab (cached 1 hour, Lichess's curated puzzle)
   - Live Random Puzzle tab (fresh on-demand, with angle/difficulty filters)

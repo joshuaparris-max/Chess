@@ -59,7 +59,7 @@ Last consolidated from repo docs: 2026-06-15.
 - [x] Puzzle tags and difficulty estimates (themes, phase, five difficulty bands)
 - [x] Puzzle attempt history (local attempt/solved tracking)
 - [x] Difficulty filter
-- [ ] Puzzle streaks and spaced repetition
+- [x] Puzzle streaks and spaced repetition
 - [x] Additional filters: theme, phase, color, and length
 - [ ] Practice modes (timed, by-theme drills)
 - [x] Puzzle reset/next/wrong-move behavior tests

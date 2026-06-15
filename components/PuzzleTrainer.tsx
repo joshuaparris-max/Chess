@@ -8,15 +8,13 @@ import type { AdultPuzzle, PuzzleDifficulty } from '@/lib/puzzles/types';
 import type { LichessPuzzle } from '@/lib/lichessClient';
 import { tryPuzzleMove } from '@/lib/puzzles/attempt';
 import ReadAloudButton from './family/ReadAloudButton';
+import { duePuzzleIds, normalisePuzzleProgress, puzzleSolveStreak, recordPuzzleMiss, recordPuzzleSolve, type PuzzleProgress } from '@/lib/puzzles/progress';
 
 // ── Progress ──────────────────────────────────────────────────────────────────
 
 const PROGRESS_KEY = 'gm-adult-puzzle-progress-v1';
 const DAILY_PUZZLE_KEY = 'gm-daily-puzzle-solved-v1';
 const LICHESS_CACHE_KEY = 'gm-lichess-puzzle-cache-v1';
-
-type PuzzleRecord = { attempts: number; solved: number };
-type PuzzleProgress = Record<string, PuzzleRecord>;
 
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -28,7 +26,7 @@ function localDateKey(date = new Date()) {
 function loadProgress(): PuzzleProgress {
   try {
     const raw = localStorage.getItem(PROGRESS_KEY);
-    if (raw) return JSON.parse(raw) as PuzzleProgress;
+    if (raw) return normalisePuzzleProgress(JSON.parse(raw));
   } catch {}
   return {};
 }
@@ -281,6 +279,14 @@ export default function PuzzleTrainer() {
   const opponentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { setProgress(loadProgress()); }, []);
+  const dueIds = useMemo(() => duePuzzleIds(progress), [progress]);
+  const visibleDueIds = useMemo(() => dueIds.filter((id) => filteredPuzzles.some((puzzle) => puzzle.id === id)), [dueIds, filteredPuzzles]);
+  const solveStreak = useMemo(() => puzzleSolveStreak(progress), [progress]);
+
+  const startReviewQueue = () => {
+    const dueIndex = filteredPuzzles.findIndex((item) => visibleDueIds.includes(item.id));
+    if (dueIndex >= 0) loadPuzzle(dueIndex);
+  };
 
   const legalTargets = useMemo(() => {
     if (!selectedSquare || opponentThinking || solved) return [];
@@ -342,6 +348,15 @@ export default function PuzzleTrainer() {
       if (nextStep >= sol.length) {
         setSolved(true);
         setMessage('');
+        setProgress((current) => {
+          const next = recordPuzzleSolve(current, puzzle.id);
+          saveProgress(next);
+          return next;
+        });
+        if (sourceTab === 'daily' && puzzle.source === 'lichess') {
+          markDailyPuzzleSolvedToday(puzzle.id);
+          setDailySolvedToday(true);
+        }
       } else {
         setMessage('Good move! Continue the line.');
       }
@@ -376,8 +391,7 @@ export default function PuzzleTrainer() {
       if (result.status === 'incorrect') {
         setMessage('Not quite — try again.');
         setSelectedSquare(null);
-        const rec = progress[puzzle.id] ?? { attempts: 0, solved: 0 };
-        const next = { ...progress, [puzzle.id]: { ...rec, attempts: rec.attempts + 1 } };
+        const next = recordPuzzleMiss(progress, puzzle.id);
         setProgress(next);
         saveProgress(next);
         return;
@@ -392,8 +406,7 @@ export default function PuzzleTrainer() {
       if (nextStep >= puzzle.solution.length) {
         setSolved(true);
         setMessage('');
-        const rec = progress[puzzle.id] ?? { attempts: 0, solved: 0 };
-        const next = { ...progress, [puzzle.id]: { ...rec, attempts: rec.attempts + 1, solved: rec.solved + 1 } };
+        const next = recordPuzzleSolve(progress, puzzle.id);
         setProgress(next);
         saveProgress(next);
 
@@ -742,6 +755,21 @@ export default function PuzzleTrainer() {
             {sourceTab === 'local' && (
               <div className="glass-panel rounded-3xl p-5">
                 <h3 className="font-bold text-teal-200 mb-3">Find a local puzzle</h3>
+                <div className="mb-4 grid grid-cols-2 gap-2">
+                  <div className="rounded-xl bg-slate-950/60 p-3">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">Solve streak</p>
+                    <p className="mt-1 text-xl font-black text-yellow-200">{solveStreak} day{solveStreak === 1 ? '' : 's'}</p>
+                  </div>
+                  <div className="rounded-xl bg-slate-950/60 p-3">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">Due for review</p>
+                    <p className="mt-1 text-xl font-black text-teal-200">{visibleDueIds.length}</p>
+                  </div>
+                </div>
+                {visibleDueIds.length > 0 && (
+                  <button onClick={startReviewQueue} className="mb-4 min-h-11 w-full rounded-xl bg-yellow-200 px-4 py-2 text-sm font-bold text-slate-950">
+                    Review a due puzzle
+                  </button>
+                )}
                 <div className="flex flex-wrap gap-2">
                   {(['all', ...DIFFICULTIES] as const).map(d => (
                     <button
