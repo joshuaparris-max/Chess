@@ -1,9 +1,17 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Grandmaster Path Alpha',
   description: 'A chess training alpha that combines play, puzzles, lessons, and model-game study.',
+  applicationName: 'Grandmaster Path',
+  appleWebApp: { capable: true, title: 'Grandmaster Path', statusBarStyle: 'black-translucent' },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#0f172a',
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
