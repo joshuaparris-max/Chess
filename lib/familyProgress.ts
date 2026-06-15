@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type FamilyProgress = {
   adventuresDone: string[];
@@ -8,8 +8,14 @@ export type FamilyProgress = {
   puzzleStars: Record<string, number>;
 };
 
-const KEY = 'gm-family-progress';
+export type FamilyProfile = { id: string; name: string; emoji: string };
+
+const LEGACY_KEY = 'gm-family-progress';
+const PROFILES_KEY = 'gm-family-profiles-v1';
+const PROGRESS_PREFIX = 'gm-family-progress::';
 const CHANGE_EVENT = 'gm-family-progress-change';
+const PROFILE_EVENT = 'gm-family-profile-change';
+
 const EMPTY: FamilyProgress = { adventuresDone: [], lessonsDone: [], puzzleStars: {} };
 const ADVENTURE_IDS = new Set(['knight', 'rook', 'bishop', 'pawn']);
 const LESSON_IDS = new Set(['pieces', 'check', 'castling', 'values', 'centre']);
@@ -20,6 +26,8 @@ const PUZZLE_STAR_LIMITS: Record<string, number> = {
   fp16: 3, fp17: 2, fp18: 2, fp19: 3, fp20: 3,
   fp21: 3, fp22: 2, fp23: 3, fp24: 2,
 };
+
+const PROFILE_EMOJIS = ['🦁', '🐯', '🐼', '🦊', '🐸', '🐵', '🦄', '🐝'];
 
 export function normaliseFamilyProgress(value: unknown): FamilyProgress {
   if (!value || typeof value !== 'object') return { adventuresDone: [], lessonsDone: [], puzzleStars: {} };
@@ -42,38 +50,163 @@ export function normaliseFamilyProgress(value: unknown): FamilyProgress {
   return { adventuresDone, lessonsDone, puzzleStars };
 }
 
-function load(): FamilyProgress {
+// ── Profiles ──────────────────────────────────────────────────────────────────
+
+export type ProfilesState = { profiles: FamilyProfile[]; activeId: string };
+
+const DEFAULT_PROFILE: FamilyProfile = { id: 'p1', name: 'Player 1', emoji: '🦁' };
+
+function progressKey(profileId: string) {
+  return `${PROGRESS_PREFIX}${profileId}`;
+}
+
+/** Loads (and on first run, seeds + migrates legacy progress into) the profiles store. */
+export function loadProfiles(): ProfilesState {
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = window.localStorage.getItem(PROFILES_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<ProfilesState>;
+      const profiles = Array.isArray(parsed.profiles)
+        ? parsed.profiles.filter((p): p is FamilyProfile => !!p && typeof p.id === 'string' && typeof p.name === 'string')
+        : [];
+      if (profiles.length) {
+        const activeId = profiles.some((p) => p.id === parsed.activeId) ? (parsed.activeId as string) : profiles[0].id;
+        return { profiles, activeId };
+      }
+    }
+  } catch {
+    // fall through to seeding
+  }
+
+  const state: ProfilesState = { profiles: [DEFAULT_PROFILE], activeId: DEFAULT_PROFILE.id };
+  try {
+    const legacy = window.localStorage.getItem(LEGACY_KEY);
+    if (legacy && !window.localStorage.getItem(progressKey(DEFAULT_PROFILE.id))) {
+      window.localStorage.setItem(progressKey(DEFAULT_PROFILE.id), legacy);
+    }
+    window.localStorage.setItem(PROFILES_KEY, JSON.stringify(state));
+  } catch {
+    // ignore storage errors
+  }
+  return state;
+}
+
+function saveProfiles(state: ProfilesState) {
+  try { window.localStorage.setItem(PROFILES_KEY, JSON.stringify(state)); } catch {}
+  queueMicrotask(() => window.dispatchEvent(new CustomEvent<ProfilesState>(PROFILE_EVENT, { detail: state })));
+}
+
+function load(profileId: string): FamilyProgress {
+  try {
+    const raw = window.localStorage.getItem(progressKey(profileId));
     if (raw) return normaliseFamilyProgress(JSON.parse(raw));
   } catch {}
   return { adventuresDone: [], lessonsDone: [], puzzleStars: {} };
 }
 
-function publish(p: FamilyProgress) {
-  try { window.localStorage.setItem(KEY, JSON.stringify(p)); } catch {}
+function publish(profileId: string, p: FamilyProgress) {
+  try { window.localStorage.setItem(progressKey(profileId), JSON.stringify(p)); } catch {}
   queueMicrotask(() => {
-    window.dispatchEvent(new CustomEvent<FamilyProgress>(CHANGE_EVENT, { detail: p }));
+    window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: { profileId, progress: p } }));
   });
 }
 
-export function useLocalProgress() {
-  const [progress, setProgress] = useState<FamilyProgress>(() => ({ ...EMPTY }));
+/** Manage the list of local family profiles (switch / add / rename / remove). */
+export function useFamilyProfiles() {
+  const [state, setState] = useState<ProfilesState>({ profiles: [DEFAULT_PROFILE], activeId: DEFAULT_PROFILE.id });
 
   useEffect(() => {
-    const syncFromStorage = (event: StorageEvent) => {
-      if (event.key === KEY) setProgress(load());
+    setState(loadProfiles());
+    const sync = () => setState(loadProfiles());
+    window.addEventListener(PROFILE_EVENT, sync);
+    window.addEventListener('storage', (e) => { if (e.key === PROFILES_KEY) sync(); });
+    return () => {
+      window.removeEventListener(PROFILE_EVENT, sync);
     };
-    const syncFromApp = (event: Event) => {
-      setProgress(normaliseFamilyProgress((event as CustomEvent<FamilyProgress>).detail));
+  }, []);
+
+  const switchProfile = useCallback((id: string) => {
+    setState((prev) => {
+      if (!prev.profiles.some((p) => p.id === id) || prev.activeId === id) return prev;
+      const next = { ...prev, activeId: id };
+      saveProfiles(next);
+      return next;
+    });
+  }, []);
+
+  const addProfile = useCallback((name?: string) => {
+    setState((prev) => {
+      const id = `p${Date.now().toString(36)}`;
+      const emoji = PROFILE_EMOJIS[prev.profiles.length % PROFILE_EMOJIS.length];
+      const cleanName = (name ?? '').trim() || `Player ${prev.profiles.length + 1}`;
+      const next = { profiles: [...prev.profiles, { id, name: cleanName.slice(0, 20), emoji }], activeId: id };
+      saveProfiles(next);
+      return next;
+    });
+  }, []);
+
+  const renameProfile = useCallback((id: string, name: string) => {
+    setState((prev) => {
+      const cleanName = name.trim().slice(0, 20);
+      if (!cleanName) return prev;
+      const next = { ...prev, profiles: prev.profiles.map((p) => (p.id === id ? { ...p, name: cleanName } : p)) };
+      saveProfiles(next);
+      return next;
+    });
+  }, []);
+
+  const removeProfile = useCallback((id: string) => {
+    setState((prev) => {
+      if (prev.profiles.length <= 1) return prev; // always keep one
+      const profiles = prev.profiles.filter((p) => p.id !== id);
+      const activeId = prev.activeId === id ? profiles[0].id : prev.activeId;
+      try { window.localStorage.removeItem(progressKey(id)); } catch {}
+      const next = { profiles, activeId };
+      saveProfiles(next);
+      return next;
+    });
+  }, []);
+
+  const activeProfile = state.profiles.find((p) => p.id === state.activeId) ?? state.profiles[0];
+
+  return { profiles: state.profiles, activeId: state.activeId, activeProfile, switchProfile, addProfile, renameProfile, removeProfile };
+}
+
+// ── Per-profile progress ────────────────────────────────────────────────────────
+
+export function useLocalProgress() {
+  const [progress, setProgress] = useState<FamilyProgress>(() => ({ ...EMPTY }));
+  const activeIdRef = useRef<string>(DEFAULT_PROFILE.id);
+
+  useEffect(() => {
+    const initial = loadProfiles();
+    activeIdRef.current = initial.activeId;
+    setProgress(load(initial.activeId));
+
+    const onProfileChange = () => {
+      const active = loadProfiles().activeId;
+      activeIdRef.current = active;
+      setProgress(load(active));
+    };
+    const onAppChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ profileId: string; progress: FamilyProgress }>).detail;
+      if (detail && detail.profileId === activeIdRef.current) {
+        setProgress(normaliseFamilyProgress(detail.progress));
+      }
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === progressKey(activeIdRef.current) || event.key === PROFILES_KEY) {
+        setProgress(load(loadProfiles().activeId));
+      }
     };
 
-    setProgress(load());
-    window.addEventListener('storage', syncFromStorage);
-    window.addEventListener(CHANGE_EVENT, syncFromApp);
+    window.addEventListener(PROFILE_EVENT, onProfileChange);
+    window.addEventListener(CHANGE_EVENT, onAppChange);
+    window.addEventListener('storage', onStorage);
     return () => {
-      window.removeEventListener('storage', syncFromStorage);
-      window.removeEventListener(CHANGE_EVENT, syncFromApp);
+      window.removeEventListener(PROFILE_EVENT, onProfileChange);
+      window.removeEventListener(CHANGE_EVENT, onAppChange);
+      window.removeEventListener('storage', onStorage);
     };
   }, []);
 
@@ -81,7 +214,7 @@ export function useLocalProgress() {
     setProgress(prev => {
       if (prev.adventuresDone.includes(id)) return prev;
       const next = { ...prev, adventuresDone: [...prev.adventuresDone, id] };
-      publish(next);
+      publish(activeIdRef.current, next);
       return next;
     });
   }, []);
@@ -90,7 +223,7 @@ export function useLocalProgress() {
     setProgress(prev => {
       if (prev.lessonsDone.includes(id)) return prev;
       const next = { ...prev, lessonsDone: [...prev.lessonsDone, id] };
-      publish(next);
+      publish(activeIdRef.current, next);
       return next;
     });
   }, []);
@@ -100,7 +233,7 @@ export function useLocalProgress() {
       const existing = prev.puzzleStars[id] ?? 0;
       if (stars <= existing) return prev;
       const next = { ...prev, puzzleStars: { ...prev.puzzleStars, [id]: stars } };
-      publish(next);
+      publish(activeIdRef.current, next);
       return next;
     });
   }, []);
@@ -108,9 +241,9 @@ export function useLocalProgress() {
   const resetProgress = useCallback(() => {
     const next: FamilyProgress = { adventuresDone: [], lessonsDone: [], puzzleStars: {} };
     setProgress(next);
-    try { window.localStorage.removeItem(KEY); } catch {}
+    try { window.localStorage.removeItem(progressKey(activeIdRef.current)); } catch {}
     queueMicrotask(() => {
-      window.dispatchEvent(new CustomEvent<FamilyProgress>(CHANGE_EVENT, { detail: next }));
+      window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: { profileId: activeIdRef.current, progress: next } }));
     });
   }, []);
 

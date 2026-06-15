@@ -7,6 +7,7 @@ import FamilyAdventures from './family/FamilyAdventures';
 import FamilyPuzzles from './family/FamilyPuzzles';
 import FamilyLessons from './family/FamilyLessons';
 import FamilyProgressView from './family/FamilyProgressView';
+import ProfileBar from './family/ProfileBar';
 
 type Tab = 'play' | 'adventures' | 'puzzles' | 'lessons' | 'progress';
 
@@ -35,6 +36,9 @@ export default function FamilyHub() {
 
   return (
     <section className="mx-auto max-w-2xl">
+      {/* Local player profiles */}
+      <ProfileBar />
+
       {/* Top nav */}
       <div className="mb-5 rounded-3xl border border-slate-600/40 bg-slate-900/60 p-2">
         <nav aria-label="Family chess sections" className="grid grid-cols-5 gap-1">
