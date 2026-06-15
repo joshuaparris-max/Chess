@@ -26,7 +26,7 @@ const PUZZLE_STAR_LIMITS: Record<string, number> = {
   fp10: 3,
 };
 
-function normalise(value: unknown): FamilyProgress {
+export function normaliseFamilyProgress(value: unknown): FamilyProgress {
   if (!value || typeof value !== 'object') return { adventuresDone: [], lessonsDone: [], puzzleStars: {} };
 
   const candidate = value as Partial<FamilyProgress>;
@@ -50,7 +50,7 @@ function normalise(value: unknown): FamilyProgress {
 function load(): FamilyProgress {
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (raw) return normalise(JSON.parse(raw));
+    if (raw) return normaliseFamilyProgress(JSON.parse(raw));
   } catch {}
   return { adventuresDone: [], lessonsDone: [], puzzleStars: {} };
 }
@@ -70,7 +70,7 @@ export function useLocalProgress() {
       if (event.key === KEY) setProgress(load());
     };
     const syncFromApp = (event: Event) => {
-      setProgress(normalise((event as CustomEvent<FamilyProgress>).detail));
+      setProgress(normaliseFamilyProgress((event as CustomEvent<FamilyProgress>).detail));
     };
 
     setProgress(load());

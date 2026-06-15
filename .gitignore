@@ -13,6 +13,8 @@
 
 # Vercel
 .vercel
+test-results/
+playwright-report/
 
 # logs and editor files
 npm-debug.log*

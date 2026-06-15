@@ -495,14 +495,14 @@ export default function PlayTrainer() {
         {!twoPlayer && (
           <div className="glass-panel rounded-3xl p-5">
             <div className="mb-4 grid grid-cols-2 gap-3">
-              <label className="text-sm font-semibold text-slate-300">Your color
-                <select value={playerColor} onChange={(event) => { const color = event.target.value as PlayerColor; setPlayerColor(color); setBoardFlipped(color === 'b'); }} className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
+              <label className="text-sm font-semibold text-slate-300" htmlFor="player-color">Your color
+                <select id="player-color" value={playerColor} onChange={(event) => { const color = event.target.value as PlayerColor; setPlayerColor(color); setBoardFlipped(color === 'b'); }} className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
                   <option value="w">White</option>
                   <option value="b">Black</option>
                 </select>
               </label>
-              <label className="text-sm font-semibold text-slate-300">Time control
-                <select value={timeControl} onChange={(event) => setTimeControl(event.target.value as TimeControl)} className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
+              <label className="text-sm font-semibold text-slate-300" htmlFor="time-control">Time control
+                <select id="time-control" value={timeControl} onChange={(event) => setTimeControl(event.target.value as TimeControl)} className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
                   <option value="untimed">Untimed</option>
                   <option value="10+0">10 minutes</option>
                   <option value="5+0">5 minutes</option>
