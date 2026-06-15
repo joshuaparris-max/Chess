@@ -3,6 +3,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { type Chess, type Square } from 'chess.js';
 import ChessPiece from './ChessPiece';
+import {
+  WhiteQueen,
+  BlackQueen,
+  WhiteKing,
+  BlackKing,
+  WhitePawn,
+  BlackPawn,
+  WhiteRook,
+  BlackRook,
+  WhiteKnight,
+  BlackKnight,
+  WhiteBishop,
+  BlackBishop,
+} from '../lib/chess/fairyPieces';
 
 type ChessBoardProps = {
   game: Chess;
@@ -56,6 +70,14 @@ const PIECE_SETS = {
     },
     classes: 'inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950/80 text-2xl font-semibold uppercase tracking-[0.16em]',
   },
+  fairy: {
+    label: 'Fairy',
+    pieces: {
+      wk: 'WQ', wq: 'WQ', wr: 'WR', wb: 'WB', wn: 'WN', wp: 'WP',
+      bk: 'BQ', bq: 'BQ', br: 'BR', bb: 'BB', bn: 'BN', bp: 'BP',
+    },
+    classes: 'inline-flex h-12 w-12 items-center justify-center text-transparent',
+  },
 };
 
 type PieceSetKey = keyof typeof PIECE_SETS;
@@ -92,6 +114,29 @@ export default function ChessBoard({
   }, [pieceSet]);
 
   const pieces: Record<string, string> = useMemo(() => PIECE_SETS[pieceSet].pieces, [pieceSet]);
+
+  const getFairyPiece = (color: 'w' | 'b', type: string) => {
+    if (color === 'w') {
+      switch (type) {
+        case 'k': return <WhiteKing />;
+        case 'q': return <WhiteQueen />;
+        case 'r': return <WhiteRook />;
+        case 'b': return <WhiteBishop />;
+        case 'n': return <WhiteKnight />;
+        case 'p': return <WhitePawn />;
+        default: return null;
+      }
+    }
+    switch (type) {
+      case 'k': return <BlackKing />;
+      case 'q': return <BlackQueen />;
+      case 'r': return <BlackRook />;
+      case 'b': return <BlackBishop />;
+      case 'n': return <BlackKnight />;
+      case 'p': return <BlackPawn />;
+      default: return null;
+    }
+  };
 
   const getPieceClasses = (color?: 'w' | 'b') => {
     if (!color) {
@@ -177,7 +222,9 @@ export default function ChessBoard({
                 {isCapture && (
                   <span className="absolute inset-0.5 rounded-sm ring-4 ring-red-500/70 sm:ring-[5px]" />
                 )}
-                {piece && pieceSet === 'classic' ? <ChessPiece color={piece.color} type={piece.type} /> : (
+                {piece && pieceSet === 'classic' ? <ChessPiece color={piece.color} type={piece.type} /> : piece && pieceSet === 'fairy' ? (
+                  getFairyPiece(piece.color, piece.type)
+                ) : (
                   <span className={`chess-piece ${piece ? getPieceClasses(piece.color) : ''}`}>
                     {piece && pieceKey ? pieces[pieceKey] : ''}
                   </span>
