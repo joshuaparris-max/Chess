@@ -26,7 +26,7 @@ export const researchPillars = [
 export const botLevels: BotLevel[] = [
   {
     id: 'street-400',
-    label: 'Street Beginner',
+    label: 'Trainer Level 1',
     elo: 400,
     style: 'Makes obvious mistakes',
     depth: 1,
@@ -38,7 +38,7 @@ export const botLevels: BotLevel[] = [
   },
   {
     id: 'learner-800',
-    label: 'Learner Bot',
+    label: 'Trainer Level 2',
     elo: 800,
     style: 'Basic tactics, still beatable',
     depth: 1,
@@ -50,7 +50,7 @@ export const botLevels: BotLevel[] = [
   },
   {
     id: 'club-1200',
-    label: 'Club Bot',
+    label: 'Trainer Level 3',
     elo: 1200,
     style: 'Safer moves, fewer freebies',
     depth: 2,
@@ -62,7 +62,7 @@ export const botLevels: BotLevel[] = [
   },
   {
     id: 'expert-2000',
-    label: 'Expert Trainer',
+    label: 'Trainer Level 4',
     elo: 2000,
     style: 'Strong but not brutal',
     depth: 2,
@@ -74,7 +74,7 @@ export const botLevels: BotLevel[] = [
   },
   {
     id: 'master-2400',
-    label: 'Master Trainer',
+    label: 'Trainer Level 5',
     elo: 2400,
     style: 'Very strong',
     depth: 2,
@@ -86,7 +86,7 @@ export const botLevels: BotLevel[] = [
   },
   {
     id: 'gm-sim-2800',
-    label: 'Grandmaster Engine',
+    label: 'Strongest Trainer',
     elo: 2800,
     style: 'Strongest alpha setting',
     depth: 2,

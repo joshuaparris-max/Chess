@@ -70,31 +70,28 @@ select:focus-visible {
   position: relative;
 }
 
-.chess-piece {
-  font-size: clamp(2rem, 9.5vw, 4rem);
-  line-height: 1;
-  display: block;
-  transform: translateY(-1px);
+.chess-piece-svg {
+  position: relative;
+  z-index: 1;
+  width: 78%;
+  height: 78%;
   pointer-events: none;
   user-select: none;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.35));
 }
 
-.white-piece {
-  color: #ffffff;
-  text-shadow:
-    -1px -1px 0 #111827,
-    1px -1px 0 #111827,
-    -1px 1px 0 #111827,
-    1px 1px 0 #111827;
+.piece-svg-white {
+  fill: #f8fafc;
+  stroke: #0f172a;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
 }
 
-.black-piece {
-  color: #111827;
-  text-shadow:
-    -1px -1px 0 rgba(255, 255, 255, 0.7),
-    1px -1px 0 rgba(255, 255, 255, 0.7),
-    -1px 1px 0 rgba(255, 255, 255, 0.7),
-    1px 1px 0 rgba(255, 255, 255, 0.7);
+.piece-svg-black {
+  fill: #111827;
+  stroke: #f8fafc;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
 }
 
 .coord {

@@ -1,21 +1,7 @@
 'use client';
 
 import { type Chess, type Square } from 'chess.js';
-
-const PIECES: Record<string, string> = {
-  wk: '♔',
-  wq: '♕',
-  wr: '♖',
-  wb: '♗',
-  wn: '♘',
-  wp: '♙',
-  bk: '♚',
-  bq: '♛',
-  br: '♜',
-  bb: '♝',
-  bn: '♞',
-  bp: '♟',
-};
+import ChessPiece from './ChessPiece';
 
 type ChessBoardProps = {
   game: Chess;
@@ -54,8 +40,6 @@ export default function ChessBoard({
           const isLegalTarget = legalTargets.includes(square);
           const isCapture = captureSquares.includes(square);
           const isLastMove = lastMove?.from === square || lastMove?.to === square;
-          const pieceKey = piece ? `${piece.color}${piece.type}` : '';
-
           return (
             <button
               key={square}
@@ -71,10 +55,8 @@ export default function ChessBoard({
               {isCapture && (
                 <span className="absolute inset-0.5 rounded-sm ring-4 ring-red-500/70 sm:ring-[5px]" />
               )}
-              <span className={`chess-piece ${piece ? (piece.color === 'w' ? 'white-piece' : 'black-piece') : ''}`}>
-                {piece ? PIECES[pieceKey] : ''}
-              </span>
-              <span className="coord">{square}</span>
+              {piece && <ChessPiece color={piece.color} type={piece.type} />}
+              {(rankNum === (flipped ? 8 : 1) || fileIndex === 0) && <span className="coord">{square}</span>}
             </button>
           );
         });

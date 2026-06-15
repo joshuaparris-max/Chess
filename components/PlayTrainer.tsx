@@ -3,14 +3,23 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Chess, type Square } from 'chess.js';
 import ChessBoard from './ChessBoard';
+import GameClock from './GameClock';
 import PostGameReview from './PostGameReview';
 import type { GameData } from '@/lib/gameReviewTypes';
 import { botLevels } from '@/lib/trainingData';
 import { getBotMove, uciToMove } from '@/lib/engine';
 import { cancelStockfishMove, getStockfishMove } from '@/lib/stockfishClient';
+import { commitClockMove, createClock, startClock, stopClock } from '@/lib/clock';
 
 type PromotionPiece = 'q' | 'r' | 'b' | 'n';
 type GameMode = 'vs-computer' | 'two-player';
+type PlayerColor = 'w' | 'b';
+type TimeControl = 'untimed' | '10+0' | '5+0';
+
+const timeControlMs: Record<Exclude<TimeControl, 'untimed'>, number> = {
+  '10+0': 10 * 60_000,
+  '5+0': 5 * 60_000,
+};
 
 type PendingPromotion = {
   from: Square;
@@ -86,6 +95,10 @@ export default function PlayTrainer() {
   const [pendingPromotion, setPendingPromotion] = useState<PendingPromotion>(null);
   const [engineNotice, setEngineNotice] = useState<string | null>(null);
   const [gameMode, setGameMode] = useState<GameMode>('vs-computer');
+  const [playerColor, setPlayerColor] = useState<PlayerColor>('w');
+  const [boardFlipped, setBoardFlipped] = useState(false);
+  const [timeControl, setTimeControl] = useState<TimeControl>('untimed');
+  const [clock, setClock] = useState(() => createClock(10 * 60_000));
   const [coachNote, setCoachNote] = useState('White starts every game. You play as White — focus on development, centre control, and king safety.');
   const engineRequestId = useRef(0);
 
@@ -112,11 +125,28 @@ export default function PlayTrainer() {
     setLastMove(null);
     setPendingPromotion(null);
     setEngineNotice(null);
-    setCoachNote('New game. Aim for safety first: centre, development, king safety.');
+    setCoachNote(playerColor === 'w' || gameMode === 'two-player' ? 'New game. White starts. Aim for safety first.' : 'New game. The bot plays White first, then it is your turn.');
+    const nextClock = timeControl === 'untimed' ? createClock(10 * 60_000) : createClock(timeControlMs[timeControl]);
+    setClock(timeControl === 'untimed' ? nextClock : startClock(nextClock, 'w', performance.now()));
     setShowReview(false);
     setReviewContext(null);
     setReviewAutoRequest(false);
   };
+
+  useEffect(() => {
+    engineRequestId.current += 1;
+    cancelStockfishMove();
+    const nextClock = timeControl === 'untimed' ? createClock(10 * 60_000) : createClock(timeControlMs[timeControl]);
+    setGame(new Chess());
+    setClock(timeControl === 'untimed' ? nextClock : startClock(nextClock, 'w', performance.now()));
+    setSelectedSquare(null);
+    setLastMove(null);
+    setPendingPromotion(null);
+    setIsThinking(false);
+    setShowReview(false);
+    setReviewContext(null);
+    setReviewAutoRequest(false);
+  }, [playerColor, timeControl]);
 
   const undoPair = () => {
     engineRequestId.current += 1;
@@ -150,6 +180,7 @@ export default function PlayTrainer() {
       const move = copy.move(promotion ? { from, to, promotion } : { from, to });
       if (!move) return false;
       setGame(copy);
+      if (timeControl !== 'untimed') setClock((value) => commitClockMove(value, move.color, performance.now()));
       setLastMove({ from: move.from, to: move.to });
       setSelectedSquare(null);
       setPendingPromotion(null);
@@ -212,7 +243,7 @@ export default function PlayTrainer() {
 
   const onSquareClick = (square: Square) => {
     if (isThinking || pendingPromotion || game.isGameOver()) return;
-    if (gameMode === 'vs-computer' && game.turn() !== 'w') return;
+    if (gameMode === 'vs-computer' && game.turn() !== playerColor) return;
 
     const currentTurn = game.turn();
     const piece = game.get(square);
@@ -244,7 +275,7 @@ export default function PlayTrainer() {
   };
 
   useEffect(() => {
-    if (gameMode === 'two-player' || game.turn() !== 'b' || game.isGameOver()) return;
+    if (gameMode === 'two-player' || game.turn() === playerColor || game.isGameOver()) return;
 
     const requestId = engineRequestId.current + 1;
     engineRequestId.current = requestId;
@@ -269,6 +300,7 @@ export default function PlayTrainer() {
       try {
         const move = copy.move(uciToMove(uci));
         setGame(copy);
+        if (move && timeControl !== 'untimed') setClock((value) => commitClockMove(value, move.color, performance.now()));
         if (move) setLastMove({ from: move.from, to: move.to });
         const stateMsg = coachMessageFromGameState(copy, 'vs-computer');
         if (stateMsg) {
@@ -292,7 +324,12 @@ export default function PlayTrainer() {
         cancelStockfishMove();
       }
     };
-  }, [game, level, gameMode]);
+  }, [game, level, gameMode, playerColor, timeControl]);
+
+  useEffect(() => {
+    if (timeControl === 'untimed' || !game.isGameOver()) return;
+    setClock((value) => stopClock(value, performance.now()));
+  }, [game, timeControl]);
 
   // Post-game review state
   const [showReview, setShowReview] = useState(false);
@@ -303,8 +340,8 @@ export default function PlayTrainer() {
     const moves = moveSanList(game);
     let result: GameData['result'] = 'draw';
     if (game.isCheckmate()) {
-      // player is White in this UI
-      const playerWon = game.turn() === 'b';
+      const winner = game.turn() === 'b' ? 'w' : 'b';
+      const playerWon = winner === playerColor;
       result = playerWon ? 'win' : 'loss';
     } else if (game.isStalemate() || game.isThreefoldRepetition() || game.isInsufficientMaterial() || game.isDraw()) {
       result = 'draw';
@@ -313,8 +350,8 @@ export default function PlayTrainer() {
     const botLevelValue = typeof botLabelOrLevel === 'object' && botLabelOrLevel?.elo ? botLabelOrLevel.elo : undefined;
 
     return {
-      playerColor: 'white',
-      botColor: twoPlayer ? undefined : 'black',
+      playerColor: playerColor === 'w' ? 'white' : 'black',
+      botColor: twoPlayer ? undefined : playerColor === 'w' ? 'black' : 'white',
       opponentType: twoPlayer ? 'human' : 'bot',
       result,
       moves,
@@ -361,7 +398,7 @@ export default function PlayTrainer() {
             <div>
               <h2 className="text-lg font-bold sm:text-2xl">{twoPlayer ? '2 Players — Pass & Play' : 'Play vs Computer'}</h2>
               <p className="text-xs text-slate-300 sm:text-sm">
-                {twoPlayer ? 'Both players take turns on this device.' : 'Choose a training level. You play White, and these are practice levels rather than official ratings.'}
+                {twoPlayer ? 'Both players take turns on this device.' : `Choose a training level. You play ${playerColor === 'w' ? 'White' : 'Black'}, and these are practice levels rather than official ratings.`}
               </p>
             </div>
             <div className="hidden sm:flex gap-2">
@@ -433,14 +470,18 @@ export default function PlayTrainer() {
           </div>
         )}
 
-        <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{twoPlayer ? 'Black' : 'Black bot'}</p>
+        <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+          {boardFlipped ? (twoPlayer ? 'White' : playerColor === 'w' ? 'You · White' : 'White bot') : (twoPlayer ? 'Black' : playerColor === 'b' ? 'You · Black' : 'Black bot')}
+        </p>
         {!twoPlayer && (
           <div className="mb-4 rounded-2xl border border-teal-300/30 bg-slate-950/70 p-3 text-sm text-teal-100">
-            White starts first in every game. You control White, and Black moves only after your first move.
+            White always starts. Select one of your pieces to see legal moves: dots are destinations and red rings are captures.
           </div>
         )}
-        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} captureSquares={captureSquares} lastMove={lastMove} disabled={isThinking || Boolean(pendingPromotion) || game.isGameOver()} onSquareClick={onSquareClick} />
-        <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">{twoPlayer ? 'White' : 'You · White'}</p>
+        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} captureSquares={captureSquares} lastMove={lastMove} disabled={isThinking || Boolean(pendingPromotion) || game.isGameOver()} flipped={boardFlipped} onSquareClick={onSquareClick} />
+        <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">
+          {boardFlipped ? (twoPlayer ? 'Black' : playerColor === 'b' ? 'You · Black' : 'Black bot') : (twoPlayer ? 'White' : playerColor === 'w' ? 'You · White' : 'White bot')}
+        </p>
 
         {/* Mobile action bar */}
         <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
@@ -453,6 +494,22 @@ export default function PlayTrainer() {
       <aside className="min-w-0 space-y-4">
         {!twoPlayer && (
           <div className="glass-panel rounded-3xl p-5">
+            <div className="mb-4 grid grid-cols-2 gap-3">
+              <label className="text-sm font-semibold text-slate-300">Your color
+                <select value={playerColor} onChange={(event) => { const color = event.target.value as PlayerColor; setPlayerColor(color); setBoardFlipped(color === 'b'); }} className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
+                  <option value="w">White</option>
+                  <option value="b">Black</option>
+                </select>
+              </label>
+              <label className="text-sm font-semibold text-slate-300">Time control
+                <select value={timeControl} onChange={(event) => setTimeControl(event.target.value as TimeControl)} className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
+                  <option value="untimed">Untimed</option>
+                  <option value="10+0">10 minutes</option>
+                  <option value="5+0">5 minutes</option>
+                </select>
+              </label>
+            </div>
+            <button onClick={() => setBoardFlipped((value) => !value)} className="mb-4 min-h-[44px] w-full rounded-xl border border-slate-600 px-4 py-2 text-sm font-bold text-slate-100 hover:bg-slate-800">Flip board</button>
             <label className="mb-2 block text-sm font-semibold text-slate-300" htmlFor="bot-level">Bot difficulty</label>
             <select id="bot-level" value={levelId} onChange={(event) => setLevelId(event.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
               {botLevels.map((bot) => (
@@ -467,6 +524,8 @@ export default function PlayTrainer() {
             </div>
           </div>
         )}
+
+        {timeControl !== 'untimed' && <div className="glass-panel rounded-3xl p-5"><GameClock clock={clock} /></div>}
 
         <div className="glass-panel rounded-3xl p-5">
           <h3 className="font-bold text-teal-200">Coach note</h3>
