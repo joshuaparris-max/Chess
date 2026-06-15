@@ -1,6 +1,19 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { lessons, researchPillars } from '@/lib/trainingData';
+import { loadLearningProgress, saveLearningProgress, type LearningProgress } from '@/lib/learningProgress';
 
 export default function LearnPath() {
+  const [progress, setProgress] = useState<LearningProgress>({ lessonsDone: [], puzzleAttempts: {} });
+  useEffect(() => setProgress(loadLearningProgress()), []);
+  const toggleLesson = (id: string) => {
+    const lessonsDone = progress.lessonsDone.includes(id) ? progress.lessonsDone.filter((item) => item !== id) : [...progress.lessonsDone, id];
+    const next = { ...progress, lessonsDone };
+    setProgress(next);
+    saveLearningProgress(next);
+  };
+
   return (
     <section className="grid gap-5 lg:grid-cols-[1fr_360px]">
       <div className="space-y-4">
@@ -27,6 +40,9 @@ export default function LearnPath() {
                 </ol>
               </div>
             </div>
+            <button onClick={() => toggleLesson(lesson.id)} className="mt-4 min-h-[44px] rounded-xl bg-teal-400 px-4 py-2 text-sm font-bold text-slate-950">
+              {progress.lessonsDone.includes(lesson.id) ? 'Completed ✓' : 'Mark lesson complete'}
+            </button>
           </article>
         ))}
       </div>

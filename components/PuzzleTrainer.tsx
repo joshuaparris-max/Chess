@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Chess, type Square } from 'chess.js';
 import ChessBoard from './ChessBoard';
 import { puzzles } from '@/lib/trainingData';
+import { loadLearningProgress, saveLearningProgress, type LearningProgress } from '@/lib/learningProgress';
 
 export default function PuzzleTrainer() {
   const [puzzleIndex, setPuzzleIndex] = useState(0);
@@ -13,6 +14,8 @@ export default function PuzzleTrainer() {
   const [message, setMessage] = useState('Find the best move. Try before using the hint.');
   const [showHint, setShowHint] = useState(false);
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
+  const [progress, setProgress] = useState<LearningProgress>({ lessonsDone: [], puzzleAttempts: {} });
+  useEffect(() => setProgress(loadLearningProgress()), []);
 
   const puzzle = puzzles[puzzleIndex];
 
@@ -78,6 +81,10 @@ export default function PuzzleTrainer() {
 
       if (nextStep >= puzzle.solution.length) {
         setMessage(`Correct. ${puzzle.teachingPoint}`);
+        const current = progress.puzzleAttempts[puzzle.id] ?? { attempts: 0, solved: 0, lastAttemptIso: '' };
+        const next = { ...progress, puzzleAttempts: { ...progress.puzzleAttempts, [puzzle.id]: { attempts: current.attempts + 1, solved: current.solved + 1, lastAttemptIso: new Date().toISOString() } } };
+        setProgress(next);
+        saveLearningProgress(next);
       } else {
         setMessage('Good first move. Now continue the line.');
       }
@@ -93,6 +100,7 @@ export default function PuzzleTrainer() {
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-yellow-200">Puzzle {puzzleIndex + 1}/{puzzles.length}</p>
           <h2 className="mt-1 text-2xl font-bold">{puzzle.title}</h2>
           <p className="text-sm text-slate-300">{puzzle.motif} · {puzzle.level} · {puzzle.sideToMove === 'w' ? 'White' : 'Black'} to move</p>
+          <p className="mt-1 text-xs text-teal-200">Solved locally: {progress.puzzleAttempts[puzzle.id]?.solved ?? 0}</p>
         </div>
         <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} lastMove={lastMove} onSquareClick={onSquareClick} />
       </div>

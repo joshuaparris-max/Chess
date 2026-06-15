@@ -12,6 +12,7 @@ import { getBotMove, uciToMove } from '@/lib/engine';
 import { cancelStockfishMove, getStockfishMove } from '@/lib/stockfishClient';
 import { commitClockMove, createClock, startClock, stopClock } from '@/lib/clock';
 import { createGameId, saveLocalGame } from '@/lib/gameArchive';
+import { recogniseOpening } from '@/lib/openings';
 
 type PromotionPiece = 'q' | 'r' | 'b' | 'n';
 type GameMode = 'vs-computer' | 'two-player';
@@ -107,6 +108,7 @@ export default function PlayTrainer() {
   const [importPgn, setImportPgn] = useState('');
 
   const level = useMemo(() => botLevels.find((bot) => bot.id === levelId) ?? botLevels[1], [levelId]);
+  const opening = useMemo(() => recogniseOpening(game.history()), [game]);
 
   const legalTargets = useMemo(() => {
     if (!selectedSquare) return [];
@@ -457,6 +459,7 @@ export default function PlayTrainer() {
         </div>
 
         {engineNotice && <p className="mb-4 rounded-xl border border-yellow-300/40 bg-yellow-950/30 p-3 text-sm text-yellow-100">{engineNotice}</p>}
+        {opening && <p className="mb-4 rounded-xl border border-teal-300/40 bg-teal-950/30 p-3 text-sm text-teal-100"><strong>{opening.name}:</strong> {opening.idea}</p>}
 
         {game.isGameOver() && (
           <div className={`mb-4 rounded-2xl border-2 p-4 text-center font-bold ${
