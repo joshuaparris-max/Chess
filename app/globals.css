@@ -132,6 +132,19 @@ html[data-theme="family"] .glass-panel {
   color: rgba(17,24,39,0.6);
 }
 
+/* Respect users who prefer reduced motion: drop animations, transitions, smooth scroll. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Mobile coach and action bar */
 .mobile-coach p:first-child {
   margin-bottom: 4px;
