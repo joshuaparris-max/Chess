@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { Chess } from 'chess.js';
 import ChessBoard from './ChessBoard';
 import ReadAloudButton from './family/ReadAloudButton';
+import Link from 'next/link';
 
 export type ModelGame = { title: string; player: string; pgn: string; lesson: string };
 
@@ -50,5 +51,9 @@ export default function ModelGameViewer({ model }: { model: ModelGame }) {
     </div>
     {predicting && <p className="mt-3 rounded-xl bg-yellow-200/10 p-3 text-sm text-yellow-100">Pause and choose your candidate move before revealing the grandmaster&apos;s choice.</p>}
     {revealedMove && <p className="mt-3 text-sm text-teal-200" aria-live="polite">Grandmaster move: {revealedMove}</p>}
+    <div className="mt-4 grid gap-2 sm:grid-cols-2">
+      <Link href="/puzzles" className="min-h-11 rounded-xl border border-yellow-300/50 px-4 py-3 text-center text-sm font-bold text-yellow-100 hover:bg-yellow-200/10">Practice with puzzles</Link>
+      <Link href="/play" className="min-h-11 rounded-xl border border-teal-300/50 px-4 py-3 text-center text-sm font-bold text-teal-100 hover:bg-teal-300/10">Try the idea in a game</Link>
+    </div>
   </article>;
 }
