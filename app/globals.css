@@ -80,6 +80,18 @@ select:focus-visible {
   filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.35));
 }
 
+html[data-theme="family"] body {
+  background:
+    radial-gradient(circle at top left, rgba(45, 212, 191, 0.35), transparent 32rem),
+    radial-gradient(circle at top right, rgba(250, 204, 21, 0.32), transparent 32rem),
+    linear-gradient(135deg, #164e63 0%, #155e75 50%, #312e81 100%);
+}
+
+html[data-theme="family"] .glass-panel {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
 .piece-svg-white {
   fill: #f8fafc;
   stroke: #0f172a;

@@ -25,3 +25,14 @@ test('timed game renders both drift-safe clocks', async ({ page }) => {
   await expect(clocks.getByText('White', { exact: true })).toBeVisible();
   await expect(clocks.getByText('Black', { exact: true })).toBeVisible();
 });
+
+test('family theme persists and family room has child activities', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.setItem('gmp-theme', 'adult'));
+  await page.goto('/family');
+  await expect(page.getByText('Josh & Sylvie — Play Together')).toBeVisible();
+  await page.getByRole('button', { name: 'Use bright family theme' }).click();
+  await expect(page.getByRole('button', { name: 'Use adult dark theme' })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Use adult dark theme' })).toBeVisible();
+});

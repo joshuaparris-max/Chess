@@ -1,0 +1,25 @@
+# Implementation Status
+
+Updated: 2026-06-15
+
+## Completed
+
+- Neutral bot labels, play as Black, adult board flip, SVG-rendered pieces, legal-target explanation
+- Untimed, 10-minute, and 5-minute delta-time clocks
+- Vitest rule/progress/resilience tests and Playwright desktop/mobile regression tests
+- Local 20-game archive, PGN import/export, and route-based rooms
+- Opening recognition, local lesson completion, puzzle attempt history, and interactive model games
+- Deterministic post-game review facts, local review cache, retries, circuit breaker, validation, and rate limiting
+- Family pass-and-play, four adventures, family puzzles/lessons/progress, read aloud, celebrations, and persistent bright theme
+
+## Next Production Work
+
+- Configure authentication and Postgres, then migrate local games/progress to cloud sync
+- Add a curated attributed Lichess puzzle import and spaced repetition
+- Add server-side Stockfish analysis and objective move classifications
+- Add deeper accessibility testing and keyboard move input
+- Add production observability and shared rate limiting
+
+## Deferred Platform Work
+
+Live multiplayer, matchmaking, ratings, moderation, anti-cheat, tournaments, clubs, and community features remain deferred until the single-player learning loop has proven retention.

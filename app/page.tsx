@@ -44,6 +44,8 @@ function modeContent(mode: AppMode) {
 
 export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }) {
   const [mode, setMode] = useState<AppMode>(initialMode);
+  const [theme, setTheme] = useState<'adult' | 'family'>('adult');
+  const [themeLoaded, setThemeLoaded] = useState(false);
   const [studyStreak, setStudyStreak] = useState(0);
   const [dailyGoal, setDailyGoal] = useState(20);
   const [lastTrained, setLastTrained] = useState<string | null>(null);
@@ -65,6 +67,19 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
       setProgressLoaded(true);
     }
   }, []);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem('gmp-theme');
+    if (saved === 'adult' || saved === 'family') setTheme(saved);
+    else if (initialMode === 'family') setTheme('family');
+    setThemeLoaded(true);
+  }, [initialMode]);
+
+  useEffect(() => {
+    if (!themeLoaded) return;
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem('gmp-theme', theme);
+  }, [theme, themeLoaded]);
 
   useEffect(() => {
     if (!progressLoaded) return;
@@ -113,6 +128,9 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
             <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">A Chess.com-style training app foundation: play bots, solve puzzles, learn in tiny modules, study elite-player patterns, and follow a beginner-to-advanced roadmap.</p>
           </div>
           <div className="grid min-w-72 gap-3 rounded-3xl bg-slate-950/60 p-4">
+            <button onClick={() => setTheme((value) => value === 'adult' ? 'family' : 'adult')} className="rounded-xl border border-slate-600 px-4 py-2 text-sm font-bold text-white">
+              {theme === 'adult' ? 'Use bright family theme' : 'Use adult dark theme'}
+            </button>
             <div className="flex items-center justify-between gap-4">
               <span className="text-sm text-slate-300">Study streak</span>
               <span className="text-2xl font-black text-teal-200">{studyStreak}</span>
@@ -139,6 +157,7 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
           </button>
         ))}
       </nav>
+      <p className="mb-5 text-center text-xs text-slate-400">Adult training: Play, Puzzles, Learn, Watch, Roadmap · Shared child-friendly activities: Family Chess</p>
 
       <div className="mb-5 rounded-3xl border border-slate-600/40 bg-slate-950/50 p-4">
         <p className="text-sm text-slate-300"><span className="font-bold text-yellow-200">Current room:</span> {active.label} — {active.tagline}</p>

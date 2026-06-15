@@ -602,6 +602,7 @@ export default function PlayTrainer() {
           </ol>
           {game.history().length === 0 && <p className="mt-2 text-sm text-slate-400">No moves yet.</p>}
         </div>
+        <p className="sr-only" aria-live="polite">{gameStatus(game)} {coachNote}</p>
 
         <div className="glass-panel rounded-3xl p-5">
           <label htmlFor="pgn-import" className="font-bold text-teal-200">Import PGN</label>
