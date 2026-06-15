@@ -19,6 +19,7 @@ type GameMode = 'vs-computer' | 'two-player';
 type PlayerColor = 'w' | 'b';
 type TimeControl = 'untimed' | '10+0' | '5+0';
 const ONBOARDING_KEY = 'gm-play-onboarding-seen-v1';
+const PLAY_SETTINGS_KEY = 'gm-play-settings-v1';
 
 const timeControlMs: Record<Exclude<TimeControl, 'untimed'>, number> = {
   '10+0': 10 * 60_000,
@@ -108,6 +109,7 @@ export default function PlayTrainer() {
   const archivedPgnRef = useRef('');
   const [importPgn, setImportPgn] = useState('');
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [settingsReady, setSettingsReady] = useState(false);
 
   useEffect(() => {
     try {
@@ -116,6 +118,29 @@ export default function PlayTrainer() {
       setShowOnboarding(true);
     }
   }, []);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(PLAY_SETTINGS_KEY) || '{}') as Partial<{
+        levelId: string; playerColor: PlayerColor; timeControl: TimeControl; boardFlipped: boolean;
+      }>;
+      if (saved.levelId && botLevels.some((bot) => bot.id === saved.levelId)) setLevelId(saved.levelId);
+      if (saved.playerColor === 'w' || saved.playerColor === 'b') setPlayerColor(saved.playerColor);
+      if (saved.timeControl === 'untimed' || saved.timeControl === '10+0' || saved.timeControl === '5+0') setTimeControl(saved.timeControl);
+      if (typeof saved.boardFlipped === 'boolean') setBoardFlipped(saved.boardFlipped);
+    } catch {
+      // Ignore malformed or unavailable local settings.
+    } finally {
+      setSettingsReady(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!settingsReady) return;
+    try {
+      localStorage.setItem(PLAY_SETTINGS_KEY, JSON.stringify({ levelId, playerColor, timeControl, boardFlipped }));
+    } catch {}
+  }, [settingsReady, levelId, playerColor, timeControl, boardFlipped]);
 
   const closeOnboarding = () => {
     setShowOnboarding(false);

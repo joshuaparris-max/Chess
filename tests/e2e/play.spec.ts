@@ -36,6 +36,17 @@ test('timed game renders both drift-safe clocks', async ({ page }) => {
   await expect(clocks.getByText('Black', { exact: true })).toBeVisible();
 });
 
+test('play settings persist across visits', async ({ page }) => {
+  await page.goto('/play');
+  await page.getByLabel('Your color').selectOption('b');
+  await page.getByLabel('Time control').selectOption('5+0');
+  await page.getByLabel('Bot difficulty').selectOption('club-1200');
+  await page.reload();
+  await expect(page.getByLabel('Your color')).toHaveValue('b');
+  await expect(page.getByLabel('Time control')).toHaveValue('5+0');
+  await expect(page.getByLabel('Bot difficulty')).toHaveValue('club-1200');
+});
+
 test('family theme persists and family room has child activities', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => localStorage.setItem('gmp-theme', 'adult'));
