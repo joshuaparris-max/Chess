@@ -5,6 +5,7 @@ import { clearLocalGames, loadLocalGames, type LocalGameRecord } from '@/lib/gam
 
 export default function GameArchive({ onLoad }: { onLoad: (pgn: string) => void }) {
   const [games, setGames] = useState<LocalGameRecord[]>([]);
+  const [openReviewId, setOpenReviewId] = useState<string | null>(null);
 
   useEffect(() => {
     const refresh = () => setGames(loadLocalGames());
@@ -38,7 +39,9 @@ export default function GameArchive({ onLoad }: { onLoad: (pgn: string) => void 
             <div className="mt-2 flex gap-2">
               <button onClick={() => onLoad(game.pgn)} className="rounded-lg bg-teal-400 px-3 py-2 text-xs font-bold text-slate-950">Load</button>
               <button onClick={() => exportPgn(game)} className="rounded-lg border border-slate-600 px-3 py-2 text-xs text-slate-200">Export PGN</button>
+              {game.reviewSummary && <button onClick={() => setOpenReviewId(openReviewId === game.id ? null : game.id)} className="rounded-lg border border-yellow-300/50 px-3 py-2 text-xs text-yellow-100">{openReviewId === game.id ? 'Hide review' : 'View review'}</button>}
             </div>
+            {game.reviewSummary && openReviewId === game.id && <p className="mt-3 whitespace-pre-wrap rounded-xl bg-slate-900 p-3 text-xs leading-5 text-slate-200">{game.reviewSummary}</p>}
           </article>
         ))}
         {games.length === 0 && <p className="text-sm text-slate-400">Finish a game to save it here.</p>}

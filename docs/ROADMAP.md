@@ -32,7 +32,7 @@ Goal: a complete beginner can play, understand what happened, and get useful fee
 - [x] Add first-game onboarding overlay: goal of chess, how pieces move, how to start
 - [ ] Add position-aware hints using shallow Stockfish facts
 - [x] Add local game archive for the last 10-20 games
-- [ ] Save local review summaries with archived games
+- [x] Save local review summaries with archived games
 - [ ] Verify Quick Review on production is specific, short, readable, and free of raw Markdown/debug text
 - [x] Add puzzle onboarding and clearer motif explanations (per-puzzle teaching points and three-level hints)
 - [x] Replace adult-board Unicode pieces with SVG-rendered pieces

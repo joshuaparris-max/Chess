@@ -37,6 +37,17 @@ export function saveLocalGame(record: LocalGameRecord): LocalGameRecord[] {
   return next;
 }
 
+export function attachReviewSummary(games: LocalGameRecord[], pgn: string, reviewSummary: string): LocalGameRecord[] {
+  return games.map((game) => game.pgn === pgn ? { ...game, reviewSummary } : game);
+}
+
+export function saveLocalGameReview(pgn: string, reviewSummary: string): LocalGameRecord[] {
+  const next = attachReviewSummary(loadLocalGames(), pgn, reviewSummary);
+  localStorage.setItem(LOCAL_GAME_ARCHIVE_KEY, JSON.stringify(next));
+  window.dispatchEvent(new CustomEvent('gmp-local-games-change', { detail: next }));
+  return next;
+}
+
 export function clearLocalGames() {
   localStorage.removeItem(LOCAL_GAME_ARCHIVE_KEY);
   window.dispatchEvent(new CustomEvent('gmp-local-games-change', { detail: [] }));

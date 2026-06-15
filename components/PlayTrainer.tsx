@@ -11,7 +11,7 @@ import { botLevels } from '@/lib/trainingData';
 import { getBotMove, uciToMove } from '@/lib/engine';
 import { cancelStockfishMove, getStockfishMove } from '@/lib/stockfishClient';
 import { commitClockMove, createClock, startClock, stopClock } from '@/lib/clock';
-import { createGameId, saveLocalGame } from '@/lib/gameArchive';
+import { createGameId, saveLocalGame, saveLocalGameReview } from '@/lib/gameArchive';
 import { recogniseOpening } from '@/lib/openings';
 
 type PromotionPiece = 'q' | 'r' | 'b' | 'n';
@@ -555,7 +555,7 @@ export default function PlayTrainer() {
                 Review my game
               </button>
             ) : (
-              reviewContext && <PostGameReview gameData={reviewContext} autoRequest={reviewAutoRequest} />
+              reviewContext && <PostGameReview gameData={reviewContext} autoRequest={reviewAutoRequest} onSummary={(summary) => saveLocalGameReview(game.pgn(), summary)} />
             )}
           </div>
         )}

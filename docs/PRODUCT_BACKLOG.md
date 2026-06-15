@@ -88,7 +88,7 @@ Last consolidated from repo docs: 2026-06-15.
 
 - [x] Local daily goal/streak basics
 - [x] Local game archive for last 20 games
-- [ ] Local review archive
+- [x] Local review archive
 - [x] Local puzzle attempt history
 - [x] Local lesson completion state
 - [ ] Export local games/reviews as PGN or JSON

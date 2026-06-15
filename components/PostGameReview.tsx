@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { GameData, ReviewResponse } from '../lib/gameReviewTypes';
 import GameReviewChat from './GameReviewChat';
 
-export default function PostGameReview({ gameData, autoRequest = false }: { gameData: GameData; autoRequest?: boolean }) {
+export default function PostGameReview({ gameData, autoRequest = false, onSummary }: { gameData: GameData; autoRequest?: boolean; onSummary?: (summary: string) => void }) {
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
@@ -14,7 +14,10 @@ export default function PostGameReview({ gameData, autoRequest = false }: { game
   useEffect(() => {
     try {
       const cached = JSON.parse(localStorage.getItem(cacheKey) ?? '{}') as ReviewResponse;
-      if (cached.summary) setSummary(cached.summary);
+      if (cached.summary) {
+        setSummary(cached.summary);
+        onSummary?.(cached.summary);
+      }
       if (cached.detail) setDetail(cached.detail);
     } catch {}
   }, [cacheKey]);
@@ -35,7 +38,9 @@ export default function PostGameReview({ gameData, autoRequest = false }: { game
         if (detailed) {
           setDetail((data as ReviewResponse).detail || null);
         } else {
-          setSummary((data as ReviewResponse).summary || null);
+          const nextSummary = (data as ReviewResponse).summary || null;
+          setSummary(nextSummary);
+          if (nextSummary) onSummary?.(nextSummary);
         }
         try {
           const current = JSON.parse(localStorage.getItem(cacheKey) ?? '{}');
