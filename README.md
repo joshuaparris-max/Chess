@@ -48,6 +48,17 @@ GROQ_MODEL=your-model-name
 
 Game reviews are user-triggered. The app sends moves and basic game details, not personal information. Review output is grounded with deterministic `chess.js` facts, cached locally, rate-limited, retried on transient failures, and protected by a short circuit breaker.
 
+## Optional Accounts And Cloud Sync
+
+Create a Supabase project, run [`supabase/migrations/20260615_user_progress.sql`](supabase/migrations/20260615_user_progress.sql), and configure:
+
+```txt
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
+
+Without these variables the app remains fully usable with local progress. With them, users can sign in through an email magic link and explicitly upload or restore their progress snapshot. Row-level security restricts each snapshot to its owner.
+
 ## Current Limitations
 
 - Bot levels are practice levels, not measured ratings.

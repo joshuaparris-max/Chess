@@ -7,6 +7,7 @@ import LearnPath from '@/components/LearnPath';
 import WatchRoom from '@/components/WatchRoom';
 import Roadmap from '@/components/Roadmap';
 import FamilyHub from '@/components/FamilyHub';
+import CloudSyncPanel from '@/components/CloudSyncPanel';
 import type { AppMode } from '@/lib/types';
 
 const modes: { id: AppMode; label: string; tagline: string }[] = [
@@ -145,6 +146,7 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
               </select>
             </div>
             <button disabled={trainedToday} onClick={markTodayTrained} className="rounded-xl bg-yellow-200 px-4 py-2 font-bold text-slate-950 hover:bg-yellow-100 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300">{trainedToday ? 'Today complete' : 'Mark today trained'}</button>
+            <CloudSyncPanel />
           </div>
         </div>
       </header>
