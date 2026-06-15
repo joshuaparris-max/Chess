@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { lessons, researchPillars } from '@/lib/trainingData';
 import { loadLearningProgress, saveLearningProgress, type LearningProgress } from '@/lib/learningProgress';
+import ReadAloudButton from './family/ReadAloudButton';
 
 export default function LearnPath() {
   const [progress, setProgress] = useState<LearningProgress>({ lessonsDone: [], puzzleAttempts: {} });
@@ -26,6 +27,10 @@ export default function LearnPath() {
                 <p className="mt-2 text-slate-300">{lesson.summary}</p>
               </div>
               <span className="rounded-full border border-teal-300/40 px-3 py-1 text-sm text-teal-100">{lesson.pillar}</span>
+              <ReadAloudButton
+                label="Read lesson aloud"
+                text={`${lesson.title}. ${lesson.summary}. Why it matters: ${lesson.whyItMatters}. Drill: ${lesson.drill.join('. ')}`}
+              />
             </div>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <div className="rounded-2xl bg-slate-950/60 p-4">

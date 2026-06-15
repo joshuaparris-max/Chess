@@ -7,6 +7,7 @@ import { adultPuzzles } from '@/lib/puzzles/adultPuzzles';
 import type { AdultPuzzle, PuzzleDifficulty } from '@/lib/puzzles/types';
 import type { LichessPuzzle } from '@/lib/lichessClient';
 import { tryPuzzleMove } from '@/lib/puzzles/attempt';
+import ReadAloudButton from './family/ReadAloudButton';
 
 // ── Progress ──────────────────────────────────────────────────────────────────
 
@@ -592,6 +593,10 @@ export default function PuzzleTrainer() {
             {/* Status / coach */}
             <div className="glass-panel rounded-3xl p-5">
               <h3 className="font-bold text-teal-200">Puzzle coach</h3>
+              <ReadAloudButton
+                label="Read coach note aloud"
+                text={solved ? `Solved. ${puzzle.teachingPoint}` : message}
+              />
 
               {opponentThinking && (
                 <p className="mt-3 animate-pulse text-slate-400 text-sm">Opponent is thinking…</p>
@@ -605,7 +610,7 @@ export default function PuzzleTrainer() {
               )}
 
               {!solved && message && (
-                <p className="mt-3 text-slate-100">{message}</p>
+                <p className="mt-3 text-slate-100" aria-live="polite">{message}</p>
               )}
 
               {/* 3-level hints */}

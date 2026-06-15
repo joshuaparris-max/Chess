@@ -148,9 +148,26 @@ export default function ChessBoard({
             return (
               <button
                 key={square}
-                aria-label={`${square}${piece ? ` ${piece.color === 'w' ? 'white' : 'black'} ${piece.type}` : ''}`}
+                data-square={square}
+                aria-label={`${square}${piece ? ` ${piece.color === 'w' ? 'white' : 'black'} ${piece.type}` : ''}${isCapture ? ', capture available' : isLegalTarget ? ', legal destination' : ''}${isSelected ? ', selected' : ''}`}
                 disabled={disabled}
                 onClick={() => onSquareClick(square)}
+                onKeyDown={(event) => {
+                  const offsets: Record<string, [number, number]> = {
+                    ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0],
+                  };
+                  const offset = offsets[event.key];
+                  if (!offset) return;
+                  event.preventDefault();
+                  const nextFile = fileIndex + offset[0];
+                  const nextRow = rowIndex + offset[1];
+                  if (nextFile < 0 || nextFile > 7 || nextRow < 0 || nextRow > 7) return;
+                  const nextRank = flipped ? nextRow + 1 : 8 - nextRow;
+                  const nextFileChar = flipped ? 'hgfedcba'[nextFile] : 'abcdefgh'[nextFile];
+                  event.currentTarget.parentElement
+                    ?.querySelector<HTMLButtonElement>(`[data-square="${nextFileChar}${nextRank}"]`)
+                    ?.focus();
+                }}
                 className={`chess-square transition ${isLight ? 'bg-[#eee6cf]' : 'bg-[#6f8f72]'} ${disabled ? 'cursor-not-allowed opacity-90' : 'cursor-pointer hover:brightness-110'} ${isSelected ? 'ring-4 ring-yellow-300 ring-inset' : ''}`}
               >
                 {isLastMove && <span className="absolute inset-0 bg-yellow-300/25" />}
