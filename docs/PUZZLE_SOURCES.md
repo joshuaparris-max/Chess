@@ -5,15 +5,19 @@ the adult puzzles are generated and verified by `scripts/generate-adult-puzzles.
 
 ## Adult Puzzles (`lib/puzzles/adultPuzzles.ts`)
 
-114 puzzles across five difficulty levels:
+117 puzzles across five difficulty levels:
 
 | Level | Count | Player moves | Focus |
 |---|---|---|---|
 | Intro | 24 | 1 | Mate in 1, hanging pieces, promotion |
-| Beginner | 28 | 1–2 | Rook mates, hanging minor pieces, knight forks |
-| Intermediate | 22 | 1–2 | Knight forks, skewers, rook mates |
+| Beginner | 28 | 1–2 | Rook mates, hanging minor pieces, knight forks, promotion with capture |
+| Intermediate | 27 | 1–2 | Knight/queen forks, skewers, queen mates |
 | Advanced | 24 | 1–3 | Forced mate in two, skewers winning the queen |
-| Expert | 16 | 3 | Forced mate in two, queen mating nets |
+| Expert | 14 | 3 | Forced mate in two, queen mating nets |
+
+Titles and three-level hints are derived per puzzle from the actual move line (SAN), so no two
+read alike. Mate and capture positions are also "decorated" with extra pawns — added and then
+re-verified — so the boards look game-like rather than bare king-and-piece studies.
 
 **Source:** `source: 'generated'`. Positions are produced by `scripts/generate-adult-puzzles.mjs`,
 which uses chess.js to construct positions and confirm the tactical property by construction:

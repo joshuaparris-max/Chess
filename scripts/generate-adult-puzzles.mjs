@@ -81,10 +81,11 @@ function replay(fen, solution) {
   return c;
 }
 function verifyMate(fen, solution) { const c = replay(fen, solution); return !!c && c.isCheckmate(); }
+function safeMove(c, move) { try { return c.move(move); } catch { return null; } }
 function verifyHanging(fen, solution) {
   const c0 = tryLoad(fen); if (!c0) return false;
   const u = solution[0];
-  const m = c0.move({ from: u.slice(0, 2), to: u.slice(2, 4) });
+  const m = safeMove(c0, { from: u.slice(0, 2), to: u.slice(2, 4) });
   if (!m || !m.captured) return false;
   // target must be undefended: black cannot recapture on that square
   return !c0.moves({ verbose: true }).some(r => r.to === u.slice(2, 4) && r.captured);
@@ -95,7 +96,7 @@ function verifyWinTarget(fen, solution) {
   const targetSq = solution[2].slice(2, 4);
   const fromSq = solution[0].slice(2, 4);
   const a = tryLoad(fen); if (!a) return false;
-  const m1 = a.move({ from: solution[0].slice(0, 2), to: fromSq });
+  const m1 = safeMove(a, { from: solution[0].slice(0, 2), to: fromSq });
   if (!m1 || !a.isCheck() || a.isCheckmate()) return false;
   const replies = a.moves({ verbose: true });
   if (replies.length === 0) return false;
@@ -111,7 +112,7 @@ function verifyWinTarget(fen, solution) {
 function verifyPromotion(fen, solution) {
   const c = tryLoad(fen); if (!c) return false;
   const u = solution[0];
-  const m = c.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || 'q' });
+  const m = safeMove(c, { from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || 'q' });
   return !!m && (m.promotion != null);
 }
 

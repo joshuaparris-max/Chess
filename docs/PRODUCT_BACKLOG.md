@@ -54,7 +54,7 @@ Last consolidated from repo docs: 2026-06-15.
 - [x] Three-level progressive hints (gentle, directional, reveal)
 - [x] Puzzle onboarding improvements (per-puzzle teaching points)
 - [x] Clear motif explanations for complete beginners
-- [x] Larger puzzle database or curated import pipeline (114 generated-and-verified adult puzzles)
+- [x] Larger puzzle database or curated import pipeline (117 generated-and-verified adult puzzles)
 - [x] License/attribution notes for imported puzzle sources (`docs/PUZZLE_SOURCES.md`)
 - [x] Puzzle tags and difficulty estimates (themes, phase, five difficulty bands)
 - [x] Puzzle attempt history (local attempt/solved tracking)

@@ -8,7 +8,7 @@ This is **not yet a full grandmaster engine platform**. It is an alpha foundatio
 
 - Next.js + TypeScript + Tailwind app
 - Play room: human as White or Black vs Stockfish-powered bot levels, with a lightweight Alpha Bot fallback, board flip, selectable piece sets, and local time controls (untimed, 10+0, 5+0)
-- Puzzle room: 114 generated-and-verified adult tactics puzzles across five difficulty bands, with themes/phase tags, multi-move sequences and opponent auto-reply, black-to-move board flip, three-level hints, a difficulty filter, and local attempt/solved tracking
+- Puzzle room: 117 generated-and-verified adult tactics puzzles across five difficulty bands, with themes/phase tags, multi-move sequences and opponent auto-reply, black-to-move board flip, three-level hints, a difficulty filter, and local attempt/solved tracking
 - Learn room: short lessons based on peak-Elo player research, with completion tracking
 - Watch room: interactive PGN/model-game boards for Carlsen, Kasparov, Caruana, Aronian and So
 - Roadmap: beginner-to-master training bands
