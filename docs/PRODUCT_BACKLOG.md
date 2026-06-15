@@ -9,9 +9,9 @@ Last consolidated from repo docs: 2026-06-08.
 - [x] Alpha Bot fallback
 - [x] Promotion picker
 - [x] Checkmate/game-over feedback
-- [ ] Play as Black option
-- [ ] Board flip/orientation control
-- [ ] Local time controls: untimed, 10+0, 5+0
+- [x] Play as Black option
+- [x] Board flip/orientation control
+- [x] Local time controls: untimed, 10+0, 5+0
 - [ ] Beginner onboarding: objective of chess, piece movement, first move guide
 - [ ] Explain legal move highlighting/selected-piece behavior
 - [ ] Better illegal move feedback with beginner explanations
@@ -42,7 +42,7 @@ Last consolidated from repo docs: 2026-06-08.
 - [ ] Production QA: "How specifically can I improve?" returns 2-3 concrete game-specific points
 - [ ] Add engine-backed move classifications: blunder, mistake, missed tactic, good move
 - [ ] Add retry-mistakes flow
-- [ ] Add review history in local archive
+- [x] Add local review caching
 - [ ] Add server-side/queued Stockfish analysis later for deeper review
 - [ ] Add cost/usage telemetry for AI review requests
 
@@ -64,7 +64,7 @@ Last consolidated from repo docs: 2026-06-08.
 - [x] Basic research-backed lesson cards
 - [ ] Expand lessons beyond current cards
 - [ ] Add interactive lessons instead of static cards
-- [ ] Add lesson completion tracking
+- [x] Add lesson completion tracking
 - [ ] Add lesson drills that launch matching puzzles or practice positions
 - [ ] Add spaced repetition for weak concepts
 - [ ] Add endgame conversion earlier in the path
@@ -72,7 +72,7 @@ Last consolidated from repo docs: 2026-06-08.
 ## Watch Room
 
 - [x] Static model-player cards
-- [ ] Convert static cards into interactive PGN/model-game boards
+- [x] Convert static cards into interactive PGN/model-game boards
 - [ ] Add guided comments: one key idea per game
 - [ ] Add "practice this idea" handoff into puzzles or play
 - [ ] Add curated model games for opening, middlegame, endgame, defense, and conversion themes
@@ -81,10 +81,10 @@ Last consolidated from repo docs: 2026-06-08.
 ## Progression and Persistence
 
 - [x] Local daily goal/streak basics
-- [ ] Local game archive for last 10-20 games
+- [x] Local game archive for last 20 games
 - [ ] Local review archive
-- [ ] Local puzzle attempt history
-- [ ] Local lesson completion state
+- [x] Local puzzle attempt history
+- [x] Local lesson completion state
 - [ ] Export local games/reviews as PGN or JSON
 - [ ] Design local-to-cloud migration
 - [ ] Accounts and cloud progress
@@ -102,9 +102,9 @@ Last consolidated from repo docs: 2026-06-08.
 
 ## Design, Mobile, and Accessibility
 
-- [ ] Replace Unicode chess pieces with SVG pieces or robust board-library pieces
+- [x] Replace adult-board Unicode pieces with SVG-rendered pieces
 - [ ] Add board and piece theme selector
-- [ ] Verify board remains square on mobile
+- [x] Verify board remains square on mobile
 - [ ] Verify review/chat layout at about 390px width
 - [ ] Ensure 48px minimum touch targets where practical
 - [ ] Add ARIA labels for squares and controls
@@ -115,7 +115,7 @@ Last consolidated from repo docs: 2026-06-08.
 
 ## Analysis and Study Tools
 
-- [ ] PGN import/export
+- [x] PGN import/export
 - [ ] Analysis board with arrows and annotations
 - [ ] Best-move and missed-tactic detection
 - [ ] Opening recognition from curated ECO/opening data

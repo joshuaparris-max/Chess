@@ -25,9 +25,9 @@ Goal: a complete beginner can play, understand what happened, and get useful fee
 
 - [ ] Remove or soften all rating/title-like bot overclaims in labels, ids, and copy
 - [ ] Calibrate bot levels with real beginner testing
-- [ ] Add play-as-Black option
-- [ ] Add board flip/orientation control
-- [ ] Add local time controls: untimed, 10+0, 5+0
+- [x] Add play-as-Black option
+- [x] Add board flip/orientation control
+- [x] Add local time controls: untimed, 10+0, 5+0
 - [ ] Explain legal move dots, selected-piece state, and illegal moves in beginner language
 - [ ] Add first-game onboarding overlay: goal of chess, how pieces move, how to start
 - [ ] Add position-aware hints using shallow Stockfish facts
@@ -35,7 +35,7 @@ Goal: a complete beginner can play, understand what happened, and get useful fee
 - [ ] Save local review summaries with archived games
 - [ ] Verify Quick Review on production is specific, short, readable, and free of raw Markdown/debug text
 - [ ] Add puzzle onboarding and clearer motif explanations
-- [ ] Replace Unicode pieces with SVG pieces or a robust board piece set
+- [x] Replace adult-board Unicode pieces with SVG-rendered pieces
 - [ ] Add board/theme settings saved locally
 - [ ] Run mobile QA at about 390px width for board, review, chat, promotion, and controls
 
@@ -47,13 +47,13 @@ Goal: the app teaches more than "play a bot" and starts forming a real improveme
 - [ ] Add puzzle tags, difficulty estimates, attempt history, and streaks
 - [ ] Add engine-backed review categories: blunder, mistake, missed tactic, good move
 - [ ] Add retry-mistakes flow after review
-- [ ] Add opening recognition from a small curated ECO/opening table
-- [ ] Add PGN import/export
+- [x] Add opening recognition from a small curated opening table
+- [x] Add PGN import/export
 - [ ] Add analysis board with arrows/annotations
-- [ ] Turn Watch cards into interactive PGN/model-game boards
-- [ ] Add structured lessons with completion tracking
+- [x] Turn Watch cards into interactive PGN/model-game boards
+- [x] Add structured lessons with completion tracking
 - [ ] Add spaced repetition basics for puzzles/lessons
-- [ ] Add route-based pages: `/play`, `/puzzles`, `/learn`, `/watch`, `/roadmap`
+- [x] Add route-based pages: `/play`, `/puzzles`, `/learn`, `/watch`, `/roadmap`, `/family`
 - [ ] Add deep links and better browser back-button behavior
 
 ## Phase 3: Cloud Learning App
@@ -61,8 +61,8 @@ Goal: the app teaches more than "play a bot" and starts forming a real improveme
 Goal: progress survives devices and the app can support durable training history.
 
 - [ ] Design local-to-cloud migration before adding accounts
-- [ ] Add authentication with Auth.js, Clerk, or Supabase Auth
-- [ ] Add Postgres storage through Supabase, Neon, or Vercel Postgres
+- [x] Add optional Supabase email authentication integration
+- [x] Add Supabase progress schema and row-level security migration
 - [ ] Save games, reviews, puzzle attempts, lesson progress, and settings
 - [ ] Sync streaks and training plans across devices
 - [ ] Add privacy/retention policy for saved games and AI review data

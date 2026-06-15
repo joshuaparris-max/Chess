@@ -11,6 +11,7 @@ Updated: 2026-06-15
 - Opening recognition, local lesson completion, puzzle attempt history, and interactive model games
 - Deterministic post-game review facts, local review cache, retries, circuit breaker, validation, and rate limiting
 - Family pass-and-play, four adventures, family puzzles/lessons/progress, read aloud, celebrations, and persistent bright theme
+- Optional Supabase email accounts and explicit cloud snapshot upload/restore with row-level security
 
 ## Next Production Work
 
