@@ -412,6 +412,23 @@ export default function PuzzleTrainer() {
 
   return (
     <section className="space-y-5">
+      {/* Quick start: Lichess puzzle shortcut */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <button
+          onClick={() => setSourceTab('daily')}
+          className="px-5 py-3 rounded-xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition shadow-lg flex items-center gap-2"
+        >
+          ⚡ Today's Lichess Puzzle
+          {dailySolvedToday && ' ✓'}
+        </button>
+        <button
+          onClick={() => { setSourceTab('archive'); }}
+          className="px-4 py-3 rounded-xl font-semibold border border-blue-500/50 text-blue-300 hover:bg-blue-500/10 transition"
+        >
+          📚 Puzzle Archive
+        </button>
+      </div>
+
       {/* Tab selector */}
       <div className="flex flex-wrap gap-3">
         <button
