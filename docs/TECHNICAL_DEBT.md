@@ -67,8 +67,8 @@ Last consolidated from repo docs: 2026-06-15.
 - [ ] Add automated or documented mobile checks around 390px width
 - [ ] Ensure board remains square and controls do not overflow
 - [ ] Ensure review/chat does not crowd the board on mobile
-- [ ] Add ARIA labels for board squares and controls
-- [ ] Add keyboard selection or notation input
+- [x] Add ARIA labels for board squares and controls
+- [~] Add keyboard selection or notation input (arrow-key square navigation shipped; notation input remains)
 - [ ] Add screen-reader announcements for selected piece, legal moves, check, checkmate, and bot thinking
 - [ ] Improve focus states and contrast
 
@@ -78,7 +78,7 @@ Last consolidated from repo docs: 2026-06-15.
 - [ ] Chess-rule tests: promotion, checkmate, stalemate, repetition, insufficient material, draw
 - [ ] Engine integration tests: Stockfish parsing, cancellation, fallback
 - [ ] API tests: missing Groq key, rate limit, validation, prompt boundaries
-- [~] Puzzle tests: solution lines validated by `scripts/validate-puzzles.mjs`; wrong-move/reset/next component tests still pending
+- [x] Puzzle tests: solution validation plus pure session tests for wrong move, reset, retry, source identity, and opponent reply
 - [ ] E2E desktop: play full game, review game, ask why checkmate
 - [ ] E2E mobile: 390px board, tap targets, promotion modal, no overflow
 - [ ] Regression tests after engine or review prompt changes

@@ -16,6 +16,9 @@ Updated: 2026-06-15
 - Family puzzle bank expanded to 24 curated child-friendly positions
 - Puzzle validator (`npm run validate:puzzles`) plus authorship/attribution notes in `docs/PUZZLE_SOURCES.md`
 - Selectable, locally persisted adult board piece sets (classic SVG, inverted, modern, outline, letters)
+- First-game beginner onboarding, persistent Play settings, keyboard board navigation, richer screen-reader square labels, and read-aloud lesson/coach/model-game content
+- Advanced local puzzle filters for theme, phase, side to move, and line length
+- Model-game prediction prompts and direct handoff into Play or Puzzles
 - **Lichess puzzle integration (NEW):**
   - Live Daily Puzzle tab (cached 1 hour, Lichess's curated puzzle)
   - Live Random Puzzle tab (fresh on-demand, with angle/difficulty filters)
@@ -35,7 +38,7 @@ Updated: 2026-06-15
 - Configure authentication and Postgres for user progress cloud sync (beyond current test setup)
 - Add puzzle streaks and spaced repetition on top of the curated library
 - Add server-side Stockfish analysis and objective move classifications
-- Add deeper accessibility testing and keyboard move input
+- Complete deeper accessibility testing and add optional notation move input
 - Add production observability and shared rate limiting
 
 ## Deferred Platform Work

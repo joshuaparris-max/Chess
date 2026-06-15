@@ -23,21 +23,21 @@ Last consolidated from repo docs: 2026-06-15.
 
 Goal: a complete beginner can play, understand what happened, and get useful feedback without external explanation.
 
-- [ ] Remove or soften all rating/title-like bot overclaims in labels, ids, and copy
+- [x] Remove or soften all rating/title-like bot overclaims in labels and copy
 - [ ] Calibrate bot levels with real beginner testing
 - [x] Add play-as-Black option
 - [x] Add board flip/orientation control
 - [x] Add local time controls: untimed, 10+0, 5+0
-- [ ] Explain legal move dots, selected-piece state, and illegal moves in beginner language
-- [ ] Add first-game onboarding overlay: goal of chess, how pieces move, how to start
+- [x] Explain legal move dots, selected-piece state, and illegal moves in beginner language
+- [x] Add first-game onboarding overlay: goal of chess, how pieces move, how to start
 - [ ] Add position-aware hints using shallow Stockfish facts
-- [ ] Add local game archive for the last 10-20 games
+- [x] Add local game archive for the last 10-20 games
 - [ ] Save local review summaries with archived games
 - [ ] Verify Quick Review on production is specific, short, readable, and free of raw Markdown/debug text
 - [x] Add puzzle onboarding and clearer motif explanations (per-puzzle teaching points and three-level hints)
 - [x] Replace adult-board Unicode pieces with SVG-rendered pieces
 - [x] Add board/theme settings saved locally (selectable piece sets persisted to localStorage)
-- [ ] Run mobile QA at about 390px width for board, review, chat, promotion, and controls
+- [~] Run mobile QA at about 390px width (automated board, controls, onboarding, clocks, and settings checks pass; review/chat/promotion coverage remains)
 
 ## Phase 2: Content, Review Depth, and Local Progress
 
@@ -81,7 +81,7 @@ Goal: reviews become objective enough for improving club players, not just motiv
 - [ ] Add endgame/tablebase lookup after analysis board exists
 - [ ] Generate personalized training plans from saved games and puzzle attempts
 - [ ] Add study mode with annotated chapters
-- [ ] Add keyboard move input and stronger accessibility flows
+- [~] Add keyboard move input and stronger accessibility flows (arrow-key board navigation and richer square labels shipped)
 
 ## Phase 5: Multiplayer and Platform Work
 

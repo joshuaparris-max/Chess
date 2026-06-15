@@ -12,19 +12,19 @@ Last consolidated from repo docs: 2026-06-15.
 - [x] Play as Black option
 - [x] Board flip/orientation control
 - [x] Local time controls: untimed, 10+0, 5+0
-- [ ] Beginner onboarding: objective of chess, piece movement, first move guide
-- [ ] Explain legal move highlighting/selected-piece behavior
-- [ ] Better illegal move feedback with beginner explanations
+- [x] Beginner onboarding: objective of chess, piece movement, first move guide
+- [x] Explain legal move highlighting/selected-piece behavior
+- [x] Better illegal move feedback with beginner explanations
 - [ ] Position-aware hints from shallow Stockfish
 - [ ] Difficulty progression suggestion after repeated wins
-- [ ] Opening recognition, e.g. "Italian Game" from move sequence
-- [ ] Local settings for player color, board theme, piece set, time control, and hint mode
+- [x] Opening recognition, e.g. "Italian Game" from move sequence
+- [x] Local settings for player color, board orientation, piece set, time control, and bot level
 
 ## Bot Difficulty and Trust
 
-- [ ] Remove official-looking Elo/title claims from user-facing labels
-- [ ] Reword "Master Trainer" and "Grandmaster Engine" if calibration remains unverified
-- [ ] Keep all levels described as practice/trainer levels, not official ratings
+- [x] Remove official-looking Elo/title claims from user-facing labels
+- [x] Reword title-like bot labels if calibration remains unverified
+- [x] Keep all levels described as practice/trainer levels, not official ratings
 - [ ] Add player-testing notes for each bot level
 - [ ] Track whether Street Beginner is actually beginner-friendly
 - [ ] Add "try next level" guidance only after real results support it
@@ -60,9 +60,9 @@ Last consolidated from repo docs: 2026-06-15.
 - [x] Puzzle attempt history (local attempt/solved tracking)
 - [x] Difficulty filter
 - [ ] Puzzle streaks and spaced repetition
-- [ ] Additional filters: theme, phase, color, and length
+- [x] Additional filters: theme, phase, color, and length
 - [ ] Practice modes (timed, by-theme drills)
-- [ ] Puzzle reset/next/wrong-move behavior tests (validator covers solution legality; component tests pending)
+- [x] Puzzle reset/next/wrong-move behavior tests
 - [ ] Puzzle Rush/Battle-style modes later, after the base puzzle bank is solid
 
 ## Learn Room
@@ -80,7 +80,7 @@ Last consolidated from repo docs: 2026-06-15.
 - [x] Static model-player cards
 - [x] Convert static cards into interactive PGN/model-game boards
 - [ ] Add guided comments: one key idea per game
-- [ ] Add "practice this idea" handoff into puzzles or play
+- [x] Add "practice this idea" handoff into puzzles or play
 - [ ] Add curated model games for opening, middlegame, endgame, defense, and conversion themes
 - [ ] Defer live broadcasts/video library until the core study mode works
 
@@ -113,9 +113,9 @@ Last consolidated from repo docs: 2026-06-15.
 - [x] Verify board remains square on mobile
 - [ ] Verify review/chat layout at about 390px width
 - [ ] Ensure 48px minimum touch targets where practical
-- [ ] Add ARIA labels for squares and controls
+- [x] Add ARIA labels for squares and controls
 - [ ] Add screen-reader status for turn, check, checkmate, selected piece, and legal targets
-- [ ] Add keyboard selection or move input
+- [x] Add keyboard square navigation and selection
 - [ ] Improve contrast and focus states
 - [ ] Keep text inside controls from overflowing on mobile
 
