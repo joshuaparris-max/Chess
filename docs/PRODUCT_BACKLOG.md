@@ -1,6 +1,6 @@
 # Product Backlog
 
-Last consolidated from repo docs: 2026-06-08.
+Last consolidated from repo docs: 2026-06-15.
 
 ## Play Screen
 
@@ -49,14 +49,20 @@ Last consolidated from repo docs: 2026-06-08.
 ## Puzzle Room
 
 - [x] Basic puzzle room
-- [ ] Puzzle onboarding improvements
-- [ ] Clear motif explanations for complete beginners
-- [ ] Larger puzzle database or curated import pipeline
-- [ ] License/attribution notes for imported puzzle sources
-- [ ] Puzzle tags and difficulty estimates
-- [ ] Puzzle attempt history
+- [x] Multi-move puzzle sequences with opponent auto-reply
+- [x] Black-to-move board flip
+- [x] Three-level progressive hints (gentle, directional, reveal)
+- [x] Puzzle onboarding improvements (per-puzzle teaching points)
+- [x] Clear motif explanations for complete beginners
+- [x] Larger puzzle database or curated import pipeline (120 original adult puzzles)
+- [x] License/attribution notes for imported puzzle sources (`docs/PUZZLE_SOURCES.md`)
+- [x] Puzzle tags and difficulty estimates (themes, phase, five difficulty bands)
+- [x] Puzzle attempt history (local attempt/solved tracking)
+- [x] Difficulty filter
 - [ ] Puzzle streaks and spaced repetition
-- [ ] Puzzle reset/next/wrong-move behavior tests
+- [ ] Additional filters: theme, phase, color, and length
+- [ ] Practice modes (timed, by-theme drills)
+- [ ] Puzzle reset/next/wrong-move behavior tests (validator covers solution legality; component tests pending)
 - [ ] Puzzle Rush/Battle-style modes later, after the base puzzle bank is solid
 
 ## Learn Room
@@ -94,7 +100,7 @@ Last consolidated from repo docs: 2026-06-08.
 
 ## Navigation and App Structure
 
-- [ ] Route-based pages: `/play`, `/puzzles`, `/learn`, `/watch`, `/roadmap`
+- [x] Route-based pages: `/play`, `/puzzles`, `/learn`, `/watch`, `/roadmap`, `/family`
 - [ ] Deep links into rooms, reviews, lessons, and saved games
 - [ ] Better browser back-button behavior
 - [ ] Reduce one-page dashboard feel
@@ -103,7 +109,7 @@ Last consolidated from repo docs: 2026-06-08.
 ## Design, Mobile, and Accessibility
 
 - [x] Replace adult-board Unicode pieces with SVG-rendered pieces
-- [ ] Add board and piece theme selector
+- [x] Add board and piece theme selector (classic SVG, inverted, modern, outline, letters; persisted locally)
 - [x] Verify board remains square on mobile
 - [ ] Verify review/chat layout at about 390px width
 - [ ] Ensure 48px minimum touch targets where practical

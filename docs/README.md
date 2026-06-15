@@ -7,21 +7,22 @@ This is **not yet a full grandmaster engine platform**. It is an alpha foundatio
 ## What is included now
 
 - Next.js + TypeScript + Tailwind app
-- Play room: human as White vs adjustable local chess bots
-- Puzzle room: tactical and principle-based training positions
-- Learn room: short lessons based on peak-Elo player research
-- Watch room: model-game study cards for Carlsen, Kasparov, Caruana, Aronian and So
+- Play room: human as White or Black vs Stockfish-powered bot levels, with a lightweight Alpha Bot fallback, board flip, selectable piece sets, and local time controls (untimed, 10+0, 5+0)
+- Puzzle room: 120 original adult tactics puzzles across five difficulty bands, with themes/phase tags, multi-move sequences and opponent auto-reply, black-to-move board flip, three-level hints, a difficulty filter, and local attempt/solved tracking
+- Learn room: short lessons based on peak-Elo player research, with completion tracking
+- Watch room: interactive PGN/model-game boards for Carlsen, Kasparov, Caruana, Aronian and So
 - Roadmap: beginner-to-master training bands
-- Local progress: daily goal and streak saved in browser local storage
+- Family mode: pass-and-play, four adventures, 24 child-friendly puzzles, lessons, progress, read-aloud, and celebrations
+- Post-game AI review and chat grounded in `chess.js` facts, with local caching
+- Local progress: daily goal and streak, 20-game archive, PGN import/export, all saved in browser local storage
+- Optional Supabase email accounts and explicit cloud snapshot upload/restore with row-level security
 - Legal move validation with `chess.js`
-- Lightweight alpha engine with material, centre, mobility, king-safety and alpha-beta search
 
 ## Important alpha limitation
 
-The current computer opponent is a browser-safe minimax trainer, not real Stockfish NNUE yet.
-Its displayed Elo bands are practice targets, not measured bot ratings.
-
-The code is structured so a later slice can replace `lib/engine.ts` with a Stockfish Web Worker / WASM adapter.
+Bot levels are powered by Stockfish (Web Worker) with a lightweight alpha-beta fallback if the
+engine fails to load. Displayed Elo bands are practice targets, not measured bot ratings, and have
+not yet been calibrated through real beginner testing.
 
 ## Run locally
 
@@ -117,15 +118,27 @@ app/
   globals.css
   layout.tsx
   page.tsx
+  [room]/            route-based pages: play, puzzles, learn, watch, roadmap, family
+  api/               game-review and review-chat routes
 components/
   ChessBoard.tsx
-  LearnPath.tsx
   PlayTrainer.tsx
-  PuzzleTrainer.tsx
+  PuzzleTrainer.tsx     multi-move adult tactics trainer
+  LearnPath.tsx
   Roadmap.tsx
   WatchRoom.tsx
+  FamilyHub.tsx
+  family/              family play, adventures, puzzles, lessons, progress
 lib/
   engine.ts
   trainingData.ts
   types.ts
+  puzzles/             adult puzzle data + types
+  familyPuzzles.ts     family puzzle data
+  familyProgress.ts    family localStorage progress
+  learningProgress.ts  adult lesson/puzzle progress
+scripts/
+  validate-puzzles.mjs  chess.js validation for adult puzzles
+docs/
+  ROADMAP.md, PRODUCT_BACKLOG.md, TECHNICAL_DEBT.md, PUZZLE_SOURCES.md, ...
 ```

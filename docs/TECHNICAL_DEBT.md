@@ -1,6 +1,6 @@
 # Technical Debt and Engineering Improvements
 
-Last consolidated from repo docs: 2026-06-08.
+Last consolidated from repo docs: 2026-06-15.
 
 ## Engine Architecture
 
@@ -46,12 +46,12 @@ Last consolidated from repo docs: 2026-06-08.
 
 ## Data and Configuration
 
-- [ ] Move hardcoded training data toward JSON, MDX, or another editable content format when content grows
+- [~] Move hardcoded training data toward editable content modules (puzzles extracted to `lib/puzzles/` and `lib/familyPuzzles.ts`; remaining training data still inline)
 - [ ] Keep bot labels, descriptions, and levels centralized
 - [ ] Add versioned localStorage schemas and migration helpers
 - [ ] Cap local game/review archive size
 - [ ] Add explicit export/import paths for local games before cloud accounts
-- [ ] Document licenses for any imported puzzle/game datasets
+- [x] Document licenses for any imported puzzle/game datasets (`docs/PUZZLE_SOURCES.md`)
 
 ## Frontend Structure
 
@@ -78,7 +78,7 @@ Last consolidated from repo docs: 2026-06-08.
 - [ ] Chess-rule tests: promotion, checkmate, stalemate, repetition, insufficient material, draw
 - [ ] Engine integration tests: Stockfish parsing, cancellation, fallback
 - [ ] API tests: missing Groq key, rate limit, validation, prompt boundaries
-- [ ] Puzzle tests: solution lines, wrong move behavior, reset/next
+- [~] Puzzle tests: solution lines validated by `scripts/validate-puzzles.mjs`; wrong-move/reset/next component tests still pending
 - [ ] E2E desktop: play full game, review game, ask why checkmate
 - [ ] E2E mobile: 390px board, tap targets, promotion modal, no overflow
 - [ ] Regression tests after engine or review prompt changes

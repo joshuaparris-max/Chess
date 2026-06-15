@@ -16,6 +16,9 @@
 test-results/
 playwright-report/
 
+# local agent/editor settings
+.claude/
+
 # logs and editor files
 npm-debug.log*
 yarn-debug.log*

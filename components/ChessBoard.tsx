@@ -22,6 +22,7 @@ const PIECE_SETS = {
       wk: '♔', wq: '♕', wr: '♖', wb: '♗', wn: '♘', wp: '♙',
       bk: '♚', bq: '♛', br: '♜', bb: '♝', bn: '♞', bp: '♟',
     },
+    classes: 'text-4xl',
   },
   inverted: {
     label: 'Inverted',
@@ -29,27 +30,31 @@ const PIECE_SETS = {
       wk: '♚', wq: '♛', wr: '♜', wb: '♝', wn: '♞', wp: '♟',
       bk: '♔', bq: '♕', br: '♖', bb: '♗', bn: '♘', bp: '♙',
     },
+    classes: 'text-4xl',
   },
-  algebraic: {
-    label: 'Algebraic',
+  modern: {
+    label: 'Modern',
     pieces: {
-      wk: 'K', wq: 'Q', wr: 'R', wb: 'B', wn: 'N', wp: 'P',
-      bk: 'k', bq: 'q', br: 'r', bb: 'b', bn: 'n', bp: 'p',
+      wk: '♔', wq: '♕', wr: '♖', wb: '♗', wn: '♘', wp: '♙',
+      bk: '♚', bq: '♛', br: '♜', bb: '♝', bn: '♞', bp: '♟',
     },
+    classes: 'inline-flex h-12 w-12 items-center justify-center rounded-full text-3xl font-semibold ring-1 ring-slate-500/20 shadow-sm',
   },
-  circled: {
-    label: 'Circled',
-    pieces: {
-      wk: 'Ⓚ', wq: 'Ⓠ', wr: 'Ⓡ', wb: 'Ⓑ', wn: 'Ⓝ', wp: 'Ⓟ',
-      bk: 'Ⓚ', bq: 'Ⓠ', br: 'Ⓡ', bb: 'Ⓑ', bn: 'Ⓝ', bp: 'Ⓟ',
-    },
-  },
-  minimal: {
-    label: 'Minimal',
+  outline: {
+    label: 'Outline',
     pieces: {
       wk: 'K', wq: 'Q', wr: 'R', wb: 'B', wn: 'N', wp: 'P',
       bk: 'K', bq: 'Q', br: 'R', bb: 'B', bn: 'N', bp: 'P',
     },
+    classes: 'inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-500/30 text-2xl font-semibold',
+  },
+  letters: {
+    label: 'Letters',
+    pieces: {
+      wk: 'K', wq: 'Q', wr: 'R', wb: 'B', wn: 'N', wp: 'P',
+      bk: 'K', bq: 'Q', br: 'R', bb: 'B', bn: 'N', bp: 'P',
+    },
+    classes: 'inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950/80 text-2xl font-semibold uppercase tracking-[0.16em]',
   },
 };
 
@@ -87,6 +92,24 @@ export default function ChessBoard({
   }, [pieceSet]);
 
   const pieces: Record<string, string> = useMemo(() => PIECE_SETS[pieceSet].pieces, [pieceSet]);
+
+  const getPieceClasses = (color?: 'w' | 'b') => {
+    if (!color) {
+      return '';
+    }
+
+    const baseClasses = PIECE_SETS[pieceSet].classes;
+    if (pieceSet === 'classic' || pieceSet === 'inverted') {
+      return `${baseClasses} ${color === 'w' ? 'text-white drop-shadow-md' : 'text-slate-950'}`;
+    }
+
+    if (pieceSet === 'modern') {
+      return `${baseClasses} ${color === 'w' ? 'bg-white text-slate-950' : 'bg-slate-950 text-white'}`;
+    }
+
+    return `${baseClasses} ${color === 'w' ? 'text-slate-950' : 'text-white'}`;
+  };
+
   const board = game.board();
   const displayRows = flipped ? [...board].reverse() : board;
 
@@ -138,7 +161,7 @@ export default function ChessBoard({
                   <span className="absolute inset-0.5 rounded-sm ring-4 ring-red-500/70 sm:ring-[5px]" />
                 )}
                 {piece && pieceSet === 'classic' ? <ChessPiece color={piece.color} type={piece.type} /> : (
-                  <span className={`chess-piece ${piece ? (piece.color === 'w' ? 'text-white drop-shadow-md' : 'text-slate-950') : ''}`}>
+                  <span className={`chess-piece ${piece ? getPieceClasses(piece.color) : ''}`}>
                     {piece && pieceKey ? pieces[pieceKey] : ''}
                   </span>
                 )}
