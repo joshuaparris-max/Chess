@@ -9,6 +9,15 @@ export default function PostGameReview({ gameData, autoRequest = false }: { game
   const [detail, setDetail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const hasAutoRequestedRef = useRef(false);
+  const cacheKey = `gmp.review.v1.${gameData.playerColor}.${gameData.moves.join('-')}`;
+
+  useEffect(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem(cacheKey) ?? '{}') as ReviewResponse;
+      if (cached.summary) setSummary(cached.summary);
+      if (cached.detail) setDetail(cached.detail);
+    } catch {}
+  }, [cacheKey]);
 
   async function requestReview(detailed = false) {
     setLoading(true);
@@ -28,6 +37,10 @@ export default function PostGameReview({ gameData, autoRequest = false }: { game
         } else {
           setSummary((data as ReviewResponse).summary || null);
         }
+        try {
+          const current = JSON.parse(localStorage.getItem(cacheKey) ?? '{}');
+          localStorage.setItem(cacheKey, JSON.stringify({ ...current, ...(data as ReviewResponse) }));
+        } catch {}
       }
     } catch (e) {
       setError('The AI review could not load, but your game was saved locally for this session.');

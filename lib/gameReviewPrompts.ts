@@ -9,9 +9,11 @@ function friendlyResultText(result: string) {
 
 export function buildCoachPrompt(gameData: GameData, detail = false) {
   const isHumanOpponent = gameData.opponentType === 'human';
+  const humanColor = gameData.playerColor === 'black' ? 'Black' : 'White';
+  const opponentColor = humanColor === 'White' ? 'Black' : 'White';
   const opponentDescription = isHumanOpponent
-    ? 'The user played White and another person played Black. Refer to the White player as "you" and the Black player as "your opponent".'
-    : 'The user played White and the bot played Black. Refer to the human as "you" and the opponent as "the bot".';
+    ? `The user played ${humanColor} and another person played ${opponentColor}. Refer to the ${humanColor} player as "you" and the ${opponentColor} player as "your opponent".`
+    : `The user played ${humanColor} and the bot played ${opponentColor}. Refer to the human as "you" and the opponent as "the bot".`;
   const opponentLine = isHumanOpponent ? 'Opponent: another person.' : `Bot level: ${gameData.botLevel ?? 'unknown'}.`;
 
   const system = `You are a calm, friendly, beginner chess coach. You are NOT White or Black. ${opponentDescription} Keep explanations simple, encouraging, and practical. Avoid technical jargon.

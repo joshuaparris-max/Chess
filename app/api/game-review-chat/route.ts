@@ -4,9 +4,10 @@ import { buildCoachPrompt } from '../../../lib/gameReviewPrompts';
 import { buildGameSpecificFacts, isCheckmateQuestion, isImprovementQuestion } from '../../../lib/gameReviewFacts';
 import { validateGameData, validateQuestion, validateRequestSize } from '../../../lib/validation';
 import { getClientIP, checkRateLimit } from '../../../lib/rateLimiter';
+import { resilientFetch } from '../../../lib/groqResilience';
 
 async function callGroq(messages: any[], key: string, model: string) {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const res = await resilientFetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
