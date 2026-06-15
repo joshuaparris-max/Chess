@@ -42,8 +42,8 @@ function modeContent(mode: AppMode) {
   }
 }
 
-export default function Home() {
-  const [mode, setMode] = useState<AppMode>('play');
+export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }) {
+  const [mode, setMode] = useState<AppMode>(initialMode);
   const [studyStreak, setStudyStreak] = useState(0);
   const [dailyGoal, setDailyGoal] = useState(20);
   const [lastTrained, setLastTrained] = useState<string | null>(null);
@@ -89,6 +89,19 @@ export default function Home() {
 
   const active = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode]);
   const trainedToday = lastTrained === localDateKey();
+  const chooseMode = (nextMode: AppMode) => {
+    setMode(nextMode);
+    window.history.pushState({}, '', `/${nextMode}`);
+  };
+
+  useEffect(() => {
+    const syncFromPath = () => {
+      const pathMode = window.location.pathname.slice(1) as AppMode;
+      if (modes.some((item) => item.id === pathMode)) setMode(pathMode);
+    };
+    window.addEventListener('popstate', syncFromPath);
+    return () => window.removeEventListener('popstate', syncFromPath);
+  }, []);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
@@ -120,7 +133,7 @@ export default function Home() {
 
       <nav className="my-5 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6" aria-label="Training modes">
         {modes.map((item) => (
-          <button key={item.id} onClick={() => setMode(item.id)} className={`rounded-3xl border p-4 text-left transition ${mode === item.id ? 'border-teal-300 bg-teal-300 text-slate-950' : 'border-slate-600/50 bg-slate-900/70 text-slate-100 hover:border-teal-200/70 hover:bg-slate-800'}`}>
+          <button key={item.id} onClick={() => chooseMode(item.id)} className={`rounded-3xl border p-4 text-left transition ${mode === item.id ? 'border-teal-300 bg-teal-300 text-slate-950' : 'border-slate-600/50 bg-slate-900/70 text-slate-100 hover:border-teal-200/70 hover:bg-slate-800'}`}>
             <span className="block text-lg font-black">{item.label}</span>
             <span className={`mt-1 block text-sm ${mode === item.id ? 'text-slate-800' : 'text-slate-400'}`}>{item.tagline}</span>
           </button>

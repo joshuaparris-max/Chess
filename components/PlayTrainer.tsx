@@ -4,12 +4,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Chess, type Square } from 'chess.js';
 import ChessBoard from './ChessBoard';
 import GameClock from './GameClock';
+import GameArchive from './GameArchive';
 import PostGameReview from './PostGameReview';
 import type { GameData } from '@/lib/gameReviewTypes';
 import { botLevels } from '@/lib/trainingData';
 import { getBotMove, uciToMove } from '@/lib/engine';
 import { cancelStockfishMove, getStockfishMove } from '@/lib/stockfishClient';
 import { commitClockMove, createClock, startClock, stopClock } from '@/lib/clock';
+import { createGameId, saveLocalGame } from '@/lib/gameArchive';
 
 type PromotionPiece = 'q' | 'r' | 'b' | 'n';
 type GameMode = 'vs-computer' | 'two-player';
@@ -101,6 +103,8 @@ export default function PlayTrainer() {
   const [clock, setClock] = useState(() => createClock(10 * 60_000));
   const [coachNote, setCoachNote] = useState('White starts every game. You play as White — focus on development, centre control, and king safety.');
   const engineRequestId = useRef(0);
+  const archivedPgnRef = useRef('');
+  const [importPgn, setImportPgn] = useState('');
 
   const level = useMemo(() => botLevels.find((bot) => bot.id === levelId) ?? botLevels[1], [levelId]);
 
@@ -331,6 +335,44 @@ export default function PlayTrainer() {
     setClock((value) => stopClock(value, performance.now()));
   }, [game, timeControl]);
 
+  useEffect(() => {
+    if (!game.isGameOver()) return;
+    const pgn = game.pgn();
+    if (!pgn || archivedPgnRef.current === pgn) return;
+    archivedPgnRef.current = pgn;
+    const createdAtIso = new Date().toISOString();
+    const winner = game.isCheckmate() ? (game.turn() === 'b' ? 'White wins' : 'Black wins') : 'Draw';
+    saveLocalGame({
+      schemaVersion: 1,
+      id: createGameId(pgn, createdAtIso),
+      createdAtIso,
+      playerColor,
+      opponentType: gameMode === 'two-player' ? 'human' : 'bot',
+      result: winner,
+      pgn,
+      moves: game.history(),
+      finalFen: game.fen(),
+      botLevelId: gameMode === 'vs-computer' ? levelId : undefined,
+    });
+  }, [game, gameMode, levelId, playerColor]);
+
+  const loadPgn = (pgn: string) => {
+    const loaded = new Chess();
+    try {
+      loaded.loadPgn(pgn);
+      engineRequestId.current += 1;
+      cancelStockfishMove();
+      setGame(loaded);
+      setSelectedSquare(null);
+      setLastMove(null);
+      setPendingPromotion(null);
+      setImportPgn('');
+      setCoachNote('PGN loaded. Review the move list or continue if the game is unfinished.');
+    } catch {
+      setCoachNote('That PGN could not be loaded. Check the move text and try again.');
+    }
+  };
+
   // Post-game review state
   const [showReview, setShowReview] = useState(false);
   const [reviewContext, setReviewContext] = useState<GameData | null>(null);
@@ -557,6 +599,14 @@ export default function PlayTrainer() {
           </ol>
           {game.history().length === 0 && <p className="mt-2 text-sm text-slate-400">No moves yet.</p>}
         </div>
+
+        <div className="glass-panel rounded-3xl p-5">
+          <label htmlFor="pgn-import" className="font-bold text-teal-200">Import PGN</label>
+          <textarea id="pgn-import" value={importPgn} onChange={(event) => setImportPgn(event.target.value)} placeholder="Paste a PGN game here" className="mt-3 min-h-24 w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-sm text-white" />
+          <button disabled={!importPgn.trim()} onClick={() => loadPgn(importPgn)} className="mt-2 min-h-[44px] w-full rounded-xl bg-teal-400 px-4 py-2 text-sm font-bold text-slate-950 disabled:opacity-40">Load PGN</button>
+        </div>
+
+        <GameArchive onLoad={loadPgn} />
       </aside>
     </section>
   );
