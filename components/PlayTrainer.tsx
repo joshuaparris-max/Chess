@@ -558,10 +558,10 @@ export default function PlayTrainer() {
             <label className="mb-2 block text-sm font-semibold text-slate-300" htmlFor="bot-level">Bot difficulty</label>
             <select id="bot-level" value={levelId} onChange={(event) => setLevelId(event.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
               {botLevels.map((bot) => (
-                <option key={bot.id} value={bot.id}>{bot.label}</option>
+                <option key={bot.id} value={bot.id}>{bot.label} · approx. {bot.elo} practice Elo</option>
               ))}
             </select>
-            <p className="mt-2 text-xs text-slate-400">These are practice levels, not official ratings.</p>
+            <p className="mt-2 text-xs text-slate-400">Approximate strength helps you choose a challenge; these are practice levels, not official ratings.</p>
             <div className="mt-4 rounded-2xl bg-slate-950/60 p-4">
               <p className="text-lg font-bold text-yellow-200">{level.label}</p>
               <p className="text-sm text-slate-300">{level.style}</p>
