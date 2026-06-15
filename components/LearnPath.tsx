@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { lessons, researchPillars } from '@/lib/trainingData';
 import { loadLearningProgress, saveLearningProgress, type LearningProgress } from '@/lib/learningProgress';
 import ReadAloudButton from './family/ReadAloudButton';
@@ -116,14 +117,22 @@ export default function LearnPath() {
                 </p>
               )}
 
-              <button
-                onClick={() => toggleLesson(lesson.id)}
-                className={`mt-4 min-h-[44px] rounded-xl px-4 py-2 text-sm font-bold text-slate-950 transition ${
-                  completed ? 'bg-teal-400' : allStepsDone ? 'bg-teal-300 ring-2 ring-teal-200' : 'bg-teal-400'
-                }`}
-              >
-                {completed ? 'Completed ✓' : 'Mark lesson complete'}
-              </button>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => toggleLesson(lesson.id)}
+                  className={`min-h-[44px] rounded-xl px-4 py-2 text-sm font-bold text-slate-950 transition ${
+                    completed ? 'bg-teal-400' : allStepsDone ? 'bg-teal-300 ring-2 ring-teal-200' : 'bg-teal-400'
+                  }`}
+                >
+                  {completed ? 'Completed ✓' : 'Mark lesson complete'}
+                </button>
+                <Link href="/puzzles" className="min-h-[44px] rounded-xl border border-slate-500/50 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-700/50">
+                  Practice in Puzzles →
+                </Link>
+                <Link href="/play" className="min-h-[44px] rounded-xl border border-slate-500/50 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-700/50">
+                  Try it vs the bot →
+                </Link>
+              </div>
             </article>
           );
         })}
