@@ -6,6 +6,7 @@ import ChessBoard from './ChessBoard';
 import { adultPuzzles } from '@/lib/puzzles/adultPuzzles';
 import type { AdultPuzzle, PuzzleDifficulty } from '@/lib/puzzles/types';
 import type { LichessPuzzle } from '@/lib/lichessClient';
+import { tryPuzzleMove } from '@/lib/puzzles/attempt';
 
 // ── Progress ──────────────────────────────────────────────────────────────────
 
@@ -262,7 +263,6 @@ export default function PuzzleTrainer() {
   const [step, setStep] = useState(0);
   const [opponentThinking, setOpponentThinking] = useState(false);
   const [solved, setSolved] = useState(false);
-  const [failed, setFailed] = useState(false);
   const [message, setMessage] = useState('');
   const [hintLevel, setHintLevel] = useState<0 | 1 | 2 | 3>(0);
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
@@ -284,7 +284,6 @@ export default function PuzzleTrainer() {
     setStep(0);
     setOpponentThinking(false);
     setSolved(false);
-    setFailed(false);
     setHintLevel(0);
     setLastMove(null);
     setMessage(p.sideToMove === 'w' ? 'White to move. Find the best continuation.' : 'Black to move. Find the best continuation.');
@@ -312,7 +311,7 @@ export default function PuzzleTrainer() {
 
   // Opponent auto-reply: when step is odd (after player move), play the opponent's reply
   useEffect(() => {
-    if (!puzzle || solved || failed) return;
+    if (!puzzle || solved) return;
     const sol = puzzle.solution;
     if (step === 0 || step >= sol.length) return;
     if (step % 2 === 0) return;  // even = player's turn, odd = opponent's reply
@@ -343,7 +342,7 @@ export default function PuzzleTrainer() {
   }, [step]);
 
   const onSquareClick = (square: Square) => {
-    if (solved || failed || opponentThinking) return;
+    if (solved || opponentThinking) return;
     if (step % 2 !== 0) return;  // not player's turn
 
     const piece = game.get(square);
@@ -355,20 +354,17 @@ export default function PuzzleTrainer() {
     if (selectedSquare === square) { setSelectedSquare(null); return; }
     if (piece?.color === game.turn()) { setSelectedSquare(square); return; }
 
-    const attempted = `${selectedSquare}${square}`;
     const expected = puzzle.solution[step];
-    const copy = new Chess(game.fen());
+    const result = tryPuzzleMove(game.fen(), expected, selectedSquare, square);
 
     try {
-      const mv = copy.move({ from: selectedSquare, to: square, promotion: 'q' });
-      if (!mv) { setMessage('Illegal move. Try again.'); setSelectedSquare(null); return; }
-
-      const isCorrect = attempted === expected || `${selectedSquare}${square}q` === expected
-        || `${selectedSquare}${square}n` === expected;
-
-      if (!isCorrect) {
-        setFailed(true);
-        setMessage(`Not quite. The best move was ${expected}. Study the teaching point below, then try again.`);
+      if (result.status === 'illegal') {
+        setMessage('Illegal move. Try again.');
+        setSelectedSquare(null);
+        return;
+      }
+      if (result.status === 'incorrect') {
+        setMessage('Not quite — try again.');
         setSelectedSquare(null);
         const rec = progress[puzzle.id] ?? { attempts: 0, solved: 0 };
         const next = { ...progress, [puzzle.id]: { ...rec, attempts: rec.attempts + 1 } };
@@ -377,8 +373,8 @@ export default function PuzzleTrainer() {
         return;
       }
 
-      setGame(copy);
-      setLastMove({ from: mv.from, to: mv.to });
+      setGame(new Chess(result.fen));
+      setLastMove({ from: result.move.from, to: result.move.to });
       setSelectedSquare(null);
       const nextStep = step + 1;
       setStep(nextStep);
@@ -608,19 +604,12 @@ export default function PuzzleTrainer() {
                 </div>
               )}
 
-              {failed && (
-                <div className="mt-3 rounded-2xl bg-red-400/10 border border-red-400/30 p-4">
-                  <p className="font-bold text-red-300">Not quite this time.</p>
-                  <p className="mt-2 text-sm text-slate-300 leading-6">{puzzle.teachingPoint}</p>
-                </div>
-              )}
-
-              {!solved && !failed && message && (
+              {!solved && message && (
                 <p className="mt-3 text-slate-100">{message}</p>
               )}
 
               {/* 3-level hints */}
-              {!solved && !failed && (
+              {!solved && (
                 <div className="mt-4 space-y-2">
                   {hintLevel === 0 && (
                     <button
@@ -665,7 +654,15 @@ export default function PuzzleTrainer() {
               )}
 
               {/* Navigation buttons */}
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-4 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
+                {sourceTab !== 'local' && sourceTab !== 'archive' && (
+                  <button
+                    onClick={() => sourceTab === 'daily' ? loadPuzzle(puzzleIndex) : loadRandomLichessPuzzle()}
+                    className="min-h-11 rounded-xl bg-teal-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-teal-300"
+                  >
+                    {sourceTab === 'daily' ? 'Reset puzzle' : 'Get another puzzle'}
+                  </button>
+                )}
                 {sourceTab === 'local' && (
                   <>
                     <button
@@ -717,14 +714,6 @@ export default function PuzzleTrainer() {
                     </span>
                   </>
                 )}
-                {sourceTab !== 'local' && sourceTab !== 'archive' && (
-                  <button
-                    onClick={() => loadRandomLichessPuzzle()}
-                    className="rounded-xl bg-teal-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-teal-300"
-                  >
-                    {sourceTab === 'daily' ? 'Refresh' : 'Get Another →'}
-                  </button>
-                )}
               </div>
             </div>
 
@@ -768,7 +757,7 @@ export default function PuzzleTrainer() {
             )}
 
             {/* Teaching point (local puzzles) */}
-            {!solved && !failed && sourceTab === 'local' && (
+            {!solved && sourceTab === 'local' && (
               <div className="glass-panel rounded-3xl p-5">
                 <h3 className="font-bold text-teal-200">About this puzzle</h3>
                 <p className="mt-3 text-sm leading-6 text-slate-300">
