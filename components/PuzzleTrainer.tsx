@@ -537,9 +537,9 @@ export default function PuzzleTrainer() {
 
       {/* Main puzzle view */}
       {!lichessLoading && !archiveLoading && activePuzzleList.length > 0 && (
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,560px)_minmax(320px,1fr)]">
+        <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,560px)_minmax(320px,1fr)]">
           {/* Board column */}
-          <div className="glass-panel rounded-3xl p-4 sm:p-6">
+          <div className="glass-panel min-w-0 overflow-hidden rounded-3xl p-4 sm:p-6">
             {/* Puzzle meta */}
             <div className="mb-4">
               <div className="flex items-center gap-2 flex-wrap">
