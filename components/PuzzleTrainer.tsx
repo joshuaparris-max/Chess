@@ -108,6 +108,10 @@ function lichessToUiPuzzle(lp: LichessPuzzle): AdultPuzzle {
 export default function PuzzleTrainer() {
   const [sourceTab, setSourceTab] = useState<'local' | 'daily' | 'random' | 'archive'>('local');
   const [diffFilter, setDiffFilter] = useState<PuzzleDifficulty | 'all'>('all');
+  const [themeFilter, setThemeFilter] = useState('all');
+  const [phaseFilter, setPhaseFilter] = useState<'all' | AdultPuzzle['phase']>('all');
+  const [colorFilter, setColorFilter] = useState<'all' | AdultPuzzle['sideToMove']>('all');
+  const [lengthFilter, setLengthFilter] = useState<'all' | 'short' | 'long'>('all');
   const [lichessPuzzle, setLichessPuzzle] = useState<LichessPuzzle | null>(null);
   const [lichessLoading, setLichessLoading] = useState(false);
   const [lichessError, setLichessError] = useState<string | null>(null);
@@ -242,10 +246,15 @@ export default function PuzzleTrainer() {
     return () => { cancelled = true; };
   }, [sourceTab, archiveOffset]);
 
-  const filteredPuzzles = useMemo(
-    () => diffFilter === 'all' ? adultPuzzles : adultPuzzles.filter(p => p.difficulty === diffFilter),
-    [diffFilter],
-  );
+  const puzzleThemes = useMemo(() => [...new Set(adultPuzzles.flatMap((p) => p.themes))].sort(), []);
+  const filteredPuzzles = useMemo(() => adultPuzzles.filter((p) => {
+    const playerMoves = p.solution.filter((_, index) => index % 2 === 0).length;
+    return (diffFilter === 'all' || p.difficulty === diffFilter)
+      && (themeFilter === 'all' || p.themes.includes(themeFilter as AdultPuzzle['themes'][number]))
+      && (phaseFilter === 'all' || p.phase === phaseFilter)
+      && (colorFilter === 'all' || p.sideToMove === colorFilter)
+      && (lengthFilter === 'all' || (lengthFilter === 'short' ? playerMoves <= 2 : playerMoves >= 3));
+  }), [diffFilter, themeFilter, phaseFilter, colorFilter, lengthFilter]);
 
   // Determine which puzzle list to display
   const activePuzzleList = useMemo((): AdultPuzzle[] => {
@@ -308,7 +317,7 @@ export default function PuzzleTrainer() {
     setPuzzleIndex(0);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sourceTab, diffFilter]);
+  }, [sourceTab, diffFilter, themeFilter, phaseFilter, colorFilter, lengthFilter]);
 
   // Opponent auto-reply: when step is odd (after player move), play the opponent's reply
   useEffect(() => {
@@ -536,6 +545,13 @@ export default function PuzzleTrainer() {
         </div>
       )}
 
+      {sourceTab === 'local' && activePuzzleList.length === 0 && (
+        <div className="glass-panel rounded-3xl p-5 text-center">
+          <p className="font-semibold text-slate-200">No local puzzles match those filters.</p>
+          <button onClick={() => { setDiffFilter('all'); setThemeFilter('all'); setPhaseFilter('all'); setColorFilter('all'); setLengthFilter('all'); }} className="mt-3 min-h-11 rounded-xl bg-teal-400 px-4 py-2 font-bold text-slate-950">Clear filters</button>
+        </div>
+      )}
+
       {/* Main puzzle view */}
       {!lichessLoading && !archiveLoading && activePuzzleList.length > 0 && (
         <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,560px)_minmax(320px,1fr)]">
@@ -725,7 +741,7 @@ export default function PuzzleTrainer() {
             {/* Filters (only for local puzzles) */}
             {sourceTab === 'local' && (
               <div className="glass-panel rounded-3xl p-5">
-                <h3 className="font-bold text-teal-200 mb-3">Filter by difficulty</h3>
+                <h3 className="font-bold text-teal-200 mb-3">Find a local puzzle</h3>
                 <div className="flex flex-wrap gap-2">
                   {(['all', ...DIFFICULTIES] as const).map(d => (
                     <button
@@ -737,6 +753,30 @@ export default function PuzzleTrainer() {
                     </button>
                   ))}
                 </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <label className="text-xs font-semibold text-slate-300">Theme
+                    <select aria-label="Puzzle theme" value={themeFilter} onChange={(event) => setThemeFilter(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-950 p-2 text-sm text-white">
+                      <option value="all">All themes</option>
+                      {puzzleThemes.map((theme) => <option key={theme} value={theme}>{theme}</option>)}
+                    </select>
+                  </label>
+                  <label className="text-xs font-semibold text-slate-300">Phase
+                    <select aria-label="Puzzle phase" value={phaseFilter} onChange={(event) => setPhaseFilter(event.target.value as typeof phaseFilter)} className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-950 p-2 text-sm text-white">
+                      <option value="all">All phases</option><option value="opening">Opening</option><option value="middlegame">Middlegame</option><option value="endgame">Endgame</option>
+                    </select>
+                  </label>
+                  <label className="text-xs font-semibold text-slate-300">Side to move
+                    <select aria-label="Puzzle side to move" value={colorFilter} onChange={(event) => setColorFilter(event.target.value as typeof colorFilter)} className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-950 p-2 text-sm text-white">
+                      <option value="all">Either side</option><option value="w">White</option><option value="b">Black</option>
+                    </select>
+                  </label>
+                  <label className="text-xs font-semibold text-slate-300">Line length
+                    <select aria-label="Puzzle line length" value={lengthFilter} onChange={(event) => setLengthFilter(event.target.value as typeof lengthFilter)} className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-950 p-2 text-sm text-white">
+                      <option value="all">Any length</option><option value="short">1–2 player moves</option><option value="long">3+ player moves</option>
+                    </select>
+                  </label>
+                </div>
+                <button onClick={() => { setDiffFilter('all'); setThemeFilter('all'); setPhaseFilter('all'); setColorFilter('all'); setLengthFilter('all'); }} className="mt-3 min-h-11 rounded-xl border border-slate-600 px-3 py-2 text-sm font-semibold text-slate-200">Clear filters</button>
                 <p className="mt-2 text-xs text-slate-500">
                   {activePuzzleList.length} puzzle{activePuzzleList.length !== 1 ? 's' : ''}
                 </p>
