@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { roadmapStages } from '@/lib/trainingData';
 import { loadLearningProgress } from '@/lib/learningProgress';
 import { adultPuzzles } from '@/lib/puzzles/adultPuzzles';
@@ -72,6 +73,11 @@ export default function Roadmap() {
         <p className="mt-3 text-xs text-slate-400">
           Solve puzzles and complete lessons to advance the recommended stage. Every five solved puzzles is worth one step.
         </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link href="/puzzles" className="rounded-xl bg-teal-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-teal-300">Solve puzzles →</Link>
+          <Link href="/learn" className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-700/50">Open lessons →</Link>
+          <Link href="/play" className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-700/50">Play a game →</Link>
+        </div>
       </div>
 
       <div className="space-y-4">
