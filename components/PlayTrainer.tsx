@@ -18,6 +18,7 @@ type PromotionPiece = 'q' | 'r' | 'b' | 'n';
 type GameMode = 'vs-computer' | 'two-player';
 type PlayerColor = 'w' | 'b';
 type TimeControl = 'untimed' | '10+0' | '5+0';
+const ONBOARDING_KEY = 'gm-play-onboarding-seen-v1';
 
 const timeControlMs: Record<Exclude<TimeControl, 'untimed'>, number> = {
   '10+0': 10 * 60_000,
@@ -106,6 +107,20 @@ export default function PlayTrainer() {
   const engineRequestId = useRef(0);
   const archivedPgnRef = useRef('');
   const [importPgn, setImportPgn] = useState('');
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    try {
+      setShowOnboarding(localStorage.getItem(ONBOARDING_KEY) !== 'true');
+    } catch {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const closeOnboarding = () => {
+    setShowOnboarding(false);
+    try { localStorage.setItem(ONBOARDING_KEY, 'true'); } catch {}
+  };
 
   const level = useMemo(() => botLevels.find((bot) => bot.id === levelId) ?? botLevels[1], [levelId]);
   const opening = useMemo(() => recogniseOpening(game.history()), [game]);
@@ -451,7 +466,33 @@ export default function PlayTrainer() {
               {!twoPlayer && <button disabled={Boolean(pendingPromotion) || game.isGameOver()} onClick={showHint} className="rounded-xl border border-yellow-300/70 bg-yellow-200/10 px-4 py-2 text-sm text-yellow-100 hover:bg-yellow-200/20 disabled:cursor-not-allowed disabled:opacity-40">Hint</button>}
             </div>
           </div>
+          <button
+            type="button"
+            onClick={() => setShowOnboarding(true)}
+            className="mt-3 min-h-11 rounded-xl border border-teal-300/50 px-4 py-2 text-sm font-semibold text-teal-100 hover:bg-teal-300/10"
+          >
+            How to play
+          </button>
         </div>
+
+        {showOnboarding && (
+          <div role="dialog" aria-labelledby="play-guide-title" className="mb-4 rounded-2xl border border-teal-300/50 bg-slate-950/95 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 id="play-guide-title" className="text-lg font-bold text-teal-200">Your first chess game</h3>
+                <p className="mt-1 text-sm text-slate-300">Win by checkmating the enemy king: attack it so there is no legal escape.</p>
+              </div>
+              <button type="button" onClick={closeOnboarding} aria-label="Close how to play guide" className="min-h-11 rounded-xl border border-slate-600 px-3 text-sm font-bold">Close</button>
+            </div>
+            <ol className="mt-4 grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
+              <li className="rounded-xl bg-slate-800/70 p-3"><strong>1. Select a piece.</strong> Choose one of your pieces. Highlighted destinations show where it can legally move.</li>
+              <li className="rounded-xl bg-slate-800/70 p-3"><strong>2. Read the markers.</strong> Dots are legal empty squares. Red rings mean a capture is available.</li>
+              <li className="rounded-xl bg-slate-800/70 p-3"><strong>3. Keep your king safe.</strong> If your king is in check, you must move, block, or capture the attacker.</li>
+              <li className="rounded-xl bg-slate-800/70 p-3"><strong>4. Start simply.</strong> Move a centre pawn, develop knights and bishops, then castle.</li>
+            </ol>
+            <button type="button" onClick={closeOnboarding} className="mt-4 min-h-12 w-full rounded-xl bg-teal-400 px-4 py-3 font-bold text-slate-950">Start playing</button>
+          </div>
+        )}
 
         <div className="mobile-coach mb-3 sm:mb-4">
           <p className="text-sm font-semibold text-yellow-200">Coach</p>

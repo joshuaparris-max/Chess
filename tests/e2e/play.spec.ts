@@ -10,6 +10,16 @@ test('mobile board stays square without horizontal overflow', async ({ page }) =
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
+test('first-game guide explains board interaction and can be reopened', async ({ page }) => {
+  await page.goto('/play');
+  await expect(page.getByRole('heading', { name: 'Your first chess game' })).toBeVisible();
+  await expect(page.getByText('Dots are legal empty squares. Red rings mean a capture is available.')).toBeVisible();
+  await page.getByRole('button', { name: 'Start playing' }).click();
+  await expect(page.getByRole('heading', { name: 'Your first chess game' })).toBeHidden();
+  await page.getByRole('button', { name: 'How to play' }).click();
+  await expect(page.getByRole('heading', { name: 'Your first chess game' })).toBeVisible();
+});
+
 test('choosing Black flips the board and lets the bot move first', async ({ page }) => {
   await page.goto('/');
   await page.getByLabel('Your color').selectOption('b');
