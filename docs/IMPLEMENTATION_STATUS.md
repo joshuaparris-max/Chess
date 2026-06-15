@@ -16,11 +16,24 @@ Updated: 2026-06-15
 - Family puzzle bank expanded to 24 curated child-friendly positions
 - Puzzle validator (`npm run validate:puzzles`) plus authorship/attribution notes in `docs/PUZZLE_SOURCES.md`
 - Selectable, locally persisted adult board piece sets (classic SVG, inverted, modern, outline, letters)
+- **Lichess puzzle integration (NEW):**
+  - Live Daily Puzzle tab (cached 1 hour, Lichess's curated puzzle)
+  - Live Random Puzzle tab (fresh on-demand, with angle/difficulty filters)
+  - Accumulated Archive tab (paginated, stable 20-puzzle pages, filterable by rating/theme/date)
+  - Daily scheduled cron job (Sydney timezone, 12-attempt retry loop, quality filters: minRating 1600, minPlays 100, no 'opening' theme)
+  - Idempotent puzzle import (UNIQUE(puzzle_date), UNIQUE(lichess_id), automatically skips if already imported)
+  - Attempt logging (all 12 retry attempts tracked in daily_puzzle_imports, reason for each rejection)
+  - Server-only admin access (Supabase service-role key protected with 'server-only' directive, never in browser)
+  - FEN reconstruction from Lichess PGN (auto-determines starting position using chess.js, handles white/black to-move)
+  - Comprehensive test coverage (46 tests: 7 date/timezone, 9 FEN parser, 14 cron logic, 16 existing)
+  - Build validation (npm run build passes, npm run lint passes, npm run validate:puzzles passes)
 
 ## Next Production Work
 
-- Configure authentication and Postgres, then migrate local games/progress to cloud sync
-- Add puzzle streaks and spaced repetition on top of the curated library, and consider an attributed external import
+- Deploy Lichess integration to production: run Supabase migration, set environment variables in Vercel, verify first cron execution (24 hours after deploy)
+- Browser testing of Lichess puzzle tabs (Daily, Random, Archive) on desktop and mobile viewports
+- Configure authentication and Postgres for user progress cloud sync (beyond current test setup)
+- Add puzzle streaks and spaced repetition on top of the curated library
 - Add server-side Stockfish analysis and objective move classifications
 - Add deeper accessibility testing and keyboard move input
 - Add production observability and shared rate limiting
