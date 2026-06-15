@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useLocalProgress } from '@/lib/familyProgress';
+import { useRef, useState } from 'react';
+import { useLocalProgress, exportFamilyData, importFamilyData } from '@/lib/familyProgress';
 
 const ADVENTURES = [
   { id: 'knight', label: 'Knight Treasure Hunt', icon: '♘' },
@@ -18,12 +18,38 @@ const LESSONS = [
   { id: 'centre',   label: 'Playing Towards the Centre' },
 ];
 
-const PUZZLE_COUNT = 10;
+const PUZZLE_COUNT = 24;
 const TOTAL_PUZZLE_STARS = 24;
 
 export default function FamilyProgressView() {
   const { progress, resetProgress } = useLocalProgress();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [importMsg, setImportMsg] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleExport = () => {
+    try {
+      const blob = new Blob([exportFamilyData()], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'grandmaster-path-family-progress.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setImportMsg('Could not export right now.');
+    }
+  };
+
+  const handleImportFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const ok = importFamilyData(String(reader.result ?? ''));
+      setImportMsg(ok ? 'Progress imported! 🎉' : 'That file did not look like a saved progress file.');
+    };
+    reader.onerror = () => setImportMsg('Could not read that file.');
+    reader.readAsText(file);
+  };
 
   const adventuresDone = ADVENTURES.filter(a => progress.adventuresDone.includes(a.id)).length;
   const lessonsDone    = LESSONS.filter(l => progress.lessonsDone.includes(l.id)).length;
@@ -118,6 +144,34 @@ export default function FamilyProgressView() {
           <p className="text-sm text-slate-300 mt-1">You have completed all adventures, all lessons, and solved puzzles together. Amazing work!</p>
         </div>
       )}
+
+      {/* Backup / transfer */}
+      <div className="mb-4 rounded-2xl border border-slate-600/50 bg-slate-900/40 p-4">
+        <h3 className="font-black text-slate-100">Backup &amp; transfer</h3>
+        <p className="mt-1 text-xs text-slate-400">Save every player&apos;s progress to a file, or load it on another device. Stays on your devices — no account needed.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            onClick={handleExport}
+            className="rounded-xl bg-teal-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-teal-300 active:scale-95"
+          >
+            ⬇ Export progress
+          </button>
+          <button
+            onClick={() => fileRef.current?.click()}
+            className="rounded-xl border border-slate-600 px-4 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800 active:scale-95"
+          >
+            ⬆ Import progress
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImportFile(f); e.target.value = ''; }}
+          />
+        </div>
+        {importMsg && <p role="status" className="mt-2 text-sm font-semibold text-teal-200">{importMsg}</p>}
+      </div>
 
       {/* Reset */}
       {!confirmReset ? (

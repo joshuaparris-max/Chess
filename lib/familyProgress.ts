@@ -172,6 +172,40 @@ export function useFamilyProfiles() {
   return { profiles: state.profiles, activeId: state.activeId, activeProfile, switchProfile, addProfile, renameProfile, removeProfile };
 }
 
+// ── Export / import (manual cross-device transfer, no accounts) ──────────────────
+
+export function exportFamilyData(): string {
+  const state = loadProfiles();
+  const progress: Record<string, FamilyProgress> = {};
+  for (const p of state.profiles) progress[p.id] = load(p.id);
+  return JSON.stringify({ version: 1, profiles: state.profiles, progress }, null, 2);
+}
+
+export function importFamilyData(json: string): boolean {
+  try {
+    const data = JSON.parse(json) as { profiles?: unknown; progress?: Record<string, unknown> };
+    if (!Array.isArray(data.profiles) || data.profiles.length === 0) return false;
+
+    const profiles: FamilyProfile[] = data.profiles
+      .filter((p): p is FamilyProfile => !!p && typeof (p as FamilyProfile).id === 'string' && typeof (p as FamilyProfile).name === 'string')
+      .map((p, i) => ({
+        id: p.id,
+        name: String(p.name).slice(0, 20) || `Player ${i + 1}`,
+        emoji: typeof p.emoji === 'string' && p.emoji ? p.emoji : PROFILE_EMOJIS[i % PROFILE_EMOJIS.length],
+      }));
+    if (profiles.length === 0) return false;
+
+    for (const p of profiles) {
+      const prog = normaliseFamilyProgress(data.progress?.[p.id]);
+      try { window.localStorage.setItem(progressKey(p.id), JSON.stringify(prog)); } catch {}
+    }
+    saveProfiles({ profiles, activeId: profiles[0].id });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // ── Per-profile progress ────────────────────────────────────────────────────────
 
 export function useLocalProgress() {

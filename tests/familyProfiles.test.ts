@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { loadProfiles } from '@/lib/familyProgress';
+import { loadProfiles, exportFamilyData, importFamilyData } from '@/lib/familyProgress';
 
 const PROFILES_KEY = 'gm-family-profiles-v1';
 const LEGACY_KEY = 'gm-family-progress';
@@ -55,5 +55,28 @@ describe('family profiles', () => {
 
     const state = loadProfiles();
     expect(state.activeId).toBe('p1');
+  });
+
+  it('round-trips progress through export and import', () => {
+    window.localStorage.setItem(PROFILES_KEY, JSON.stringify({
+      profiles: [{ id: 'p1', name: 'Josh', emoji: '🦁' }, { id: 'p2', name: 'Sylvie', emoji: '🦄' }],
+      activeId: 'p1',
+    }));
+    window.localStorage.setItem(`${PROGRESS_PREFIX}p2`, JSON.stringify({ adventuresDone: ['knight'], lessonsDone: ['pieces'], puzzleStars: { fp01: 3 } }));
+
+    const exported = exportFamilyData();
+    window.localStorage.clear();
+    expect(importFamilyData(exported)).toBe(true);
+
+    const restored = loadProfiles();
+    expect(restored.profiles.map((p) => p.name)).toEqual(['Josh', 'Sylvie']);
+    const sylvie = JSON.parse(window.localStorage.getItem(`${PROGRESS_PREFIX}p2`)!);
+    expect(sylvie.puzzleStars.fp01).toBe(3);
+    expect(sylvie.adventuresDone).toEqual(['knight']);
+  });
+
+  it('rejects malformed import data', () => {
+    expect(importFamilyData('not json')).toBe(false);
+    expect(importFamilyData(JSON.stringify({ profiles: [] }))).toBe(false);
   });
 });
