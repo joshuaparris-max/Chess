@@ -83,8 +83,13 @@ select:focus-visible {
 .chess-piece {
   position: relative;
   z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Segoe UI Symbol", "Segoe UI Emoji", "Noto Color Emoji", Arial, Helvetica, sans-serif;
   font-size: clamp(2rem, 9.5vw, 4rem);
   line-height: 1;
+  text-align: center;
   pointer-events: none;
   user-select: none;
 }

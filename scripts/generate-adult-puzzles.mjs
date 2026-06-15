@@ -96,10 +96,11 @@ function genMateIn1(whiteExtra, limit, blackExtra = {}) {
 }
 
 // 2) Free capture of an undefended black piece by a white piece.
-function genHangingCapture(whitePiece, blackPiece, limit) {
+function genHangingCapture(whitePiece, blackPiece, limit, maxScan = 120000) {
   const found = [];
   const seen = new Set();
-  const VAL = { q: 9, r: 5, b: 3, n: 3, p: 1 };
+  let scan = 0;
+  outer:
   for (const wk of SCATTER) {
     for (const bk of SCATTER) {
       if (cheby(bk, wk) < 2) continue;
@@ -107,6 +108,7 @@ function genHangingCapture(whitePiece, blackPiece, limit) {
         if (wp === wk || wp === bk) continue;
         for (const bp of SCATTER) {
           if (bp === wk || bp === bk || bp === wp) continue;
+          if (++scan > maxScan) break outer;
           const pieces = { [wk]: 'K', [bk]: 'k', [wp]: whitePiece, [bp]: blackPiece };
           const fen = buildFen(pieces, 'w');
           if (seen.has(fen)) continue;
@@ -164,9 +166,11 @@ function genPromotion(limit) {
 
 // 4) Knight fork: Nx+ gives check and forks an undefended R/Q; for EVERY black reply
 //    white can capture the forked piece. 2 player moves.
-function genKnightFork(targetPiece, limit) {
+function genKnightFork(targetPiece, limit, maxScan = 400000) {
   const found = [];
   const seen = new Set();
+  let scan = 0;
+  outer:
   for (const wk of SCATTER) {
     for (const bk of SCATTER) {
       if (cheby(bk, wk) < 2) continue;
@@ -174,6 +178,7 @@ function genKnightFork(targetPiece, limit) {
         if (wn === wk || wn === bk) continue;
         for (const bt of SCATTER) {
           if (bt === wk || bt === bk || bt === wn) continue;
+          if (++scan > maxScan) break outer;
           const pieces = { [wk]: 'K', [bk]: 'k', [wn]: 'N', [bt]: targetPiece };
           const fen = buildFen(pieces, 'w');
           if (seen.has(fen)) continue;
@@ -218,9 +223,11 @@ function genKnightFork(targetPiece, limit) {
 
 // 5) Skewer/pin on a line: rook or bishop checks the king with a piece behind it;
 //    king is forced to move off the line, then white captures the back piece. 2 moves.
-function genSkewer(attacker, targetPiece, limit) {
+function genSkewer(attacker, targetPiece, limit, maxScan = 400000) {
   const found = [];
   const seen = new Set();
+  let scan = 0;
+  outer:
   for (const wk of SCATTER) {
     for (const bk of SCATTER) {
       if (cheby(bk, wk) < 2) continue;
@@ -228,6 +235,7 @@ function genSkewer(attacker, targetPiece, limit) {
         if (wa === wk || wa === bk) continue;
         for (const bt of SCATTER) {
           if (bt === wk || bt === bk || bt === wa) continue;
+          if (++scan > maxScan) break outer;
           const pieces = { [wk]: 'K', [bk]: 'k', [wa]: attacker, [bt]: targetPiece };
           const fen = buildFen(pieces, 'w');
           if (seen.has(fen)) continue;
@@ -265,19 +273,21 @@ function genSkewer(attacker, targetPiece, limit) {
 }
 
 // 6) Mate in 2 with a FORCED single black reply in between.
-function genMateIn2(whiteExtras, limit) {
+function genMateIn2(whiteExtras, limit, maxScan = 600000) {
   const found = [];
   const seen = new Set();
-  const place = (squares, codes, idx, pieces, cb) => {
-    if (idx === squares.length) { cb(pieces); return; }
-  };
-  for (const wk of SCATTER) {
-    for (const bk of SCATTER) {
+  // mates concentrate when the black king is on an edge/corner — search those first
+  const EDGE = SCATTER.filter(s => fileOf(s) === 0 || fileOf(s) === 7 || rankOf(s) === 0 || rankOf(s) === 7);
+  let scan = 0;
+  outer:
+  for (const bk of EDGE) {
+    for (const wk of SCATTER) {
       if (cheby(bk, wk) < 2) continue;
       for (const s1 of SCATTER) {
         if (s1 === wk || s1 === bk) continue;
         for (const s2 of SCATTER) {
           if (s2 === wk || s2 === bk || s2 === s1) continue;
+          if (++scan > maxScan) break outer;
           const pieces = { [wk]: 'K', [bk]: 'k', [s1]: whiteExtras[0], [s2]: whiteExtras[1] };
           const fen = buildFen(pieces, 'w');
           if (seen.has(fen)) continue;

@@ -1,22 +1,30 @@
 # Puzzle Sources
 
-All puzzles in this project are original compositions created specifically for Grandmaster Path Alpha.
+All puzzles in this project are original to Grandmaster Path Alpha. The family puzzles are hand-composed;
+the adult puzzles are generated and verified by `scripts/generate-adult-puzzles.mjs`.
 
 ## Adult Puzzles (`lib/puzzles/adultPuzzles.ts`)
 
-120 puzzles across five difficulty levels:
+114 puzzles across five difficulty levels:
 
 | Level | Count | Player moves | Focus |
 |---|---|---|---|
-| Intro | 24 | 1 | Mate in 1, hanging pieces, basic forks |
-| Beginner | 28 | 1–2 | 2-move combinations, basic tactics |
-| Intermediate | 28 | 2–3 | Multi-step sequences, positional themes |
-| Advanced | 24 | 2–4 | Sacrifices, complex coordinates |
-| Expert | 16 | 3–5 | Deep combinations, endgame technique |
+| Intro | 24 | 1 | Mate in 1, hanging pieces, promotion |
+| Beginner | 28 | 1–2 | Rook mates, hanging minor pieces, knight forks |
+| Intermediate | 22 | 1–2 | Knight forks, skewers, rook mates |
+| Advanced | 24 | 1–3 | Forced mate in two, skewers winning the queen |
+| Expert | 16 | 3 | Forced mate in two, queen mating nets |
 
-**Source:** All positions are original compositions (`source: 'original'`). FEN positions were designed
-to illustrate specific tactical or strategic concepts cleanly, without extraneous material.
-They are not taken from over-the-board games or existing puzzle databases.
+**Source:** `source: 'generated'`. Positions are produced by `scripts/generate-adult-puzzles.mjs`,
+which uses chess.js to construct positions and confirm the tactical property by construction:
+checkmates are verified with `isCheckmate()`, free captures are confirmed to be undefended,
+forks/skewers are confirmed to win the target against every legal reply, and forced mates in two
+require the in-between reply to be the opponent's only legal move. **The file is auto-generated —
+regenerate it with the script rather than hand-editing.** Every FEN and solution line is replayed
+through chess.js before the file is written, and again by `npm run validate:puzzles`.
+
+These positions are composed for teaching; they are not taken from over-the-board games or external
+puzzle databases.
 
 **Solution format:** The `solution` array interleaves player and opponent moves:
 - Even indices (0, 2, 4…) = player's moves
@@ -49,9 +57,14 @@ legal according to chess.js. This catches:
 - Duplicate puzzle IDs
 - Side-to-move mismatches
 
-## Adding New Puzzles
+## Regenerating / Adding Adult Puzzles
 
-1. Add to `lib/puzzles/adultPuzzles.ts` following the `AdultPuzzle` type in `lib/puzzles/types.ts`
-2. Assign a unique ID following the pattern: `i25`, `b29`, `m29`, `a25`, `e17`, etc.
-3. Run `npm run validate:puzzles` to verify
+The adult puzzle file is auto-generated. To change counts, tactic mix, or templates:
+
+1. Edit the generators or band assembly in `scripts/generate-adult-puzzles.mjs`
+2. Run `node scripts/generate-adult-puzzles.mjs` to rewrite `lib/puzzles/adultPuzzles.ts`
+3. Run `npm run validate:puzzles` to confirm every line is legal
 4. Run `npm run lint` and `npm run build` before committing
+
+To add a hand-composed family puzzle, edit `lib/familyPuzzles.ts` (and extend
+`PUZZLE_STAR_LIMITS` in `lib/familyProgress.ts`); family puzzles are not auto-generated.

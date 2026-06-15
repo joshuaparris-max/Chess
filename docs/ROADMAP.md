@@ -43,7 +43,7 @@ Goal: a complete beginner can play, understand what happened, and get useful fee
 
 Goal: the app teaches more than "play a bot" and starts forming a real improvement loop.
 
-- [x] Import or curate a larger legal puzzle dataset with license/attribution notes (120 original adult puzzles + `docs/PUZZLE_SOURCES.md`)
+- [x] Import or curate a larger legal puzzle dataset with license/attribution notes (114 generated-and-verified adult puzzles + `docs/PUZZLE_SOURCES.md`)
 - [x] Add puzzle tags, difficulty estimates, and attempt history (themes/phase tags, five difficulty bands, local attempt/solved tracking)
 - [x] Add multi-move puzzle sequences with opponent auto-reply and three-level hints
 - [ ] Add puzzle streaks and spaced repetition

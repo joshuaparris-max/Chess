@@ -2,108 +2,88 @@
  * validate-puzzles.mjs
  * Run: node scripts/validate-puzzles.mjs
  *
- * Validates adult puzzles only (family puzzles use simplified geometry, no chess.js).
- * Checks: legal FEN, solution moves playable in sequence, no stale references.
+ * Validates adult puzzles (family puzzles use simplified geometry, no chess.js).
+ * The data file ends with a JSON array literal, so we extract and JSON.parse it
+ * rather than regex-scanning — this is robust to formatting.
+ *
+ * Checks: legal FEN, sideToMove matches, every solution move plays legally
+ * in sequence, and no duplicate IDs.
  */
 
 import { Chess } from 'chess.js';
-import { createRequire } from 'module';
-import { pathToFileURL } from 'url';
-import path from 'path';
 import { readFileSync } from 'fs';
+import path from 'path';
 
-// Load the puzzle data via ts-stripped JSON extraction from the .ts source file.
-// We do a minimal parse: find the exported array literal and extract id/fen/solution via regex.
 const srcPath = path.resolve(process.cwd(), 'lib/puzzles/adultPuzzles.ts');
 const src = readFileSync(srcPath, 'utf-8');
 
-// Extract individual puzzle objects (rough extraction for validation only)
-const puzzleBlocks = [];
-const blockRe = /\{\s*id:\s*'([^']+)'[\s\S]*?solution:\s*\[([^\]]*)\][\s\S]*?fen:\s*'([^']+)'[\s\S]*?\}/g;
-// Alternatively, extract id, fen, sideToMove, solution in order
-// Use a simpler approach: extract all id, fen, solution triplets in order from the file
+// Extract the array literal: anchor on the declaration, then take from its '[' to the final ']'.
+const decl = src.indexOf('adultPuzzles');
+const eq = src.indexOf('=', decl);
+const start = src.indexOf('[', eq);
+const end = src.lastIndexOf(']');
+if (decl === -1 || eq === -1 || start === -1 || end === -1) {
+  console.error('Could not locate the puzzle array literal in adultPuzzles.ts');
+  process.exit(1);
+}
 
-const idFenSolRe = /id:\s*'([^']+)'[^}]*?fen:\s*'([^']+)'[^}]*?sideToMove:\s*'([wb])'[^}]*?solution:\s*\[([^\]]*)\]/gs;
+let puzzles;
+try {
+  puzzles = JSON.parse(src.slice(start, end + 1));
+} catch (e) {
+  console.error('Failed to JSON.parse the puzzle array. The generator emits JSON; if the file');
+  console.error('was hand-edited into TS-literal form, restore JSON formatting. Error:', e.message);
+  process.exit(1);
+}
 
-let match;
 let errors = 0;
-let warnings = 0;
-let checked = 0;
+const seen = new Set();
 
-while ((match = idFenSolRe.exec(src)) !== null) {
-  const [, id, fen, sideToMove, solutionRaw] = match;
-  const solution = solutionRaw.match(/'([^']+)'/g)?.map(s => s.replace(/'/g, '')) ?? [];
+for (const p of puzzles) {
+  const id = p.id ?? '(no id)';
 
-  checked++;
+  if (seen.has(id)) { console.error(`[${id}] Duplicate puzzle ID`); errors++; }
+  seen.add(id);
+
+  if (!Array.isArray(p.solution) || p.solution.length === 0) {
+    console.error(`[${id}] Empty or missing solution array`);
+    errors++;
+    continue;
+  }
+
   let chess;
-
-  // 1. FEN must be loadable
   try {
-    chess = new Chess(fen);
-  } catch (e) {
-    console.error(`[${id}] Invalid FEN: ${fen}`);
+    chess = new Chess(p.fen);
+  } catch {
+    console.error(`[${id}] Invalid FEN: ${p.fen}`);
     errors++;
     continue;
   }
 
-  // 2. Side to move must match
-  if (chess.turn() !== sideToMove) {
-    console.error(`[${id}] sideToMove mismatch: FEN says '${chess.turn()}' but field says '${sideToMove}'`);
+  if (chess.turn() !== p.sideToMove) {
+    console.error(`[${id}] sideToMove mismatch: FEN turn '${chess.turn()}' vs field '${p.sideToMove}'`);
     errors++;
   }
 
-  // 3. Solution must be non-empty
-  if (solution.length === 0) {
-    console.error(`[${id}] Empty solution array`);
-    errors++;
-    continue;
-  }
-
-  // 4. Play through all solution moves
-  let valid = true;
-  for (let i = 0; i < solution.length; i++) {
-    const uci = solution[i];
-    const from = uci.slice(0, 2);
-    const to = uci.slice(2, 4);
-    const promotion = uci.length === 5 ? uci[4] : undefined;
+  for (let i = 0; i < p.solution.length; i++) {
+    const u = p.solution[i];
+    const move = { from: u.slice(0, 2), to: u.slice(2, 4), ...(u.length === 5 ? { promotion: u[4] } : {}) };
     try {
-      const mv = chess.move({ from, to, ...(promotion ? { promotion } : {}) });
-      if (!mv) {
-        console.error(`[${id}] Solution move ${i} (${uci}) is illegal in position:\n  ${chess.fen()}`);
+      const m = chess.move(move);
+      if (!m) {
+        console.error(`[${id}] Solution move ${i} (${u}) is illegal in:\n  ${chess.fen()}`);
         errors++;
-        valid = false;
         break;
       }
     } catch (e) {
-      console.error(`[${id}] Solution move ${i} (${uci}) threw: ${e.message}`);
+      console.error(`[${id}] Solution move ${i} (${u}) threw: ${e.message}`);
       errors++;
-      valid = false;
       break;
     }
   }
-
-  if (valid) {
-    // 5. Warn if solution doesn't end in a decisive position (checkmate, capture, or clear advantage)
-    // Just a courtesy check — not an error.
-    const finalTurn = chess.turn();
-    if (!chess.isCheckmate() && !chess.isGameOver()) {
-      // That's fine — tactical puzzles don't have to end in checkmate
-    }
-  }
 }
 
-// Check for duplicate IDs
-const idMatches = [...src.matchAll(/id:\s*'([^']+)'/g)].map(m => m[1]);
-const seen = new Set();
-for (const id of idMatches) {
-  if (seen.has(id)) {
-    console.error(`Duplicate puzzle ID: '${id}'`);
-    errors++;
-  }
-  seen.add(id);
-}
-
-console.log(`\nValidated ${checked} puzzles.`);
+console.log(`\nValidated ${puzzles.length} puzzles.`);
 if (errors > 0) {
   console.error(`${errors} error(s) found.`);
   process.exit(1);
