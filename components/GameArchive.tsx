@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { clearLocalGames, loadLocalGames, type LocalGameRecord } from '@/lib/gameArchive';
+import { clearLocalGames, exportGameArchiveJson, loadLocalGames, type LocalGameRecord } from '@/lib/gameArchive';
 
 export default function GameArchive({ onLoad }: { onLoad: (pgn: string) => void }) {
   const [games, setGames] = useState<LocalGameRecord[]>([]);
@@ -22,6 +22,14 @@ export default function GameArchive({ onLoad }: { onLoad: (pgn: string) => void 
     URL.revokeObjectURL(link.href);
   };
 
+  const exportAll = () => {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([exportGameArchiveJson(games)], { type: 'application/json' }));
+    link.download = 'grandmaster-path-game-archive.json';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+
   return (
     <div className="glass-panel rounded-3xl p-5">
       <div className="flex items-center justify-between gap-3">
@@ -29,7 +37,10 @@ export default function GameArchive({ onLoad }: { onLoad: (pgn: string) => void 
           <h3 className="font-bold text-teal-200">Local game archive</h3>
           <p className="text-xs text-slate-400">The latest 20 completed games stay on this device.</p>
         </div>
-        {games.length > 0 && <button onClick={() => { if (window.confirm('Clear all locally saved games?')) clearLocalGames(); }} className="rounded-xl border border-red-400/30 px-3 py-2 text-xs text-red-200">Clear</button>}
+        {games.length > 0 && <div className="flex gap-2">
+          <button onClick={exportAll} className="rounded-xl border border-teal-400/40 px-3 py-2 text-xs text-teal-100">Export JSON</button>
+          <button onClick={() => { if (window.confirm('Clear all locally saved games?')) clearLocalGames(); }} className="rounded-xl border border-red-400/30 px-3 py-2 text-xs text-red-200">Clear</button>
+        </div>}
       </div>
       <div className="mt-3 space-y-2">
         {games.map((game) => (

@@ -91,7 +91,7 @@ Last consolidated from repo docs: 2026-06-15.
 - [x] Local review archive
 - [x] Local puzzle attempt history
 - [x] Local lesson completion state
-- [ ] Export local games/reviews as PGN or JSON
+- [x] Export local games/reviews as PGN or JSON
 - [ ] Design local-to-cloud migration
 - [ ] Accounts and cloud progress
 - [ ] Cloud game history

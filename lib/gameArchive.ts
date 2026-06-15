@@ -58,3 +58,11 @@ export function createGameId(pgn: string, createdAtIso: string) {
   for (const char of `${createdAtIso}:${pgn}`) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
   return `game-${(hash >>> 0).toString(36)}`;
 }
+
+export function exportGameArchiveJson(games: LocalGameRecord[]): string {
+  return JSON.stringify({
+    schemaVersion: 1,
+    exportedAtIso: new Date().toISOString(),
+    games: normaliseGameArchive(games),
+  }, null, 2);
+}
