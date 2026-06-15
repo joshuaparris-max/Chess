@@ -308,6 +308,13 @@ export default function PuzzleTrainer() {
           {/* Navigation buttons */}
           <div className="mt-5 flex flex-wrap gap-2">
             <button
+              onClick={() => loadPuzzle((puzzleIndex - 1 + filteredPuzzles.length) % filteredPuzzles.length)}
+              disabled={filteredPuzzles.length < 2}
+              className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm hover:bg-slate-700/50 disabled:opacity-40"
+            >
+              ← Previous
+            </button>
+            <button
               onClick={() => loadPuzzle(puzzleIndex)}
               className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm hover:bg-slate-700/50"
             >
@@ -315,9 +322,10 @@ export default function PuzzleTrainer() {
             </button>
             <button
               onClick={() => loadPuzzle((puzzleIndex + 1) % filteredPuzzles.length)}
-              className="rounded-xl bg-teal-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-teal-300"
+              disabled={filteredPuzzles.length < 2}
+              className="rounded-xl bg-teal-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-teal-300 disabled:opacity-40"
             >
-              Next
+              Next →
             </button>
           </div>
         </div>
