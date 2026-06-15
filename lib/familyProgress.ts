@@ -14,16 +14,11 @@ const EMPTY: FamilyProgress = { adventuresDone: [], lessonsDone: [], puzzleStars
 const ADVENTURE_IDS = new Set(['knight', 'rook', 'bishop', 'pawn']);
 const LESSON_IDS = new Set(['pieces', 'check', 'castling', 'values', 'centre']);
 const PUZZLE_STAR_LIMITS: Record<string, number> = {
-  fp01: 3,
-  fp02: 3,
-  fp03: 3,
-  fp04: 2,
-  fp05: 2,
-  fp06: 2,
-  fp07: 2,
-  fp08: 2,
-  fp09: 2,
-  fp10: 3,
+  fp01: 3, fp02: 3, fp03: 3, fp04: 2, fp05: 2,
+  fp06: 2, fp07: 2, fp08: 2, fp09: 2, fp10: 3,
+  fp11: 2, fp12: 2, fp13: 2, fp14: 3, fp15: 2,
+  fp16: 3, fp17: 2, fp18: 2, fp19: 3, fp20: 3,
+  fp21: 3, fp22: 2, fp23: 3, fp24: 2,
 };
 
 export function normaliseFamilyProgress(value: unknown): FamilyProgress {

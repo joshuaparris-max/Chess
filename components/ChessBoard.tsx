@@ -121,7 +121,7 @@ export default function ChessBoard({
             const isLegalTarget = legalTargets.includes(square);
             const isCapture = captureSquares.includes(square);
             const isLastMove = lastMove?.from === square || lastMove?.to === square;
-            const pieceKey = piece ? `${piece.color}${piece.type}` : '';
+            const pieceKey = piece ? (`${piece.color}${piece.type}` as keyof typeof pieces) : undefined;
             return (
               <button
                 key={square}
@@ -139,7 +139,7 @@ export default function ChessBoard({
                 )}
                 {piece && pieceSet === 'classic' ? <ChessPiece color={piece.color} type={piece.type} /> : (
                   <span className={`chess-piece ${piece ? (piece.color === 'w' ? 'text-white drop-shadow-md' : 'text-slate-950') : ''}`}>
-                    {piece ? pieces[pieceKey] : ''}
+                    {piece && pieceKey ? pieces[pieceKey] : ''}
                   </span>
                 )}
                 {(rankNum === (flipped ? 8 : 1) || fileIndex === 0) && <span className="coord">{square}</span>}
