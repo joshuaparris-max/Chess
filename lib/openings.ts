@@ -1,4 +1,4 @@
-const OPENINGS = [
+export const OPENINGS = [
   { moves: ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4'], name: 'Italian Game', idea: 'Develop quickly and prepare to castle.' },
   { moves: ['e4', 'e5', 'Nf3', 'Nc6', 'Bb5'], name: 'Ruy Lopez', idea: 'Pressure the knight that protects the centre.' },
   { moves: ['e4', 'c5'], name: 'Sicilian Defence', idea: 'Black fights for the centre from the side.' },
