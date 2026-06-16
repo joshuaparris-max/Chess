@@ -217,3 +217,46 @@ html[data-theme="family"] .glass-panel {
     z-index: 60;
   }
 }
+
+/* Ticket 2.2 — Bedtime Mode: soft dark-purple night tint, fully additive. */
+[data-bedtime='true'] body {
+  background-color: #15123a;
+  filter: brightness(0.82) saturate(0.85) hue-rotate(6deg);
+}
+[data-bedtime='true'] .chess-board {
+  filter: brightness(0.85) saturate(0.7);
+}
+.bedtime-toggle {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 70;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(196, 181, 253, 0.5);
+  background: rgba(49, 46, 129, 0.85);
+  color: #ede9fe;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(15, 12, 58, 0.45);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.bedtime-toggle:hover {
+  transform: translateY(-1px);
+}
+.bedtime-toggle-on {
+  background: #7c3aed;
+  border-color: #a78bfa;
+}
+.bedtime-toggle-label {
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .bedtime-toggle-label {
+    display: none;
+  }
+}
