@@ -11,6 +11,7 @@ import CloudSyncPanel from '@/components/CloudSyncPanel';
 import StickerBook from '@/components/StickerBook';
 import StoryMode from '@/components/story/StoryMode';
 import EndgameDrills from '@/components/EndgameDrills';
+import Resources from '@/components/Resources';
 import XpBadge from '@/components/XpBadge';
 import QuestLog from '@/components/QuestLog';
 import SettingsMenu from '@/components/SettingsMenu';
@@ -27,6 +28,7 @@ const modes: { id: AppMode; label: string; tagline: string }[] = [
   { id: 'stickers', label: 'Sticker Book', tagline: 'Collect story rewards' },
   { id: 'story', label: 'Princess Story 👑', tagline: 'Rescue the Fairy Queen' },
   { id: 'endgames', label: 'Endgames', tagline: 'Practice winning endings' },
+  { id: 'resources', label: 'Resources', tagline: 'Free chess books, audio, tools, and training links' },
 ];
 
 function localDateKey(date = new Date()) {
