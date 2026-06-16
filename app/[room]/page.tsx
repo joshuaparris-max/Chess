@@ -8,8 +8,13 @@ export function generateStaticParams() {
   return rooms.map((room) => ({ room }));
 }
 
-export default async function RoomPage({ params }: { params: Promise<{ room: string }> }) {
+interface RoomPageProps {
+  params: Promise<{ room: string }>;
+}
+
+export default async function RoomPage({ params }: RoomPageProps) {
   const { room } = await params;
-  if (!rooms.includes(room as AppMode)) notFound();
-  return <Home initialMode={room as AppMode} />;
+  const roomMode = room as AppMode;
+  if (!rooms.includes(roomMode)) notFound();
+  return <Home initialMode={roomMode} />;
 }
