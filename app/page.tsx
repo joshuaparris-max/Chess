@@ -58,6 +58,8 @@ function modeContent(mode: AppMode) {
       return <StoryMode />;
     case 'endgames':
       return <EndgameDrills />;
+    case 'resources':
+      return <Resources />;
   }
 }
 
