@@ -10,6 +10,7 @@ export type EndgameDrill = {
   fen: string;
   goal: string;
   teachingPoint: string;
+  hints: string[];
   successText: string;
   solution: string[];
 };
@@ -33,6 +34,12 @@ export const endgameDrills: EndgameDrill[] = [
     fen: '8/8/8/8/7k/8/6Q1/6K1 w - - 0 1',
     goal: 'Use the queen to gently reduce the black king\'s space.',
     teachingPoint: 'In queen endings, keep your queen a knight move away from the king so it controls escape squares without being captured.',
+    hints: [
+      'Use the queen, not the king. The queen should move far enough away that the black king cannot capture it.',
+      'Try placing the queen on the same diagonal as the black king. From there it boxes the king without standing next to it.',
+      'The target square is on the b-file. Move the queen from g2 to b7.',
+      'Play Qb7. In board coordinates, drag the queen from g2 to b7.',
+    ],
     successText: 'Great box. The queen took away the king\'s room without stepping too close.',
     solution: ['g2b7'],
   },
@@ -44,6 +51,12 @@ export const endgameDrills: EndgameDrill[] = [
     fen: '8/8/8/8/8/5k2/6R1/6K1 w - - 0 1',
     goal: 'Check from the side and start pushing the king toward the edge.',
     teachingPoint: 'Rooks win by cutting the king off rank by rank or file by file. Give checks from a safe distance.',
+    hints: [
+      'Use the rook. A rook checks best from a safe distance along a rank or file.',
+      'Move the rook onto the same rank as the black king, but keep one square between them.',
+      'The rook should slide one square left, from g2 to f2.',
+      'Play Rf2+. In board coordinates, drag the rook from g2 to f2.',
+    ],
     successText: 'That rook check starts the ladder. The king has fewer files to run to now.',
     solution: ['g2f2'],
   },
@@ -55,6 +68,12 @@ export const endgameDrills: EndgameDrill[] = [
     fen: '8/8/4k3/8/1pP5/1P6/P7/4K3 w - - 0 1',
     goal: 'Find the pawn break that creates a passed pawn.',
     teachingPoint: 'When pawns face each other, a sacrifice can clear the road for the pawn behind it.',
+    hints: [
+      'Look at the queenside pawns. You want to create one pawn that can run without an enemy pawn blocking it.',
+      'The pawn on a2 can move two squares because it has not moved yet.',
+      'Push the a-pawn from a2 to a4 to break open the b-pawn structure.',
+      'Play a4. In board coordinates, drag the pawn from a2 to a4.',
+    ],
     successText: 'Nice breakthrough. That sacrifice turns the queenside pawns into a real runner.',
     solution: ['a2a4'],
   },
@@ -66,6 +85,12 @@ export const endgameDrills: EndgameDrill[] = [
     fen: '8/8/8/4k3/8/4K3/4P3/8 w - - 0 1',
     goal: 'Move your king so the enemy king has to give ground.',
     teachingPoint: 'Opposition means putting the kings face to face with one square between them, forcing the other king to step aside.',
+    hints: [
+      'This is a king move. You are trying to stand opposite the black king with one square between the kings.',
+      'Do not move toward the e-file yet. Step sideways so the kings face each other across the d-file.',
+      'Move the white king from e3 to d3.',
+      'Play Kd3. In board coordinates, drag the king from e3 to d3.',
+    ],
     successText: 'You took the opposition. That is the key idea in many king-and-pawn endings.',
     solution: ['e3d3'],
   },
@@ -75,6 +100,12 @@ export const emptyEndgameProgress: EndgameDrillProgress = {
   completedIds: [],
   attemptsById: {},
 };
+
+export function getEndgameHint(drill: EndgameDrill, attempts: number): string {
+  if (attempts <= 0) return drill.goal;
+  const hintIndex = Math.min(Math.floor((attempts - 1) / 2), drill.hints.length - 1);
+  return drill.hints[hintIndex] ?? drill.teachingPoint;
+}
 
 export function normaliseEndgameProgress(value: unknown): EndgameDrillProgress {
   const raw = (value ?? {}) as Partial<EndgameDrillProgress>;

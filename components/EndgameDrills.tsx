@@ -7,6 +7,7 @@ import {
   ENDGAME_DRILL_PROGRESS_KEY,
   emptyEndgameProgress,
   endgameDrills,
+  getEndgameHint,
   normaliseEndgameProgress,
   recordEndgameAttempt,
   tryEndgameMove,
@@ -24,6 +25,7 @@ export default function EndgameDrills() {
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
   const [ply, setPly] = useState(0);
   const [message, setMessage] = useState(active.goal);
+  const [sessionMisses, setSessionMisses] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [progress, setProgress] = useState<EndgameDrillProgress>(emptyEndgameProgress);
 
@@ -42,6 +44,7 @@ export default function EndgameDrills() {
     setLastMove(null);
     setPly(0);
     setCompleted(false);
+    setSessionMisses(0);
     setMessage(active.goal);
   }, [active]);
 
@@ -73,6 +76,7 @@ export default function EndgameDrills() {
     setLastMove(null);
     setPly(0);
     setCompleted(false);
+    setSessionMisses(0);
     setMessage(active.goal);
   };
 
@@ -112,13 +116,22 @@ export default function EndgameDrills() {
     }
 
     if (result.status === 'incorrect') {
-      saveProgress(recordEndgameAttempt(progress, active.id, false));
+      const nextProgress = recordEndgameAttempt(progress, active.id, false);
+      const misses = sessionMisses + 1;
+      const totalMisses = nextProgress.attemptsById[active.id] ?? misses;
+      setSessionMisses(misses);
+      saveProgress(nextProgress);
+      setSelectedSquare(null);
+      setMessage(`${result.reason} Hint ${Math.min(Math.floor((totalMisses - 1) / 2) + 1, active.hints.length)}: ${getEndgameHint(active, totalMisses)}`);
+      return;
     }
     setSelectedSquare(null);
     setMessage(result.reason);
   };
 
   const completedCount = endgameDrills.filter((drill) => progress.completedIds.includes(drill.id)).length;
+  const totalAttemptsForActive = progress.attemptsById[active.id] ?? 0;
+  const currentHint = getEndgameHint(active, Math.max(sessionMisses, totalAttemptsForActive));
 
   return (
     <section className="grid gap-5 lg:grid-cols-[minmax(0,620px)_minmax(320px,1fr)]">
@@ -168,12 +181,24 @@ export default function EndgameDrills() {
           </button>
           <button
             type="button"
-            onClick={() => setMessage(active.teachingPoint)}
+            onClick={() => setMessage(currentHint)}
             className="min-h-11 rounded-xl border border-emerald-300/60 bg-emerald-300/10 px-4 py-2 text-sm font-bold text-emerald-100 hover:bg-emerald-300/20"
           >
-            Show idea
+            Get hint
           </button>
         </div>
+
+        {!completed && (sessionMisses > 0 || totalAttemptsForActive > 0) && (
+          <div className="mt-4 rounded-2xl border border-emerald-300/30 bg-emerald-950/20 p-4 text-sm leading-6 text-emerald-50">
+            <p className="font-bold text-emerald-200">Current hint</p>
+            <p className="mt-1">{currentHint}</p>
+            {totalAttemptsForActive >= 8 && (
+              <p className="mt-2 text-emerald-100">
+                You have tried this one {totalAttemptsForActive} times. It is okay to use the exact move hint and then replay it once from memory.
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <aside className="space-y-4">

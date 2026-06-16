@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   endgameDrills,
+  getEndgameHint,
   normaliseEndgameProgress,
   recordEndgameAttempt,
   tryEndgameMove,
@@ -68,5 +69,16 @@ describe('endgame drills', () => {
     const second = recordEndgameAttempt(first, 'king-box', true);
     expect(second.completedIds).toEqual(['king-box']);
     expect(second.attemptsById['king-box']).toBe(2);
+  });
+
+  it('escalates hints after repeated misses', () => {
+    const drill = endgameDrills.find((item) => item.id === 'king-box');
+    expect(drill).toBeDefined();
+
+    expect(getEndgameHint(drill!, 0)).toBe(drill!.goal);
+    expect(getEndgameHint(drill!, 1)).toContain('Use the queen');
+    expect(getEndgameHint(drill!, 3)).toContain('same diagonal');
+    expect(getEndgameHint(drill!, 5)).toContain('g2 to b7');
+    expect(getEndgameHint(drill!, 13)).toContain('Play Qb7');
   });
 });
