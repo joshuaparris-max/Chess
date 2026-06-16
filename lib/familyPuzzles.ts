@@ -38,7 +38,7 @@ export const FAMILY_PUZZLES: FamilyPuzzle[] = [
   },
   {
     id: 'fp04', label: 'Win the Rook', theme: 'Free Capture', maxStars: 2,
-    fen: 'k7/8/8/3Q3r/8/8/8/K7 w - - 0 1',
+    fen: '7k/8/8/3Q3r/8/8/8/K7 w - - 0 1',
     from: 'd5', to: 'h5',
     hint: 'The queen can slide all the way along row 5 to reach the rook!',
     celebrate: "Got it! The queen slid right across the rank and took the rook for free.",
@@ -52,7 +52,7 @@ export const FAMILY_PUZZLES: FamilyPuzzle[] = [
   },
   {
     id: 'fp06', label: 'Win the Bishop', theme: 'Free Capture', maxStars: 2,
-    fen: 'k7/8/8/3Q1b2/8/8/8/K7 w - - 0 1',
+    fen: '7k/8/8/3Q1b2/8/8/8/K7 w - - 0 1',
     from: 'd5', to: 'f5',
     hint: 'Slide the queen two squares to the right along row 5!',
     celebrate: "The queen slid right over to f5 and took the bishop. Always look for undefended pieces!",
@@ -177,9 +177,9 @@ export const FAMILY_PUZZLES: FamilyPuzzle[] = [
   {
     id: 'fp23', label: 'Rook Delivers Checkmate', theme: 'Checkmate', maxStars: 3,
     fen: '7k/5ppp/5K2/8/8/8/8/6R1 w - - 0 1',
-    from: 'g1', to: 'g8',
-    hint: 'Slide the rook all the way up the g-file. The king\'s own pawns have trapped it!',
-    celebrate: "Checkmate! The rook on g8 gave check, the pawns blocked every escape, and the white king covered g7.",
+    from: 'g1', to: 'g7',
+    hint: 'Slide the rook up the g-file and capture the pawn next to the king!',
+    celebrate: "Checkmate! The rook on g7 gave check, the pawns blocked every escape, and the white king protected the rook.",
   },
   {
     id: 'fp24', label: 'Pawn Takes the Knight', theme: 'Pawn Capture', maxStars: 2,

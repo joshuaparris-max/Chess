@@ -173,7 +173,7 @@ export const puzzles: Puzzle[] = [
     title: 'The classic smothered finish',
     motif: 'Back-rank pattern',
     level: 'Beginner+',
-    fen: '6k1/5Qpp/8/8/8/8/6PP/6K1 w - - 0 1',
+    fen: '7k/5Qpp/8/8/8/8/6PP/6K1 w - - 0 1',
     sideToMove: 'w',
     solution: ['f7e8'],
     hint: 'Use the queen to take away the king’s final safe square.',

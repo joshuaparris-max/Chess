@@ -23,6 +23,31 @@ const PROGRESS_KEY = 'gm-adult-puzzle-progress-v1';
 const DAILY_PUZZLE_KEY = 'gm-daily-puzzle-solved-v1';
 const LICHESS_CACHE_KEY = 'gm-lichess-puzzle-cache-v1';
 
+function spreadPuzzleThemes(puzzles: AdultPuzzle[]): AdultPuzzle[] {
+  const buckets = new Map<string, AdultPuzzle[]>();
+  puzzles.forEach((puzzle) => {
+    const key = puzzle.themes[0] ?? 'other';
+    buckets.set(key, [...(buckets.get(key) ?? []), puzzle]);
+  });
+
+  const orderedBuckets = [...buckets.values()].sort((a, b) => b.length - a.length);
+  const spread: AdultPuzzle[] = [];
+  let added = true;
+
+  while (added) {
+    added = false;
+    orderedBuckets.forEach((bucket) => {
+      const next = bucket.shift();
+      if (next) {
+        spread.push(next);
+        added = true;
+      }
+    });
+  }
+
+  return spread;
+}
+
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -268,14 +293,18 @@ export default function PuzzleTrainer() {
   }, [sourceTab, archiveOffset]);
 
   const puzzleThemes = useMemo(() => [...new Set(adultPuzzles.flatMap((p) => p.themes))].sort(), []);
-  const filteredPuzzles = useMemo(() => adultPuzzles.filter((p) => {
-    const playerMoves = p.solution.filter((_, index) => index % 2 === 0).length;
-    return (diffFilter === 'all' || p.difficulty === diffFilter)
-      && (themeFilter === 'all' || p.themes.includes(themeFilter as AdultPuzzle['themes'][number]))
-      && (phaseFilter === 'all' || p.phase === phaseFilter)
-      && (colorFilter === 'all' || p.sideToMove === colorFilter)
-      && (lengthFilter === 'all' || (lengthFilter === 'short' ? playerMoves <= 2 : playerMoves >= 3));
-  }), [diffFilter, themeFilter, phaseFilter, colorFilter, lengthFilter]);
+  const filteredPuzzles = useMemo(() => {
+    const matches = adultPuzzles.filter((p) => {
+      const playerMoves = p.solution.filter((_, index) => index % 2 === 0).length;
+      return (diffFilter === 'all' || p.difficulty === diffFilter)
+        && (themeFilter === 'all' || p.themes.includes(themeFilter as AdultPuzzle['themes'][number]))
+        && (phaseFilter === 'all' || p.phase === phaseFilter)
+        && (colorFilter === 'all' || p.sideToMove === colorFilter)
+        && (lengthFilter === 'all' || (lengthFilter === 'short' ? playerMoves <= 2 : playerMoves >= 3));
+    });
+
+    return themeFilter === 'all' ? spreadPuzzleThemes(matches) : matches;
+  }, [diffFilter, themeFilter, phaseFilter, colorFilter, lengthFilter]);
 
   // Determine which puzzle list to display
   const activePuzzleList = useMemo((): AdultPuzzle[] => {
