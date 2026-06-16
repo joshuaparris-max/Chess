@@ -11,6 +11,7 @@ import CloudSyncPanel from '@/components/CloudSyncPanel';
 import StickerBook from '@/components/StickerBook';
 import StoryMode from '@/components/story/StoryMode';
 import XpBadge from '@/components/XpBadge';
+import QuestLog from '@/components/QuestLog';
 import type { AppMode } from '@/lib/types';
 
 const modes: { id: AppMode; label: string; tagline: string }[] = [
@@ -139,6 +140,7 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
           </div>
           <div className="grid min-w-72 gap-3 rounded-3xl bg-slate-950/60 p-4">
             <XpBadge />
+            <QuestLog />
             <button onClick={() => setTheme((value) => value === 'adult' ? 'family' : 'adult')} className="rounded-xl border border-slate-600 px-4 py-2 text-sm font-bold text-white">
               {theme === 'adult' ? 'Use bright family theme' : 'Use adult dark theme'}
             </button>
