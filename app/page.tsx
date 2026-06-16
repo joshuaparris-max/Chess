@@ -171,6 +171,44 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
           </button>
         ))}
       </nav>
+
+      <section className="mb-5 rounded-3xl border border-slate-700/60 bg-slate-950/50 p-4" aria-label="Explore more">
+        <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Explore more</p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[
+            { title: 'Train', links: [
+              { href: '/puzzles/rush', label: '⚡ Puzzle Rush' },
+              { href: '/puzzles/streak', label: '🔥 Puzzle Streak' },
+              { href: '/puzzles/duel', label: '👥 Puzzle Duel' },
+            ] },
+            { title: 'Adventure', links: [
+              { href: '/bosses', label: '⚔️ Boss Battles' },
+              { href: '/story', label: '👑 Princess Story' },
+            ] },
+            { title: 'Progress', links: [
+              { href: '/profile', label: '📜 Character Sheet' },
+              { href: '/family/leaderboard', label: '👨‍👩‍👧 Family Leaderboard' },
+              { href: '/report', label: '📊 Parent Report' },
+            ] },
+          ].map((group) => (
+            <div key={group.title}>
+              <p className="mb-2 text-sm font-black text-slate-200">{group.title}</p>
+              <div className="flex flex-wrap gap-2">
+                {group.links.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="rounded-2xl border border-slate-600/60 bg-slate-900/70 px-3 py-2 text-sm font-bold text-slate-100 transition hover:border-teal-300/70 hover:bg-slate-800"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <p className="mb-5 text-center text-xs text-slate-400">Adult training: Play, Puzzles, Learn, Watch, Roadmap · Shared child-friendly activities: Family Chess</p>
 
       <div className="mb-5 rounded-3xl border border-slate-600/40 bg-slate-950/50 p-4">
