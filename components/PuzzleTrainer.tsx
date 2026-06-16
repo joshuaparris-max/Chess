@@ -15,6 +15,7 @@ import {
   PUZZLE_ATTEMPT_HISTORY_KEY,
   type PuzzleAttemptSource,
 } from '@/lib/puzzles/attemptHistory';
+import { recordPuzzleSolved } from '@/lib/progression/xp';
 
 // ── Progress ──────────────────────────────────────────────────────────────────
 
@@ -299,6 +300,7 @@ export default function PuzzleTrainer() {
   const [progress, setProgress] = useState<PuzzleProgress>({});
   const [dailySolvedToday, setDailySolvedToday] = useState(false);
   const opponentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const puzzleMissesRef = useRef(0);
   const attemptSource: PuzzleAttemptSource = sourceTab;
 
   useEffect(() => { setProgress(loadProgress()); }, []);
@@ -325,6 +327,7 @@ export default function PuzzleTrainer() {
     setSolved(false);
     setHintLevel(0);
     setLastMove(null);
+    puzzleMissesRef.current = 0;
     setMessage(p.sideToMove === 'w' ? 'White to move. Find the best continuation.' : 'Black to move. Find the best continuation.');
 
     // Check if daily puzzle was solved today
@@ -378,6 +381,7 @@ export default function PuzzleTrainer() {
           step: nextStep,
           expectedMove: sol[step],
         });
+        recordPuzzleSolved(puzzleMissesRef.current === 0);
         setProgress((current) => {
           const next = recordPuzzleSolve(current, puzzle.id);
           saveProgress(next);
@@ -429,6 +433,7 @@ export default function PuzzleTrainer() {
           attemptedMove: `${selectedSquare}${square}`,
           expectedMove: expected,
         });
+        puzzleMissesRef.current += 1;
         const next = recordPuzzleMiss(progress, puzzle.id);
         setProgress(next);
         saveProgress(next);
@@ -452,6 +457,7 @@ export default function PuzzleTrainer() {
           attemptedMove: `${selectedSquare}${square}`,
           expectedMove: expected,
         });
+        recordPuzzleSolved(puzzleMissesRef.current === 0);
         const next = recordPuzzleSolve(progress, puzzle.id);
         setProgress(next);
         saveProgress(next);

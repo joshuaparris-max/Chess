@@ -1,4 +1,4 @@
-export type AppMode = 'play' | 'puzzles' | 'learn' | 'watch' | 'roadmap' | 'family' | 'stickers';
+export type AppMode = 'play' | 'puzzles' | 'learn' | 'watch' | 'roadmap' | 'family' | 'stickers' | 'story';
 
 export type BotLevel = {
   id: string;

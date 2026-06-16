@@ -24,6 +24,7 @@ import {
   playPieceMove,
   setChessSoundsEnabled,
 } from '@/lib/audio/chessSounds';
+import { recordGameCompleted } from '@/lib/progression/xp';
 
 type PromotionPiece = 'q' | 'r' | 'b' | 'n';
 type GameMode = 'vs-computer' | 'two-player';
@@ -453,6 +454,10 @@ export default function PlayTrainer() {
     archivedPgnRef.current = pgn;
     const createdAtIso = new Date().toISOString();
     const winner = game.isCheckmate() ? (game.turn() === 'b' ? 'White wins' : 'Black wins') : 'Draw';
+    if (gameMode === 'vs-computer') {
+      const winningColor = game.isCheckmate() ? (game.turn() === 'b' ? 'w' : 'b') : null;
+      recordGameCompleted(winningColor === playerColor);
+    }
     saveLocalGame({
       schemaVersion: 1,
       id: createGameId(pgn, createdAtIso),

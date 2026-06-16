@@ -9,6 +9,8 @@ import Roadmap from '@/components/Roadmap';
 import FamilyHub from '@/components/FamilyHub';
 import CloudSyncPanel from '@/components/CloudSyncPanel';
 import StickerBook from '@/components/StickerBook';
+import StoryMode from '@/components/story/StoryMode';
+import XpBadge from '@/components/XpBadge';
 import type { AppMode } from '@/lib/types';
 
 const modes: { id: AppMode; label: string; tagline: string }[] = [
@@ -19,6 +21,7 @@ const modes: { id: AppMode; label: string; tagline: string }[] = [
   { id: 'roadmap', label: 'Roadmap', tagline: 'Beginner to advanced path' },
   { id: 'family', label: 'Family Chess', tagline: 'Play, learn & explore together' },
   { id: 'stickers', label: 'Sticker Book', tagline: 'Collect story rewards' },
+  { id: 'story', label: 'Princess Story 👑', tagline: 'Rescue the Fairy Queen' },
 ];
 
 function localDateKey(date = new Date()) {
@@ -44,6 +47,8 @@ function modeContent(mode: AppMode) {
       return <FamilyHub />;
     case 'stickers':
       return <StickerBook />;
+    case 'story':
+      return <StoryMode />;
   }
 }
 
@@ -133,6 +138,7 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
             <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">A Chess.com-style training app foundation: play bots, solve puzzles, learn in tiny modules, study elite-player patterns, and follow a beginner-to-advanced roadmap.</p>
           </div>
           <div className="grid min-w-72 gap-3 rounded-3xl bg-slate-950/60 p-4">
+            <XpBadge />
             <button onClick={() => setTheme((value) => value === 'adult' ? 'family' : 'adult')} className="rounded-xl border border-slate-600 px-4 py-2 text-sm font-bold text-white">
               {theme === 'adult' ? 'Use bright family theme' : 'Use adult dark theme'}
             </button>
