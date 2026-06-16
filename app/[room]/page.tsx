@@ -9,11 +9,11 @@ export function generateStaticParams() {
 }
 
 interface RoomPageProps {
-  params: Promise<{ room: string }>;
+  params: { room: string };
 }
 
-export default async function RoomPage({ params }: RoomPageProps) {
-  const { room } = await params;
+export default function RoomPage({ params }: RoomPageProps) {
+  const { room } = params;
   const roomMode = room as AppMode;
   if (!rooms.includes(roomMode)) notFound();
   return <Home initialMode={roomMode} />;
