@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import BedtimeToggle from '@/components/BedtimeToggle';
 import LootModal from '@/components/LootModal';
+import StickerMilestones from '@/components/StickerMilestones';
 
 export const metadata: Metadata = {
   title: 'Grandmaster Path Alpha',
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {children}
         <BedtimeToggle />
         <LootModal />
+        <StickerMilestones />
       </body>
     </html>
   );
