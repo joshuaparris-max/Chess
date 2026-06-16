@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Chess, type Square } from 'chess.js';
 import ChessBoard from './ChessBoard';
+import EmojiReaction from './EmojiReaction';
 import GameClock from './GameClock';
 import GameArchive from './GameArchive';
 import PostGameReview from './PostGameReview';
@@ -56,6 +57,8 @@ const promotionChoices: { piece: PromotionPiece; label: string; symbol: string }
   { piece: 'b', label: 'Bishop', symbol: '♗' },
   { piece: 'n', label: 'Knight', symbol: '♘' },
 ];
+
+const reactionEmojis = ['👏', '🎉', '😮', '🤔', '😄', '🙈', '❤️', '⭐'];
 
 function gameStatus(game: Chess): string {
   if (game.history().length === 0) return 'White starts the game.';
@@ -150,6 +153,8 @@ export default function PlayTrainer() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [settingsReady, setSettingsReady] = useState(false);
   const [soundEffects, setSoundEffects] = useState(true);
+  const [reaction, setReaction] = useState<{ emoji: string; nonce: number } | null>(null);
+  const reactionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     try {
@@ -190,6 +195,18 @@ export default function PlayTrainer() {
     setShowOnboarding(false);
     try { localStorage.setItem(ONBOARDING_KEY, 'true'); } catch {}
   };
+
+  const showReaction = (emoji: string) => {
+    if (reactionTimer.current) clearTimeout(reactionTimer.current);
+    setReaction({ emoji, nonce: Date.now() });
+    reactionTimer.current = setTimeout(() => setReaction(null), 1600);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (reactionTimer.current) clearTimeout(reactionTimer.current);
+    };
+  }, []);
 
   const level = useMemo(() => botLevels.find((bot) => bot.id === levelId) ?? botLevels[1], [levelId]);
   const opening = useMemo(() => recogniseOpening(game.history()), [game]);
@@ -641,10 +658,29 @@ export default function PlayTrainer() {
             White always starts. Select one of your pieces to see legal moves: dots are destinations and red rings are captures.
           </div>
         )}
-        <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} captureSquares={captureSquares} lastMove={lastMove} disabled={isThinking || Boolean(pendingPromotion) || game.isGameOver()} flipped={boardFlipped} onSquareClick={onSquareClick} />
+        <div className="relative">
+          <ChessBoard game={game} selectedSquare={selectedSquare} legalTargets={legalTargets} captureSquares={captureSquares} lastMove={lastMove} disabled={isThinking || Boolean(pendingPromotion) || game.isGameOver()} flipped={boardFlipped} onSquareClick={onSquareClick} />
+          {reaction && <EmojiReaction key={reaction.nonce} emoji={reaction.emoji} />}
+        </div>
         <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">
           {boardFlipped ? (twoPlayer ? 'Black' : playerColor === 'b' ? 'You · Black' : 'Black bot') : (twoPlayer ? 'White' : playerColor === 'w' ? 'You · White' : 'White bot')}
         </p>
+
+        {twoPlayer && (
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-3 border-t border-slate-600/50 pt-3">
+            {reactionEmojis.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => showReaction(emoji)}
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-600/60 bg-slate-950/60 text-2xl transition hover:border-teal-300 hover:bg-slate-800 active:scale-95"
+                aria-label={`React with ${emoji}`}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Mobile action bar */}
         <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
