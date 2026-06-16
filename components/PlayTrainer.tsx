@@ -13,6 +13,16 @@ import { cancelStockfishMove, getStockfishMove } from '@/lib/stockfishClient';
 import { commitClockMove, createClock, startClock, stopClock } from '@/lib/clock';
 import { createGameId, saveLocalGame, saveLocalGameReview } from '@/lib/gameArchive';
 import { recogniseOpening } from '@/lib/openings';
+import {
+  initAudio,
+  playCapture,
+  playCheck,
+  playCheckmate,
+  playFairyQueenLayer,
+  playPawnMove,
+  playPieceMove,
+  setChessSoundsEnabled,
+} from '@/lib/audio/chessSounds';
 
 type PromotionPiece = 'q' | 'r' | 'b' | 'n';
 type GameMode = 'vs-computer' | 'two-player';
@@ -20,6 +30,15 @@ type PlayerColor = 'w' | 'b';
 type TimeControl = 'untimed' | '10+0' | '5+0';
 const ONBOARDING_KEY = 'gm-play-onboarding-seen-v1';
 const PLAY_SETTINGS_KEY = 'gm-play-settings-v1';
+const CHESS_SOUNDS_KEY = 'chessSounds';
+
+function fairyQueenActive() {
+  try {
+    return window.localStorage.getItem('gm-piece-set') === 'fairy';
+  } catch {
+    return false;
+  }
+}
 
 const timeControlMs: Record<Exclude<TimeControl, 'untimed'>, number> = {
   '10+0': 10 * 60_000,
@@ -91,6 +110,26 @@ function copyGame(game: Chess): Chess {
   return copy;
 }
 
+function playMoveSound(move: { piece: string; captured?: string; san: string }, afterMove: Chess) {
+  if (afterMove.isCheckmate() || move.san.includes('#')) {
+    playCheckmate();
+    return;
+  }
+  if (afterMove.inCheck() || move.san.includes('+')) {
+    playCheck();
+    return;
+  }
+  if (move.captured) {
+    playCapture();
+    return;
+  }
+  if (move.piece === 'p') {
+    playPawnMove();
+    return;
+  }
+  playPieceMove();
+}
+
 export default function PlayTrainer() {
   const [game, setGame] = useState(() => new Chess());
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
@@ -110,6 +149,7 @@ export default function PlayTrainer() {
   const [importPgn, setImportPgn] = useState('');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [settingsReady, setSettingsReady] = useState(false);
+  const [soundEffects, setSoundEffects] = useState(true);
 
   useEffect(() => {
     try {
@@ -128,6 +168,8 @@ export default function PlayTrainer() {
       if (saved.playerColor === 'w' || saved.playerColor === 'b') setPlayerColor(saved.playerColor);
       if (saved.timeControl === 'untimed' || saved.timeControl === '10+0' || saved.timeControl === '5+0') setTimeControl(saved.timeControl);
       if (typeof saved.boardFlipped === 'boolean') setBoardFlipped(saved.boardFlipped);
+      const savedSounds = localStorage.getItem(CHESS_SOUNDS_KEY);
+      if (savedSounds !== null) setSoundEffects(savedSounds === 'true');
     } catch {
       // Ignore malformed or unavailable local settings.
     } finally {
@@ -139,8 +181,10 @@ export default function PlayTrainer() {
     if (!settingsReady) return;
     try {
       localStorage.setItem(PLAY_SETTINGS_KEY, JSON.stringify({ levelId, playerColor, timeControl, boardFlipped }));
+      localStorage.setItem(CHESS_SOUNDS_KEY, String(soundEffects));
     } catch {}
-  }, [settingsReady, levelId, playerColor, timeControl, boardFlipped]);
+    setChessSoundsEnabled(soundEffects);
+  }, [settingsReady, levelId, playerColor, timeControl, boardFlipped, soundEffects]);
 
   const closeOnboarding = () => {
     setShowOnboarding(false);
@@ -228,6 +272,8 @@ export default function PlayTrainer() {
       setGame(copy);
       if (timeControl !== 'untimed') setClock((value) => commitClockMove(value, move.color, performance.now()));
       setLastMove({ from: move.from, to: move.to });
+      playMoveSound(move, copy);
+      if (move.piece === 'q' && fairyQueenActive()) playFairyQueenLayer();
       setSelectedSquare(null);
       setPendingPromotion(null);
       const stateMsg = coachMessageFromGameState(copy, gameMode);
@@ -257,6 +303,7 @@ export default function PlayTrainer() {
 
   const completePromotion = (promotion: PromotionPiece) => {
     if (!pendingPromotion || isThinking || game.isGameOver()) return;
+    initAudio();
 
     const moved = applyPlayerMove(pendingPromotion.from, pendingPromotion.to, promotion);
     if (!moved) {
@@ -289,6 +336,7 @@ export default function PlayTrainer() {
 
   const onSquareClick = (square: Square) => {
     if (isThinking || pendingPromotion || game.isGameOver()) return;
+    initAudio();
     if (gameMode === 'vs-computer' && game.turn() !== playerColor) return;
 
     const currentTurn = game.turn();
@@ -348,6 +396,10 @@ export default function PlayTrainer() {
         setGame(copy);
         if (move && timeControl !== 'untimed') setClock((value) => commitClockMove(value, move.color, performance.now()));
         if (move) setLastMove({ from: move.from, to: move.to });
+        if (move) {
+          playMoveSound(move, copy);
+          if (move.piece === 'q' && fairyQueenActive()) playFairyQueenLayer();
+        }
         const stateMsg = coachMessageFromGameState(copy, 'vs-computer');
         if (stateMsg) {
           setCoachNote(stateMsg);
@@ -603,6 +655,25 @@ export default function PlayTrainer() {
       </div>
 
       <aside className="min-w-0 space-y-4">
+        <div className="glass-panel rounded-3xl p-5">
+          <h3 className="font-bold text-teal-200">Settings</h3>
+          <label className="mt-4 flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-slate-600/60 bg-slate-950/50 px-4 py-3">
+            <span>
+              <span className="block text-sm font-bold text-slate-100">Sound effects</span>
+              <span className="block text-xs text-slate-400">Move chimes and capture sparkles</span>
+            </span>
+            <input
+              type="checkbox"
+              checked={soundEffects}
+              onChange={(event) => {
+                initAudio();
+                setSoundEffects(event.target.checked);
+              }}
+              className="h-5 w-5 accent-teal-400"
+            />
+          </label>
+        </div>
+
         {!twoPlayer && (
           <div className="glass-panel rounded-3xl p-5">
             <div className="mb-4 grid grid-cols-2 gap-3">
