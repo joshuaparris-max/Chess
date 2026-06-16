@@ -12,6 +12,8 @@ import StickerBook from '@/components/StickerBook';
 import StoryMode from '@/components/story/StoryMode';
 import XpBadge from '@/components/XpBadge';
 import QuestLog from '@/components/QuestLog';
+import SettingsMenu from '@/components/SettingsMenu';
+import { useSectionVisibility } from '@/lib/settings/uiSettings';
 import type { AppMode } from '@/lib/types';
 
 const modes: { id: AppMode; label: string; tagline: string }[] = [
@@ -61,6 +63,7 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
   const [dailyGoal, setDailyGoal] = useState(20);
   const [lastTrained, setLastTrained] = useState<string | null>(null);
   const [progressLoaded, setProgressLoaded] = useState(false);
+  const visible = useSectionVisibility();
 
   useEffect(() => {
     try {
@@ -91,6 +94,15 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem('gmp-theme', theme);
   }, [theme, themeLoaded]);
+
+  useEffect(() => {
+    const onThemeChange = (event: Event) => {
+      const nextTheme = (event as CustomEvent).detail;
+      if (nextTheme === 'adult' || nextTheme === 'family') setTheme(nextTheme);
+    };
+    window.addEventListener('gmp-theme-change', onThemeChange);
+    return () => window.removeEventListener('gmp-theme-change', onThemeChange);
+  }, []);
 
   useEffect(() => {
     if (!progressLoaded) return;
@@ -136,29 +148,33 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-yellow-200">Alpha first slice</p>
             <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-6xl">Grandmaster Path</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">A Chess.com-style training app foundation: play bots, solve puzzles, learn in tiny modules, study elite-player patterns, and follow a beginner-to-advanced roadmap.</p>
+            {visible('intro') && (
+              <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">A Chess.com-style training app foundation: play bots, solve puzzles, learn in tiny modules, study elite-player patterns, and follow a beginner-to-advanced roadmap.</p>
+            )}
           </div>
           <div className="grid min-w-72 gap-3 rounded-3xl bg-slate-950/60 p-4">
-            <XpBadge />
-            <QuestLog />
-            <button onClick={() => setTheme((value) => value === 'adult' ? 'family' : 'adult')} className="rounded-xl border border-slate-600 px-4 py-2 text-sm font-bold text-white">
-              {theme === 'adult' ? 'Use bright family theme' : 'Use adult dark theme'}
-            </button>
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-sm text-slate-300">Study streak</span>
-              <span className="text-2xl font-black text-teal-200">{studyStreak}</span>
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <label className="text-sm text-slate-300" htmlFor="daily-goal">Daily goal</label>
-              <select id="daily-goal" value={dailyGoal} onChange={(event) => setDailyGoal(Number(event.target.value))} className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white">
-                <option value={10}>10 min</option>
-                <option value={20}>20 min</option>
-                <option value={30}>30 min</option>
-                <option value={45}>45 min</option>
-              </select>
-            </div>
-            <button disabled={trainedToday} onClick={markTodayTrained} className="rounded-xl bg-yellow-200 px-4 py-2 font-bold text-slate-950 hover:bg-yellow-100 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300">{trainedToday ? 'Today complete' : 'Mark today trained'}</button>
-            <CloudSyncPanel />
+            <SettingsMenu />
+            {visible('statsPanel') && (
+              <>
+                <XpBadge />
+                <QuestLog />
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-sm text-slate-300">Study streak</span>
+                  <span className="text-2xl font-black text-teal-200">{studyStreak}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-sm text-slate-300" htmlFor="daily-goal">Daily goal</label>
+                  <select id="daily-goal" value={dailyGoal} onChange={(event) => setDailyGoal(Number(event.target.value))} className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white">
+                    <option value={10}>10 min</option>
+                    <option value={20}>20 min</option>
+                    <option value={30}>30 min</option>
+                    <option value={45}>45 min</option>
+                  </select>
+                </div>
+                <button disabled={trainedToday} onClick={markTodayTrained} className="rounded-xl bg-yellow-200 px-4 py-2 font-bold text-slate-950 hover:bg-yellow-100 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300">{trainedToday ? 'Today complete' : 'Mark today trained'}</button>
+                <CloudSyncPanel />
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -172,48 +188,54 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
         ))}
       </nav>
 
-      <section className="mb-5 rounded-3xl border border-slate-700/60 bg-slate-950/50 p-4" aria-label="Explore more">
-        <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Explore more</p>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {[
-            { title: 'Train', links: [
-              { href: '/puzzles/rush', label: '⚡ Puzzle Rush' },
-              { href: '/puzzles/streak', label: '🔥 Puzzle Streak' },
-              { href: '/puzzles/duel', label: '👥 Puzzle Duel' },
-            ] },
-            { title: 'Adventure', links: [
-              { href: '/bosses', label: '⚔️ Boss Battles' },
-              { href: '/story', label: '👑 Princess Story' },
-            ] },
-            { title: 'Progress', links: [
-              { href: '/profile', label: '📜 Character Sheet' },
-              { href: '/family/leaderboard', label: '👨‍👩‍👧 Family Leaderboard' },
-              { href: '/report', label: '📊 Parent Report' },
-            ] },
-          ].map((group) => (
-            <div key={group.title}>
-              <p className="mb-2 text-sm font-black text-slate-200">{group.title}</p>
-              <div className="flex flex-wrap gap-2">
-                {group.links.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    className="rounded-2xl border border-slate-600/60 bg-slate-900/70 px-3 py-2 text-sm font-bold text-slate-100 transition hover:border-teal-300/70 hover:bg-slate-800"
-                  >
-                    {link.label}
-                  </a>
-                ))}
+      {visible('explore') && (
+        <section className="mb-5 rounded-3xl border border-slate-700/60 bg-slate-950/50 p-4" aria-label="Explore more">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Explore more</p>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              { title: 'Train', links: [
+                { href: '/puzzles/rush', label: 'Puzzle Rush' },
+                { href: '/puzzles/streak', label: 'Puzzle Streak' },
+                { href: '/puzzles/duel', label: 'Puzzle Duel' },
+              ] },
+              { title: 'Adventure', links: [
+                { href: '/bosses', label: 'Boss Battles' },
+                { href: '/story', label: 'Princess Story' },
+              ] },
+              { title: 'Progress', links: [
+                { href: '/profile', label: 'Character Sheet' },
+                { href: '/family/leaderboard', label: 'Family Leaderboard' },
+                { href: '/report', label: 'Parent Report' },
+              ] },
+            ].map((group) => (
+              <div key={group.title}>
+                <p className="mb-2 text-sm font-black text-slate-200">{group.title}</p>
+                <div className="flex flex-wrap gap-2">
+                  {group.links.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className="rounded-2xl border border-slate-600/60 bg-slate-900/70 px-3 py-2 text-sm font-bold text-slate-100 transition hover:border-teal-300/70 hover:bg-slate-800"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        </section>
+      )}
+
+      {visible('modeHint') && (
+        <p className="mb-5 text-center text-xs text-slate-400">Adult training: Play, Puzzles, Learn, Watch, Roadmap ? Shared child-friendly activities: Family Chess</p>
+      )}
+
+      {visible('currentRoom') && (
+        <div className="mb-5 rounded-3xl border border-slate-600/40 bg-slate-950/50 p-4">
+          <p className="text-sm text-slate-300"><span className="font-bold text-yellow-200">Current room:</span> {active.label} - {active.tagline}</p>
         </div>
-      </section>
-
-      <p className="mb-5 text-center text-xs text-slate-400">Adult training: Play, Puzzles, Learn, Watch, Roadmap · Shared child-friendly activities: Family Chess</p>
-
-      <div className="mb-5 rounded-3xl border border-slate-600/40 bg-slate-950/50 p-4">
-        <p className="text-sm text-slate-300"><span className="font-bold text-yellow-200">Current room:</span> {active.label} — {active.tagline}</p>
-      </div>
+      )}
 
       {modeContent(mode)}
 

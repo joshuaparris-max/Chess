@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { type Chess, type Square } from "chess.js";
 import ChessPiece from "./ChessPiece";
-import BoardThemePicker from "./BoardThemePicker";
 import { BOARD_THEME_OPTIONS, type BoardTheme } from "@/lib/chess/boardThemes";
 import {
   WhiteQueen,
@@ -177,25 +176,27 @@ export default function ChessBoard({
       // Ignore storage errors.
     }
 
-    // Live-apply when a theme is unlocked/applied elsewhere (e.g. loot drops).
+    // Live-apply when theme or piece style is changed elsewhere (Settings menu,
+    // loot drops, boss rewards).
     const onThemeChange = (event: Event) => {
       const id = (event as CustomEvent).detail as string | undefined;
       if (id && BOARD_THEME_OPTIONS.some((item) => item.id === id)) {
         setBoardTheme(id);
       }
     };
+    const onPieceChange = (event: Event) => {
+      const id = (event as CustomEvent).detail as string | undefined;
+      if (id && id in PIECE_SETS) {
+        setPieceSet(id as PieceSetKey);
+      }
+    };
     window.addEventListener("gm-board-theme-change", onThemeChange as EventListener);
-    return () => window.removeEventListener("gm-board-theme-change", onThemeChange as EventListener);
+    window.addEventListener("gm-piece-set-change", onPieceChange as EventListener);
+    return () => {
+      window.removeEventListener("gm-board-theme-change", onThemeChange as EventListener);
+      window.removeEventListener("gm-piece-set-change", onPieceChange as EventListener);
+    };
   }, []);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem("gm-piece-set", pieceSet);
-      window.localStorage.setItem("gm-board-theme", boardTheme);
-    } catch {
-      // Ignore storage errors.
-    }
-  }, [pieceSet, boardTheme]);
 
   const pieces: Record<string, string> = useMemo(
     () => PIECE_SETS[pieceSet].pieces,
@@ -267,33 +268,6 @@ export default function ChessBoard({
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
-        <BoardThemePicker
-          selectedTheme={boardTheme}
-          onSelectTheme={(themeId) => setBoardTheme(themeId as ThemeKey)}
-        />
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-slate-600 bg-slate-950/60 p-3 text-slate-100">
-          <div>
-            <p className="text-sm font-semibold text-slate-200">Piece style</p>
-            <p className="text-xs text-slate-400">
-              Choose how the board pieces appear.
-            </p>
-          </div>
-          <select
-            aria-label="Select chess icon set"
-            value={pieceSet}
-            onChange={(event) => setPieceSet(event.target.value as PieceSetKey)}
-            className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white"
-          >
-            {Object.entries(PIECE_SETS).map(([key, option]) => (
-              <option key={key} value={key}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
       <div
         className="relative chess-board board-shadow rounded-2xl border overflow-hidden"
         style={{
