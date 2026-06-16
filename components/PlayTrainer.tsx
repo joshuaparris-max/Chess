@@ -25,6 +25,7 @@ import {
   setChessSoundsEnabled,
 } from '@/lib/audio/chessSounds';
 import { recordGameCompleted } from '@/lib/progression/xp';
+import { useSectionVisibility } from '@/lib/settings/uiSettings';
 import {
   getSlots,
   useSpell,
@@ -161,7 +162,7 @@ export default function PlayTrainer() {
   const [importPgn, setImportPgn] = useState('');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [settingsReady, setSettingsReady] = useState(false);
-  const [soundEffects, setSoundEffects] = useState(true);
+  const visible = useSectionVisibility();
   const [spellSlots, setSpellSlots] = useState<SpellSlots>({ date: '', slots: { truesight: 1, rewind: 1, shield: 1 } });
   const [spellsOn, setSpellsOn] = useState(true);
 
@@ -205,7 +206,7 @@ export default function PlayTrainer() {
       if (saved.timeControl === 'untimed' || saved.timeControl === '10+0' || saved.timeControl === '5+0') setTimeControl(saved.timeControl);
       if (typeof saved.boardFlipped === 'boolean') setBoardFlipped(saved.boardFlipped);
       const savedSounds = localStorage.getItem(CHESS_SOUNDS_KEY);
-      if (savedSounds !== null) setSoundEffects(savedSounds === 'true');
+      setChessSoundsEnabled(savedSounds === null ? true : savedSounds === 'true');
     } catch {
       // Ignore malformed or unavailable local settings.
     } finally {
@@ -217,10 +218,8 @@ export default function PlayTrainer() {
     if (!settingsReady) return;
     try {
       localStorage.setItem(PLAY_SETTINGS_KEY, JSON.stringify({ levelId, playerColor, timeControl, boardFlipped }));
-      localStorage.setItem(CHESS_SOUNDS_KEY, String(soundEffects));
     } catch {}
-    setChessSoundsEnabled(soundEffects);
-  }, [settingsReady, levelId, playerColor, timeControl, boardFlipped, soundEffects]);
+  }, [settingsReady, levelId, playerColor, timeControl, boardFlipped]);
 
   const closeOnboarding = () => {
     setShowOnboarding(false);
@@ -669,10 +668,12 @@ export default function PlayTrainer() {
           </div>
         )}
 
-        <div className="mobile-coach mb-3 sm:mb-4">
-          <p className="text-sm font-semibold text-yellow-200">Coach</p>
-          <p className="text-sm text-slate-100">{isThinking && !twoPlayer ? 'Bot is thinking…' : coachNote}</p>
-        </div>
+        {visible('coach') && (
+          <div className="mobile-coach mb-3 sm:mb-4">
+            <p className="text-sm font-semibold text-yellow-200">Coach</p>
+            <p className="text-sm text-slate-100">{isThinking && !twoPlayer ? 'Bot is thinking…' : coachNote}</p>
+          </div>
+        )}
 
         {engineNotice && <p className="mb-4 rounded-xl border border-yellow-300/40 bg-yellow-950/30 p-3 text-sm text-yellow-100">{engineNotice}</p>}
         {opening && <p className="mb-4 rounded-xl border border-teal-300/40 bg-teal-950/30 p-3 text-sm text-teal-100"><strong>{opening.name}:</strong> {opening.idea}</p>}
@@ -773,25 +774,6 @@ export default function PlayTrainer() {
       </div>
 
       <aside className="min-w-0 space-y-4">
-        <div className="glass-panel rounded-3xl p-5">
-          <h3 className="font-bold text-teal-200">Settings</h3>
-          <label className="mt-4 flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-slate-600/60 bg-slate-950/50 px-4 py-3">
-            <span>
-              <span className="block text-sm font-bold text-slate-100">Sound effects</span>
-              <span className="block text-xs text-slate-400">Move chimes and capture sparkles</span>
-            </span>
-            <input
-              type="checkbox"
-              checked={soundEffects}
-              onChange={(event) => {
-                initAudio();
-                setSoundEffects(event.target.checked);
-              }}
-              className="h-5 w-5 accent-teal-400"
-            />
-          </label>
-        </div>
-
         {!twoPlayer && (
           <div className="glass-panel rounded-3xl p-5">
             <div className="mb-4 grid grid-cols-2 gap-3">
@@ -827,26 +809,28 @@ export default function PlayTrainer() {
 
         {timeControl !== 'untimed' && <div className="glass-panel rounded-3xl p-5"><GameClock clock={clock} /></div>}
 
-        <div className="glass-panel rounded-3xl p-5">
-          <h3 className="font-bold text-teal-200">Coach note</h3>
-          <p className="mt-2 text-slate-100">{isThinking && !twoPlayer ? 'Bot is thinking…' : coachNote}</p>
-          <div className="mt-4">
-            <p className="text-xs font-bold uppercase text-slate-400">Game status</p>
-            <p className={`mt-1 text-sm font-semibold ${
-              game.isGameOver()
-                ? game.isCheckmate() && game.turn() === 'b'
-                  ? 'text-green-300'
-                  : game.isCheckmate()
-                  ? 'text-red-300'
-                  : 'text-yellow-300'
-                : game.inCheck()
-                ? 'text-orange-300'
-                : 'text-slate-400'
-            }`}>
-              {gameStatus(game)}
-            </p>
+        {visible('coach') && (
+          <div className="glass-panel rounded-3xl p-5">
+            <h3 className="font-bold text-teal-200">Coach note</h3>
+            <p className="mt-2 text-slate-100">{isThinking && !twoPlayer ? 'Bot is thinking…' : coachNote}</p>
+            <div className="mt-4">
+              <p className="text-xs font-bold uppercase text-slate-400">Game status</p>
+              <p className={`mt-1 text-sm font-semibold ${
+                game.isGameOver()
+                  ? game.isCheckmate() && game.turn() === 'b'
+                    ? 'text-green-300'
+                    : game.isCheckmate()
+                    ? 'text-red-300'
+                    : 'text-yellow-300'
+                  : game.inCheck()
+                  ? 'text-orange-300'
+                  : 'text-slate-400'
+              }`}>
+                {gameStatus(game)}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="glass-panel max-h-80 overflow-auto rounded-3xl p-5">
           <h3 className="font-bold text-teal-200">Move list</h3>
