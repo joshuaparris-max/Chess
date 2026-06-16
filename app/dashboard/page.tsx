@@ -1,4 +1,4 @@
-import Home from '@/app/page-hub';
+import Home from '../page-hub';
 
 export default function DashboardPage() {
   return <Home initialMode="play" />;
