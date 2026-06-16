@@ -26,6 +26,7 @@ import {
 } from '@/lib/audio/chessSounds';
 import { recordGameCompleted } from '@/lib/progression/xp';
 import { buildCheckmateExplanation, explainRejectedMove } from '@/lib/chess/checkExplanation';
+import { BOT_STYLE_KEY, getBotStyle, type BotStyle } from '@/lib/chess/botDifficulty';
 import { useSectionVisibility } from '@/lib/settings/uiSettings';
 import {
   getSlots,
@@ -166,8 +167,10 @@ export default function PlayTrainer() {
   const visible = useSectionVisibility();
   const [spellSlots, setSpellSlots] = useState<SpellSlots>({ date: '', slots: { truesight: 1, rewind: 1, shield: 1 } });
   const [spellsOn, setSpellsOn] = useState(true);
+  const [botStyle, setBotStyle] = useState<BotStyle>('gentle');
 
   useEffect(() => {
+    setBotStyle(getBotStyle());
     setSpellSlots(getSlots());
     setSpellsOn(readSpellsEnabled());
     const onChanged = () => setSpellSlots(getSlots());
@@ -799,10 +802,24 @@ export default function PlayTrainer() {
             <label className="mb-2 block text-sm font-semibold text-slate-300" htmlFor="bot-level">Bot difficulty</label>
             <select id="bot-level" value={levelId} onChange={(event) => setLevelId(event.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white">
               {botLevels.map((bot) => (
-                <option key={bot.id} value={bot.id}>{bot.label} · approx. {bot.elo} practice Elo</option>
+                <option key={bot.id} value={bot.id}>{bot.label} · {bot.style}</option>
               ))}
             </select>
-            <p className="mt-2 text-xs text-slate-400">Approximate strength helps you choose a challenge; these are practice levels, not official ratings.</p>
+            <p className="mt-2 text-xs text-slate-400">Trainer levels describe difficulty and are not official chess ratings.</p>
+            <label className="mt-3 mb-1 block text-sm font-semibold text-slate-300" htmlFor="bot-style">Bot style</label>
+            <select
+              id="bot-style"
+              value={botStyle}
+              onChange={(event) => {
+                const next = event.target.value as BotStyle;
+                setBotStyle(next);
+                try { localStorage.setItem(BOT_STYLE_KEY, next); } catch {}
+              }}
+              className="w-full rounded-xl border border-slate-600 bg-slate-950 p-3 text-white"
+            >
+              <option value="gentle">Gentle — misses more tactics, room for beginners</option>
+              <option value="standard">Standard — normal configured difficulty</option>
+            </select>
             <div className="mt-4 rounded-2xl bg-slate-950/60 p-4">
               <p className="text-lg font-bold text-yellow-200">{level.label}</p>
               <p className="text-sm text-slate-300">{level.style}</p>

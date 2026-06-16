@@ -1,4 +1,5 @@
 import type { BotLevel } from './types';
+import { chooseWeakenedMove, getBotStyle } from './chess/botDifficulty';
 
 const WORKER_URL = '/stockfish/stockfish-18-lite-single.js';
 
@@ -90,8 +91,15 @@ export async function getStockfishMove(fen: string, level: BotLevel): Promise<st
 
       const move = message.split(/\s+/)[1];
       cleanup();
-      if (!move || move === '(none)') reject(new Error('Stockfish did not return a legal move.'));
-      else resolve(move);
+      if (!move || move === '(none)') {
+        reject(new Error('Stockfish did not return a legal move.'));
+        return;
+      }
+      // Weaken low trainer levels: the engine's raw best move is frequently
+      // replaced with a plausible weaker move (and short mates are sometimes
+      // overlooked), so Level 1 actually feels like a beginner.
+      const played = chooseWeakenedMove(fen, level, move, { style: getBotStyle() }) ?? move;
+      resolve(played);
     };
 
     engine.addEventListener('message', onMessage);
