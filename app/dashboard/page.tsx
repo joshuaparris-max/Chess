@@ -1,5 +1,7 @@
 'use client';
 
+'use client';
+
 import Home from '../page-hub';
 
 export default function DashboardPage() {
