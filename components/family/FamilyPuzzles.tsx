@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { Chess, type Square } from 'chess.js';
 import { useLocalProgress } from '@/lib/familyProgress';
 import { FAMILY_PUZZLES } from '@/lib/familyPuzzles';
+import { useHintDensity } from '@/lib/settings/hintSettings';
 import CelebrationOverlay from './CelebrationOverlay';
 import ReadAloudButton from './ReadAloudButton';
 
@@ -19,6 +20,7 @@ function calcStars(attempts: number, hintUsed: boolean, maxStars: number): numbe
 }
 
 export default function FamilyPuzzles() {
+  const { moreHints } = useHintDensity();
   const { progress, setPuzzleStars } = useLocalProgress();
   const [idx, setIdx] = useState(0);
   const [game, setGame] = useState(() => new Chess(FAMILY_PUZZLES[0].fen));
@@ -193,8 +195,8 @@ export default function FamilyPuzzles() {
               const isSelected = selected === sq;
               const isLegal = legalTargets.includes(sq);
               const isCapture = captureSquares.includes(sq);
-              const isHintFrom = hintUsed && sq === puzzle.from && !solved;
-              const isHintTo = hintUsed && sq === puzzle.to && !solved;
+              const isHintFrom = (hintUsed || moreHints) && sq === puzzle.from && !solved;
+              const isHintTo = (hintUsed || moreHints) && sq === puzzle.to && !solved;
               const sym = piece ? PIECE_SYMBOLS[`${piece.color}${piece.type}`] : '';
 
               return (
@@ -235,6 +237,11 @@ export default function FamilyPuzzles() {
       </div>
 
       {/* Controls */}
+      {moreHints && !feedback && (
+        <div className="mb-3 rounded-2xl border border-yellow-300/40 bg-yellow-950/30 p-3 text-center text-sm font-bold text-yellow-100">
+          Hint: {puzzle.hint}
+        </div>
+      )}
       <div className="flex gap-3">
         <button
           onClick={showHintHandler}

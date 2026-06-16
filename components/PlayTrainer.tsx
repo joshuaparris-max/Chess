@@ -28,6 +28,7 @@ import { recordGameCompleted } from '@/lib/progression/xp';
 import { buildCheckmateExplanation, explainRejectedMove } from '@/lib/chess/checkExplanation';
 import { BOT_STYLE_KEY, getBotStyle, type BotStyle } from '@/lib/chess/botDifficulty';
 import { useSectionVisibility } from '@/lib/settings/uiSettings';
+import { useHintDensity } from '@/lib/settings/hintSettings';
 import {
   getSlots,
   useSpell,
@@ -146,6 +147,7 @@ function playMoveSound(move: { piece: string; captured?: string; san: string }, 
 }
 
 export default function PlayTrainer() {
+  const { moreHints } = useHintDensity();
   const [game, setGame] = useState(() => new Chess());
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
@@ -401,7 +403,7 @@ export default function PlayTrainer() {
       setCoachNote('Hint unavailable while the game is over or the bot is thinking.');
       return;
     }
-    if (!spendSpell('truesight')) {
+    if (!moreHints && !spendSpell('truesight')) {
       setCoachNote('🔮 True Sight recharges tomorrow ✨');
       return;
     }
@@ -635,7 +637,7 @@ export default function PlayTrainer() {
             <div className="hidden sm:flex gap-2">
               <button onClick={resetGame} className="rounded-xl bg-teal-400 px-4 py-2 font-bold text-slate-950 hover:bg-teal-300">New game</button>
               <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion) || (!twoPlayer && spellsOn && spellSlots.slots.rewind <= 0)} onClick={undoPair} className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm text-slate-100 hover:bg-slate-700/50 disabled:cursor-not-allowed disabled:opacity-40" title="Rewind spell">⏪ {twoPlayer ? 'Undo' : 'Undo pair'}{!twoPlayer && spellsOn ? ` (${spellSlots.slots.rewind})` : ''}</button>
-              {!twoPlayer && <button disabled={Boolean(pendingPromotion) || game.isGameOver() || (spellsOn && spellSlots.slots.truesight <= 0)} onClick={showHint} className="rounded-xl border border-yellow-300/70 bg-yellow-200/10 px-4 py-2 text-sm text-yellow-100 hover:bg-yellow-200/20 disabled:cursor-not-allowed disabled:opacity-40" title="True Sight spell">🔮 True Sight{spellsOn ? ` (${spellSlots.slots.truesight})` : ''}</button>}
+              {!twoPlayer && <button disabled={Boolean(pendingPromotion) || game.isGameOver() || (!moreHints && spellsOn && spellSlots.slots.truesight <= 0)} onClick={showHint} className="rounded-xl border border-yellow-300/70 bg-yellow-200/10 px-4 py-2 text-sm text-yellow-100 hover:bg-yellow-200/20 disabled:cursor-not-allowed disabled:opacity-40" title="True Sight spell">🔮 True Sight{!moreHints && spellsOn ? ` (${spellSlots.slots.truesight})` : ''}</button>}
               {!twoPlayer && <button disabled={game.isGameOver() || game.history().length === 0 || (spellsOn && spellSlots.slots.shield <= 0)} onClick={castShield} className="rounded-xl border border-sky-300/70 bg-sky-200/10 px-4 py-2 text-sm text-sky-100 hover:bg-sky-200/20 disabled:cursor-not-allowed disabled:opacity-40" title="Shield spell — warns if your last piece is hanging">🛡️ Shield{spellsOn ? ` (${spellSlots.slots.shield})` : ''}</button>}
             </div>
           </div>
@@ -775,7 +777,7 @@ export default function PlayTrainer() {
         <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
           <button onClick={resetGame} className="flex-1 rounded-2xl bg-teal-400 py-3 text-center font-bold text-slate-950">New</button>
           <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion) || (!twoPlayer && spellsOn && spellSlots.slots.rewind <= 0)} onClick={undoPair} className="flex-1 rounded-2xl border border-slate-600 py-3 text-center text-sm text-slate-100 disabled:cursor-not-allowed disabled:opacity-40">⏪{!twoPlayer && spellsOn ? ` ${spellSlots.slots.rewind}` : ''}</button>
-          <button disabled={Boolean(pendingPromotion) || game.isGameOver() || (!twoPlayer && spellsOn && spellSlots.slots.truesight <= 0)} onClick={twoPlayer ? () => setCoachNote('Hint: Look for checks, captures, and threats before each move.') : showHint} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100 disabled:cursor-not-allowed disabled:opacity-40">🔮{!twoPlayer && spellsOn ? ` ${spellSlots.slots.truesight}` : ''}</button>
+          <button disabled={Boolean(pendingPromotion) || game.isGameOver() || (!moreHints && !twoPlayer && spellsOn && spellSlots.slots.truesight <= 0)} onClick={twoPlayer ? () => setCoachNote('Hint: Look for checks, captures, and threats before each move.') : showHint} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100 disabled:cursor-not-allowed disabled:opacity-40">🔮{!moreHints && !twoPlayer && spellsOn ? ` ${spellSlots.slots.truesight}` : ''}</button>
           {!twoPlayer && <button disabled={game.isGameOver() || game.history().length === 0 || (spellsOn && spellSlots.slots.shield <= 0)} onClick={castShield} className="flex-1 rounded-2xl bg-sky-200/10 py-3 text-center text-sm text-sky-100 disabled:cursor-not-allowed disabled:opacity-40">🛡️{spellsOn ? ` ${spellSlots.slots.shield}` : ''}</button>}
         </div>
       </div>
@@ -834,6 +836,11 @@ export default function PlayTrainer() {
           <div className="glass-panel rounded-3xl p-5">
             <h3 className="font-bold text-teal-200">Coach note</h3>
             <p className="mt-2 text-slate-100">{isThinking && !twoPlayer ? 'Bot is thinking…' : coachNote}</p>
+            {moreHints && !game.isGameOver() && (
+              <p className="mt-3 rounded-2xl border border-yellow-300/30 bg-yellow-950/20 p-3 text-sm text-yellow-100">
+                Hint habit: check forcing moves first, then captures, then loose pieces. If none work, improve your least active piece.
+              </p>
+            )}
             <div className="mt-4">
               <p className="text-xs font-bold uppercase text-slate-400">Game status</p>
               <p className={`mt-1 text-sm font-semibold ${

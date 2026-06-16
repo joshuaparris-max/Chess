@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { lessons, researchPillars } from '@/lib/trainingData';
 import { loadLearningProgress, saveLearningProgress, type LearningProgress } from '@/lib/learningProgress';
+import { useHintDensity } from '@/lib/settings/hintSettings';
 import ReadAloudButton from './family/ReadAloudButton';
 
 // Per-step drill completion, stored locally on this device only.
@@ -17,6 +18,7 @@ function saveDrills(value: Record<string, number[]>) {
 }
 
 export default function LearnPath() {
+  const { moreHints } = useHintDensity();
   const [progress, setProgress] = useState<LearningProgress>({ lessonsDone: [], puzzleAttempts: {} });
   const [drills, setDrills] = useState<Record<string, number[]>>({});
 
@@ -114,6 +116,11 @@ export default function LearnPath() {
               {allStepsDone && !completed && (
                 <p role="status" className="mt-4 rounded-xl border border-teal-400/30 bg-teal-400/10 p-3 text-sm font-semibold text-teal-100">
                   Nice — every drill step is done. Mark the lesson complete to track it on your roadmap.
+                </p>
+              )}
+              {moreHints && !allStepsDone && (
+                <p className="mt-4 rounded-xl border border-yellow-300/30 bg-yellow-950/20 p-3 text-sm font-semibold text-yellow-100">
+                  Hint: start with the first unchecked drill step, do it out loud once, then mark it when you have actually tried it.
                 </p>
               )}
 

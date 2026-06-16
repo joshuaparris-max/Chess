@@ -5,6 +5,7 @@ import BoardThemePicker from './BoardThemePicker';
 import { BOARD_THEME_OPTIONS } from '@/lib/chess/boardThemes';
 import { PIECE_SET_OPTIONS, getPieceSet, setPieceSet } from '@/lib/chess/pieceSets';
 import { setChessSoundsEnabled } from '@/lib/audio/chessSounds';
+import { getHintDensity, setHintDensity, type HintDensity } from '@/lib/settings/hintSettings';
 import {
   TOGGLEABLE_SECTIONS,
   getHiddenSections,
@@ -22,6 +23,7 @@ export default function SettingsMenu() {
   const [appTheme, setAppTheme] = useState<'adult' | 'family'>('adult');
   const [pieceSet, setPieceSetState] = useState('classic');
   const [soundEffects, setSoundEffects] = useState(true);
+  const [hintDensity, setHintDensityState] = useState<HintDensity>('less');
   const [hidden, setHidden] = useState<string[]>([]);
 
   useEffect(() => {
@@ -36,6 +38,7 @@ export default function SettingsMenu() {
     } catch {
       setSoundEffects(true);
     }
+    setHintDensityState(getHintDensity());
     setPieceSetState(getPieceSet());
     setHidden(getHiddenSections());
   }, [open]);
@@ -73,6 +76,11 @@ export default function SettingsMenu() {
     } catch {
       // ignore
     }
+  };
+
+  const applyHintDensity = (value: HintDensity) => {
+    setHintDensityState(value);
+    setHintDensity(value);
   };
 
   const toggleSection = (id: string, currentlyHidden: boolean) => {
@@ -154,6 +162,23 @@ export default function SettingsMenu() {
 
             <section className="mt-6">
               <h3 className="text-sm font-black uppercase tracking-[0.18em] text-slate-400">Play</h3>
+              <div className="mt-3 rounded-2xl border border-slate-700 bg-slate-900/60 p-3">
+                <label htmlFor="settings-hint-density" className="text-sm font-semibold text-slate-200">
+                  Hints
+                </label>
+                <select
+                  id="settings-hint-density"
+                  value={hintDensity}
+                  onChange={(event) => applyHintDensity(event.target.value as HintDensity)}
+                  className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white"
+                >
+                  <option value="more">More hints</option>
+                  <option value="less">Less hints</option>
+                </select>
+                <p className="mt-2 text-xs text-slate-400">
+                  More hints shows coaching nudges sooner across puzzles, play, stories, and endgames.
+                </p>
+              </div>
               <div className="mt-3 rounded-2xl border border-slate-700 bg-slate-900/60 p-3">
                 <label className="flex cursor-pointer items-start justify-between gap-3">
                   <span>

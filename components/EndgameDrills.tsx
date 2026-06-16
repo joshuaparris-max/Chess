@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Chess, type Square } from 'chess.js';
 import ChessBoard from '@/components/ChessBoard';
+import { useHintDensity } from '@/lib/settings/hintSettings';
 import {
   ENDGAME_DRILL_PROGRESS_KEY,
   emptyEndgameProgress,
@@ -15,6 +16,7 @@ import {
 } from '@/lib/endgames/drills';
 
 export default function EndgameDrills() {
+  const { moreHints } = useHintDensity();
   const [activeId, setActiveId] = useState(endgameDrills[0]?.id ?? '');
   const active = useMemo(
     () => endgameDrills.find((drill) => drill.id === activeId) ?? endgameDrills[0],
@@ -131,7 +133,7 @@ export default function EndgameDrills() {
 
   const completedCount = endgameDrills.filter((drill) => progress.completedIds.includes(drill.id)).length;
   const totalAttemptsForActive = progress.attemptsById[active.id] ?? 0;
-  const currentHint = getEndgameHint(active, Math.max(sessionMisses, totalAttemptsForActive));
+  const currentHint = getEndgameHint(active, moreHints ? Math.max(1, sessionMisses, totalAttemptsForActive) : Math.max(sessionMisses, totalAttemptsForActive));
 
   return (
     <section className="grid gap-5 lg:grid-cols-[minmax(0,620px)_minmax(320px,1fr)]">
@@ -188,7 +190,7 @@ export default function EndgameDrills() {
           </button>
         </div>
 
-        {!completed && (sessionMisses > 0 || totalAttemptsForActive > 0) && (
+        {!completed && (moreHints || sessionMisses > 0 || totalAttemptsForActive > 0) && (
           <div className="mt-4 rounded-2xl border border-emerald-300/30 bg-emerald-950/20 p-4 text-sm leading-6 text-emerald-50">
             <p className="font-bold text-emerald-200">Current hint</p>
             <p className="mt-1">{currentHint}</p>

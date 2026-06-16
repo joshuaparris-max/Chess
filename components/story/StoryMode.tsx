@@ -15,10 +15,12 @@ import {
   type StoryProgress,
 } from '@/lib/story/chapters';
 import { awardXP } from '@/lib/progression/xp';
+import { useHintDensity } from '@/lib/settings/hintSettings';
 
 type View = 'select' | 'story' | 'challenge' | 'success';
 
 export default function StoryMode() {
+  const { moreHints } = useHintDensity();
   const [progress, setProgress] = useState<StoryProgress>({ chaptersComplete: [], stickersEarned: [] });
   const [activeId, setActiveId] = useState<number | null>(null);
   const [view, setView] = useState<View>('select');
@@ -89,7 +91,9 @@ export default function StoryMode() {
       }
       return;
     }
-    setFeedback('Not quite — read the hint and try again! 🌟');
+    setFeedback(moreHints && active
+      ? `Not quite. Try moving from ${active.solutionMove.from} to ${active.solutionMove.to}.`
+      : 'Not quite — read the hint and try again! 🌟');
     setSelectedSquare(null);
   };
 
@@ -182,6 +186,11 @@ export default function StoryMode() {
           <p className="mt-4 rounded-2xl bg-slate-900/70 p-4 text-center text-lg font-semibold text-fuchsia-100">
             {active.instruction}
           </p>
+          {moreHints && (
+            <p className="mt-2 rounded-2xl border border-fuchsia-300/30 bg-fuchsia-950/40 p-3 text-center text-sm font-bold text-fuchsia-100">
+              Hint: use the piece on {active.solutionMove.from} and move it to {active.solutionMove.to}.
+            </p>
+          )}
           {feedback && <p className="mt-2 text-center text-lg font-black text-fuchsia-300">{feedback}</p>}
           <div className="mt-4 text-center">
             <button

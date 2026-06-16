@@ -16,6 +16,7 @@ import {
   type PuzzleAttemptSource,
 } from '@/lib/puzzles/attemptHistory';
 import { recordPuzzleSolved } from '@/lib/progression/xp';
+import { useHintDensity } from '@/lib/settings/hintSettings';
 
 // ── Progress ──────────────────────────────────────────────────────────────────
 
@@ -152,6 +153,7 @@ function lichessToUiPuzzle(lp: LichessPuzzle): AdultPuzzle {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function PuzzleTrainer() {
+  const { moreHints } = useHintDensity();
   const [sourceTab, setSourceTab] = useState<'local' | 'daily' | 'random' | 'archive'>('local');
   const [diffFilter, setDiffFilter] = useState<PuzzleDifficulty | 'all'>('all');
   const [themeFilter, setThemeFilter] = useState('all');
@@ -354,7 +356,7 @@ export default function PuzzleTrainer() {
     setStep(0);
     setOpponentThinking(false);
     setSolved(false);
-    setHintLevel(0);
+    setHintLevel(moreHints ? 1 : 0);
     setLastMove(null);
     puzzleMissesRef.current = 0;
     setMessage(p.sideToMove === 'w' ? 'White to move. Find the best continuation.' : 'Black to move. Find the best continuation.');
@@ -365,7 +367,7 @@ export default function PuzzleTrainer() {
     } else {
       setDailySolvedToday(false);
     }
-  }, [sourceTab]);
+  }, [sourceTab, moreHints]);
 
   const loadPuzzle = useCallback((index: number) => {
     setPuzzleIndex(index);
@@ -452,7 +454,12 @@ export default function PuzzleTrainer() {
         return;
       }
       if (result.status === 'incorrect') {
-        setMessage('Not quite. The board is back where it was, so try the same position again.');
+        const nextMisses = puzzleMissesRef.current + 1;
+        const nextHintLevel = moreHints ? Math.min(3, Math.max(hintLevel + 1, nextMisses + 1)) as 1 | 2 | 3 : hintLevel;
+        if (moreHints) setHintLevel(nextHintLevel);
+        setMessage(moreHints
+          ? `Not quite. The board is back where it was. Hint ${nextHintLevel}: ${nextHintLevel >= 3 ? puzzle.hints.reveal : nextHintLevel === 2 ? puzzle.hints.directional : puzzle.hints.gentle}`
+          : 'Not quite. The board is back where it was, so try the same position again.');
         setSelectedSquare(null);
         savePuzzleAttempt({
           puzzleId: puzzle.id,
@@ -462,7 +469,7 @@ export default function PuzzleTrainer() {
           attemptedMove: `${selectedSquare}${square}`,
           expectedMove: expected,
         });
-        puzzleMissesRef.current += 1;
+        puzzleMissesRef.current = nextMisses;
         const next = recordPuzzleMiss(progress, puzzle.id);
         setProgress(next);
         saveProgress(next);
