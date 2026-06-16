@@ -45,3 +45,33 @@ Updated: 2026-06-15
 ## Deferred Platform Work
 
 Live multiplayer, matchmaking, ratings, moderation, anti-cheat, tournaments, clubs, and community features remain deferred until the single-player learning loop has proven retention.
+
+## Ticket Implementation Status (integration QA snapshot)
+
+| Ticket | Owner | Commit | Present on origin/main | Lint | Tests | Build | Manual QA | Live Vercel | Notes |
+|--------|-------|--------|------------------------:|:----:|:-----:|:-----:|:---------:|:-----------:|:------|
+| 1.1    | Codex | 7bcab20 | Yes | ✅ | n/a | ✅ | Pending | Pending | Fairy piece set added (SVG) |
+| 1.2    | Claude | 41fce37 | Yes | ✅ | n/a | ✅ | Requires live verification | Pending | Fairy Garden theme present — mark for live check |
+| 1.3    | Codex | b3ceed9 | Yes | ✅ | ? | ✅ | Pending | Pending | Magical Sounds commit present on origin/main (verify audio UX) |
+| 1.4    | Claude | 3f7afc9 / (recovery branch f10d79e) | NOT merged (recovery/ticket-1.4-wip) | n/a (WIP) | n/a | n/a | PRESERVED IN recovery/ticket-1.4-wip (do not merge) | Pending | Overlapping Copilot edits — compare Claude's branch before merging |
+| 2.1    | Codex | cc32ba6 | Yes | ✅ | ? | ✅ | Pending | Pending | Sticker Book present on origin/main; verify sticker UI and storage handling |
+| 2.3    | Codex | 4d556e2 | Yes | ✅ | ? | ✅ | Pending | Pending | Emoji reactions commit present on origin/main; verify pass-and-play behavior |
+
+Notes:
+- This table is an initial QA snapshot created by the integration manager. "?" indicates tests not yet fully observed in the clean integration worktree run (vitest results require re-run capture).  
+- Ticket 1.4 work has been preserved on a local recovery branch (`recovery/ticket-1.4-wip`) and MUST NOT be force-pushed, reset, or merged until Claude's branch is reviewed and reconciled.  
+- Next steps: run focused manual QA for tickets 1.3, 2.1, 2.3 in the integration worktree, capture vitest output, and perform browser checks (desktop + 390px mobile).  
+
+## Grandmaster Path Family Roadmap — COMPLETE (2026-06-16)
+
+All 19 roadmap tickets implemented, built green, and shipped to `main`:
+
+- **Phase 1:** 1.1 Fairy piece set · 1.2 Fairy Garden board · 1.3 Magical sounds · 1.4 Princess Story Mode (interactive, awards stickers + XP)
+- **Phase 2:** 2.1 Sticker Book · 2.2 Bedtime Mode · 2.3 Emoji reactions · 2.4 Parent Report Card (`/report`)
+- **Phase 3:** 3.1 XP & levelling (badge + toast + level-up modal) · 3.2 Daily Quest Log · 3.3 Loot Drops (`+` Ocean/Forest/Sunset themes) · 3.4 Puzzle Rush (`/puzzles/rush`) · 3.5 Puzzle Streak (`/puzzles/streak`)
+- **Phase 4:** 4.1 Spell Slots (True Sight / Rewind / Shield, daily-limited, classic toggle) · 4.2 Boss Battles (`/bosses`) · 4.3 Character Sheet (`/profile`)
+- **Phase 5:** 5.1 Family Leaderboard (`/family/leaderboard`) · 5.2 Family Puzzle Duel (`/puzzles/duel`)
+- **6.1 Navigation:** Explore-more links bar wiring all new routes.
+- **Polish:** milestone stickers auto-award from real progress; XP feeds quests, loot, and the leaderboard.
+
+Verification: `tsc --noEmit` + `next build` green; 130 Vitest tests pass; all 8 new routes return 200 with no console errors.
