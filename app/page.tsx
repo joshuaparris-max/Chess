@@ -10,6 +10,7 @@ import FamilyHub from '@/components/FamilyHub';
 import CloudSyncPanel from '@/components/CloudSyncPanel';
 import StickerBook from '@/components/StickerBook';
 import StoryMode from '@/components/story/StoryMode';
+import EndgameDrills from '@/components/EndgameDrills';
 import XpBadge from '@/components/XpBadge';
 import QuestLog from '@/components/QuestLog';
 import SettingsMenu from '@/components/SettingsMenu';
@@ -25,6 +26,7 @@ const modes: { id: AppMode; label: string; tagline: string }[] = [
   { id: 'family', label: 'Family Chess', tagline: 'Play, learn & explore together' },
   { id: 'stickers', label: 'Sticker Book', tagline: 'Collect story rewards' },
   { id: 'story', label: 'Princess Story 👑', tagline: 'Rescue the Fairy Queen' },
+  { id: 'endgames', label: 'Endgames', tagline: 'Practice winning endings' },
 ];
 
 function localDateKey(date = new Date()) {
@@ -52,6 +54,8 @@ function modeContent(mode: AppMode) {
       return <StickerBook />;
     case 'story':
       return <StoryMode />;
+    case 'endgames':
+      return <EndgameDrills />;
   }
 }
 
@@ -179,7 +183,7 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
         </div>
       </header>
 
-      <nav className="my-5 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7" aria-label="Training modes">
+      <nav className="my-5 grid gap-3 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8" aria-label="Training modes">
         {modes.map((item) => (
           <button key={item.id} onClick={() => chooseMode(item.id)} className={`rounded-3xl border p-4 text-left transition ${mode === item.id ? 'border-teal-300 bg-teal-300 text-slate-950' : 'border-slate-600/50 bg-slate-900/70 text-slate-100 hover:border-teal-200/70 hover:bg-slate-800'}`}>
             <span className="block text-lg font-black">{item.label}</span>
@@ -197,6 +201,7 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
                 { href: '/puzzles/rush', label: 'Puzzle Rush' },
                 { href: '/puzzles/streak', label: 'Puzzle Streak' },
                 { href: '/puzzles/duel', label: 'Puzzle Duel' },
+                { href: '/endgames', label: 'Endgame Drills' },
               ] },
               { title: 'Adventure', links: [
                 { href: '/bosses', label: 'Boss Battles' },
