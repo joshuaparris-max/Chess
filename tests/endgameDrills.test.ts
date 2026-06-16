@@ -5,8 +5,33 @@ import {
   recordEndgameAttempt,
   tryEndgameMove,
 } from '@/lib/endgames/drills';
+import { Chess, type Color, type Square } from 'chess.js';
+
+function findKing(game: Chess, color: Color): Square | undefined {
+  for (const row of game.board()) {
+    for (const piece of row) {
+      if (piece?.type === 'k' && piece.color === color) {
+        return piece.square;
+      }
+    }
+  }
+
+  return undefined;
+}
 
 describe('endgame drills', () => {
+  it('starts from legal drill positions where the waiting king is not already in check', () => {
+    endgameDrills.forEach((drill) => {
+      const game = new Chess(drill.fen);
+      const sideToMove = game.turn();
+      const waitingSide = sideToMove === 'w' ? 'b' : 'w';
+      const waitingKing = findKing(game, waitingSide);
+
+      expect(waitingKing, drill.id).toBeDefined();
+      expect(game.isAttacked(waitingKing!, sideToMove), drill.id).toBe(false);
+    });
+  });
+
   it('has legal intended first moves for every drill', () => {
     endgameDrills.forEach((drill) => {
       const move = drill.solution[0];

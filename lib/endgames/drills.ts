@@ -30,7 +30,7 @@ export const endgameDrills: EndgameDrill[] = [
     title: 'Box the king',
     theme: 'Queen and king mate',
     level: 'beginner',
-    fen: '8/8/8/8/8/6k1/6Q1/6K1 w - - 0 1',
+    fen: '8/8/8/8/7k/8/6Q1/6K1 w - - 0 1',
     goal: 'Use the queen to gently reduce the black king\'s space.',
     teachingPoint: 'In queen endings, keep your queen a knight move away from the king so it controls escape squares without being captured.',
     successText: 'Great box. The queen took away the king\'s room without stepping too close.',
