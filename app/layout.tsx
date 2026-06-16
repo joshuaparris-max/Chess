@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import BedtimeToggle from '@/components/BedtimeToggle';
+import LootModal from '@/components/LootModal';
 
 export const metadata: Metadata = {
   title: 'Grandmaster Path Alpha',
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         {children}
         <BedtimeToggle />
+        <LootModal />
       </body>
     </html>
   );

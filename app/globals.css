@@ -260,3 +260,15 @@ html[data-theme="family"] .glass-panel {
     display: none;
   }
 }
+
+/* Ticket 3.3 — Loot Drops: chest shake before opening. */
+@keyframes loot-chest-shake {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-12deg); }
+  40% { transform: rotate(12deg); }
+  60% { transform: rotate(-8deg); }
+  80% { transform: rotate(8deg); }
+}
+.loot-chest-shake {
+  animation: loot-chest-shake 0.9s ease-in-out infinite;
+}

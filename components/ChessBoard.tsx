@@ -31,7 +31,7 @@ type ChessBoardProps = {
   onSquareClick: (square: Square) => void;
 };
 
-type ThemeKey = "classic" | "fairyGarden" | "midnight";
+type ThemeKey = string;
 
 const PIECE_SETS = {
   classic: {
@@ -170,16 +170,22 @@ export default function ChessBoard({
         setPieceSet(saved as PieceSetKey);
       }
       const savedTheme = window.localStorage.getItem("gm-board-theme");
-      if (
-        savedTheme === "fairyGarden" ||
-        savedTheme === "midnight" ||
-        savedTheme === "classic"
-      ) {
+      if (savedTheme && BOARD_THEME_OPTIONS.some((item) => item.id === savedTheme)) {
         setBoardTheme(savedTheme);
       }
     } catch {
       // Ignore storage errors.
     }
+
+    // Live-apply when a theme is unlocked/applied elsewhere (e.g. loot drops).
+    const onThemeChange = (event: Event) => {
+      const id = (event as CustomEvent).detail as string | undefined;
+      if (id && BOARD_THEME_OPTIONS.some((item) => item.id === id)) {
+        setBoardTheme(id);
+      }
+    };
+    window.addEventListener("gm-board-theme-change", onThemeChange as EventListener);
+    return () => window.removeEventListener("gm-board-theme-change", onThemeChange as EventListener);
   }, []);
 
   useEffect(() => {

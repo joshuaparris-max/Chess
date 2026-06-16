@@ -23,10 +23,31 @@ export const BOARD_THEMES: Record<string, BoardTheme> = {
   },
   midnight: {
     id: 'midnight',
-    label: 'Midnight',
+    label: '🌙 Midnight',
     light: '#1f2937',
     dark: '#111827',
     border: '#4f46e5',
+  },
+  ocean: {
+    id: 'ocean',
+    label: '🌊 Ocean',
+    light: '#e0f2fe',
+    dark: '#0369a1',
+    border: '#0ea5e9',
+  },
+  forest: {
+    id: 'forest',
+    label: '🌲 Forest',
+    light: '#dcfce7',
+    dark: '#166534',
+    border: '#22c55e',
+  },
+  sunset: {
+    id: 'sunset',
+    label: '🌅 Sunset',
+    light: '#fff7ed',
+    dark: '#c2410c',
+    border: '#fb923c',
   },
 };
 
