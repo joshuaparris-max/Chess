@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { type Chess, type Square } from "chess.js";
 import ChessPiece from "./ChessPiece";
-import { BOARD_THEME_OPTIONS, type BoardTheme } from "@/lib/chess/boardThemes";
+import { BOARD_THEME_OPTIONS, type BoardTheme } from '@/lib/chess/boardThemes';
+import { PIECE_SET_OPTIONS, getPieceSet } from '@/lib/chess/pieceSets';
 import {
   WhiteQueen,
   BlackQueen,
@@ -164,9 +165,9 @@ export default function ChessBoard({
 
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem("gm-piece-set");
-      if (saved && saved in PIECE_SETS) {
-        setPieceSet(saved as PieceSetKey);
+      const savedPieceSet = getPieceSet();
+      if (PIECE_SET_OPTIONS.some((item) => item.id === savedPieceSet)) {
+        setPieceSet(savedPieceSet as PieceSetKey);
       }
       const savedTheme = window.localStorage.getItem("gm-board-theme");
       if (savedTheme && BOARD_THEME_OPTIONS.some((item) => item.id === savedTheme)) {
@@ -176,8 +177,6 @@ export default function ChessBoard({
       // Ignore storage errors.
     }
 
-    // Live-apply when theme or piece style is changed elsewhere (Settings menu,
-    // loot drops, boss rewards).
     const onThemeChange = (event: Event) => {
       const id = (event as CustomEvent).detail as string | undefined;
       if (id && BOARD_THEME_OPTIONS.some((item) => item.id === id)) {
@@ -186,7 +185,7 @@ export default function ChessBoard({
     };
     const onPieceChange = (event: Event) => {
       const id = (event as CustomEvent).detail as string | undefined;
-      if (id && id in PIECE_SETS) {
+      if (id && PIECE_SET_OPTIONS.some((item) => item.id === id)) {
         setPieceSet(id as PieceSetKey);
       }
     };
@@ -197,11 +196,6 @@ export default function ChessBoard({
       window.removeEventListener("gm-piece-set-change", onPieceChange as EventListener);
     };
   }, []);
-
-  const pieces: Record<string, string> = useMemo(
-    () => PIECE_SETS[pieceSet].pieces,
-    [pieceSet],
-  );
 
   const getFairyPiece = (color: "w" | "b", type: string) => {
     if (color === "w") {
@@ -239,6 +233,11 @@ export default function ChessBoard({
         return null;
     }
   };
+
+  const pieces: Record<string, string> = useMemo(
+    () => PIECE_SETS[pieceSet].pieces,
+    [pieceSet],
+  );
 
   const getPieceClasses = (color?: "w" | "b") => {
     if (!color) {
