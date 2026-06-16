@@ -1,0 +1,1142 @@
+Here you go Josh:
+
+---
+
+# Chess App — 30 Feature Ideas Brainstorm
+
+## 🎲 DnD / Gamification
+
+1. **XP & Levelling** — Earn XP per game/puzzle. Level up from Peasant → Knight → Wizard → Grandmaster.
+2. **Spell Slots** — Earn castable "spells" (undo, hint, time extension) that recharge daily like DnD slots.
+3. **Character Sheet** — Profile page styled as a 5e character sheet with Chess Stats as ability scores.
+4. **Quest Log** — Daily/weekly quests like "Win 3 games as white" or "Solve 5 endgame puzzles."
+5. **Class Specialisation** — Pick a class (Tactician, Blitzer, Endgame Wizard) that affects your puzzle type unlocks.
+6. **Loot Drops** — Win a game? Open a chest. Randomised cosmetic rewards — board skins, piece sets, titles.
+7. **Boss Battles** — Face AI "bosses" named after monsters. Each has a quirky weakness to exploit.
+8. **Party Mode** — Team up with friends. Shared XP pool. Guild-style seasonal leaderboard.
+9. **Resurrection Token** — Use a token to "revive" mid-game — a second chance mechanic for kids and beginners.
+10. **Prestige System** — After hitting max level, reset for Prestige XP and a special badge. Long-term loop.
+
+---
+
+## 🧚 Sylvie-Themed
+
+11. **Fairy Queen Pieces** — Unlock a full fairy-themed piece set. Queen = Fairy Queen, Pawns = flower sprites.
+12. **Princess Story Mode** — Story-driven campaign: rescue pieces captured by the Shadow King. Chapter-based.
+13. **Bluey Board Theme** — Fan-style Bluey board skin with Heeler family as pieces.
+14. **Lego Builder Board** — Pieces look like LEGO minifigs. Capture = brick gets knocked off the plate.
+15. **Magical Sounds** — Each piece has a themed capture sound. Fairy Queen sparkle, Pawn pop, Knight whinny.
+16. **Sticker Rewards** — Earn digital stickers after wins. Fill a sticker book. Sharable with parents.
+17. **Safe Emoji Chat** — Communicate using pre-set emoji reactions only — totally safe for young players.
+18. **Fairy Garden Board** — A pastel board with animated butterflies and flowers in background squares.
+19. **Bedtime Mode** — Low-stimulation night theme with soft music — slower time controls, calming colours.
+20. **Parent Report Card** — Weekly summary for parents: puzzles solved, improvement areas, time played.
+
+---
+
+## 🏆 Pro / Competitive
+
+21. **Zen Mode** — Hide opponent rating, username, and clock. Pure chess, no anxiety.
+22. **Blunder Reaction Voices** — Toggle audio commentary that reacts to your moves — supportive or witty.
+23. **Post-Game Report** — Auto-analysis with top 3 mistakes, best move, and an accuracy percentage.
+24. **Adaptive AI Opponent** — AI that adjusts difficulty mid-game so it stays 10% above your current level.
+25. **Fog of War Variant** — You can only see squares your pieces could move to. Surprise attacks everywhere.
+26. **Chess Clock Overlay** — Use your phone as a physical tournament clock for real-life games.
+27. **Puzzle Streak** — Solve puzzles in a row. Difficulty climbs. One wrong move ends the streak.
+
+---
+
+## 🧩 Puzzles / Training
+
+28. **Puzzle Rush** — 3-minute blitz. Solve as many as you can. Your best score is your badge.
+29. **Opening Trainer** — Drill specific openings. Deviate and the board shows where you went off-book.
+30. **Endgame Trainer** — K+R vs K, K+Q vs K — master essential endgames with structured micro-lessons.
+
+---
+
+## Quick Priority Notes
+
+- **Highest impact, easiest build:** Puzzle Rush, Puzzle Streak, Zen Mode
+- **Most unique (no one else does this):** Spell Slots mechanic
+- **Best for Sylvie:** Princess Story Mode + Fairy Queen piece set
+- **Best long-term retention loop:** XP/Levelling + Prestige System
+
+Okay, solid foundation — you've got Play, Puzzles, Learn, Watch, Roadmap, and Family Chess already. Here's how a vibe coder adds each of the 30:
+
+---
+
+## 🎲 DnD / Gamification
+
+**1. XP & Levelling**
+Add a `userProfile` object in localStorage with `xp` and `level`. Award XP on game end and puzzle solve. Show a level badge in the nav. *Prompt: "Add an XP system to my chess app. Award 50 XP per game win, 20 per puzzle solved. Store in localStorage. Show level (Peasant/Knight/Wizard/Grandmaster) in the header."*
+
+**2. Spell Slots**
+3 daily-resetting slots stored in localStorage with a timestamp. Each slot = one Hint or Undo. *Prompt: "Replace my unlimited Hint/Undo buttons with a spell slot system — 3 uses per day, resets at midnight, shown as potion icons."*
+
+**3. Character Sheet**
+New `/profile` route. Render a styled card with Win Rate, Puzzles Solved, Favourite Opening as "ability scores." *Prompt: "Create a /profile page styled like a DnD character sheet. Pull stats from localStorage."*
+
+**4. Quest Log**
+Array of daily quest objects with conditions checked on game/puzzle completion. *Prompt: "Add a Quest Log sidebar. Daily quests: win a game, solve 3 puzzles, play 10 moves without hints. Mark complete and award XP."*
+
+**5. Class Specialisation**
+Onboarding modal: pick Tactician (more puzzles), Blitzer (faster time controls), Endgame Wizard (endgame trainer unlocked). Store in localStorage, filter content accordingly. *Prompt: "Add a one-time class picker on first load. Three classes. Store choice in localStorage and use it to prioritise content on the Roadmap."*
+
+**6. Loot Drops**
+Post-game modal that randomly picks from a cosmetic pool (board colour, piece style). Unlock stored in localStorage. *Prompt: "After a game win, show a chest-opening animation and randomly award one cosmetic unlock from a predefined array."*
+
+**7. Boss Battles**
+Named AI bots with a backstory blurb and a special difficulty tweak. Beat them to unlock their cosmetic. *Prompt: "Create 5 named boss bots (e.g. 'The Goblin King — reckless attacker'). Each maps to a Stockfish depth. Beating one marks it defeated in localStorage."*
+
+**8. Party Mode**
+Stretch goal — requires accounts. For now: shared device leaderboard. *Prompt: "Add a local family leaderboard stored in localStorage. Show top 5 scores by player name entered at game start."*
+
+**9. Resurrection Token**
+One-per-day "take back last move" token separate from Hint. *Prompt: "Add a Resurrection Token — one per day — that lets the player undo the last two half-moves (their move + bot's response)."*
+
+**10. Prestige System**
+Check if level === max, offer a "Prestige" button that resets XP but adds a ⭐ to their title. *Prompt: "When a user hits Grandmaster level, show a Prestige option. Resets XP to 0, adds a prestige star to their profile badge."*
+
+---
+
+## 🧚 Sylvie-Themed
+
+**11. Fairy Queen Pieces**
+Add a new piece style option to your existing selector. SVG set with sparkly fairy designs. *Prompt: "Add a 'Fairy' piece style option to my piece selector. Use a royalty-free SVG fairy chess set from Wikimedia or generate simple SVG shapes per piece."*
+
+**12. Princess Story Mode**
+New `/story` route. Series of intro screens + chess challenges framed as rescuing fairy pieces from the Shadow King. *Prompt: "Create a Story Mode page with 5 chapters. Each chapter has a title card with flavour text and launches a specific puzzle position."*
+
+**13. Bluey Board Theme**
+A CSS theme with blue/orange palette, Bluey-style font, bone-shaped squares (joking — but blue/tan squares). *Prompt: "Add a 'Bluey' board theme — light blue and tan squares, orange accent colour, playful rounded UI."*
+
+**14. Lego Builder Board**
+Yellow/red/blue square palette, piece labels in blocky font. *Prompt: "Add a LEGO board theme — primary colour squares, brick-texture CSS pattern, blocky font for piece labels."*
+
+**15. Magical Sounds**
+Small sound effect library triggered on piece events. Web Audio API or tiny MP3s. *Prompt: "Add sound effects to piece moves and captures. Use a fairy theme — sparkle on queen moves, pop on pawn, trumpet on checkmate. Use Web Audio API tone generation, no external files."*
+
+**16. Sticker Rewards**
+Post-puzzle sticker modal. Sticker collection page with a grid. *Prompt: "After solving a puzzle, award a random sticker from a set of 20 emoji-style stickers. Show a sticker book page at /stickers displaying earned ones."*
+
+**17. Safe Emoji Chat**
+For 2-player pass-and-play: a panel of 8 emoji buttons that append to a small reaction log. *Prompt: "In 2-player mode, add an emoji reaction bar below the board — 8 preset emojis, each appends to a small chat log visible to both players."*
+
+**18. Fairy Garden Board**
+CSS animated background on the board wrapper — subtle floating sparkles using keyframe animation. *Prompt: "Add a Fairy Garden board theme with an animated pastel background. Use CSS keyframes to float 10 small sparkle divs behind the board."*
+
+**19. Bedtime Mode**
+Dark soft-purple theme, slower default time control, gentle ambient sound toggle. *Prompt: "Add a Bedtime Mode toggle in settings. Applies a soft dark purple theme, sets default time control to 10 min, and plays a looping low-volume ambient tone via Web Audio."*
+
+**20. Parent Report Card**
+Weekly stats pulled from localStorage game archive. Rendered as a printable/shareable summary. *Prompt: "Add a /report page that reads the local game archive and shows this week's games played, puzzles solved, win rate, and most-used opening. Make it printable."*
+
+---
+
+## 🏆 Pro / Competitive
+
+**21. Zen Mode**
+Toggle that hides the move list, clocks, and bot difficulty label. *Prompt: "Add a Zen Mode toggle. When on, hide the move list, time remaining, and bot name. Show only the board and basic controls."*
+
+**22. Blunder Reaction Voices**
+After each move, check if Stockfish eval drops sharply. If so, play a voice line via SpeechSynthesis API. *Prompt: "Use the Web Speech API to read out a short reaction when the player's move causes a centipawn loss > 150. Use a list of 10 pre-written funny or encouraging lines."*
+
+**23. Post-Game Report**
+At game end, compare played moves vs Stockfish best moves. Show accuracy %, top 3 blunders. *Prompt: "After each game, show a report modal: accuracy percentage (moves matching engine top choice), and the 3 biggest blunders with the correct move highlighted."*
+
+**24. Adaptive AI Opponent**
+Track player win/loss streak. After 2 wins, bump bot level. After 2 losses, lower it. *Prompt: "Make the bot difficulty auto-adjust based on win/loss streak. 2 wins in a row = increase level by 1. 2 losses = decrease by 1. Show the current adaptive level."*
+
+**25. Fog of War Variant**
+Only show squares the player's pieces attack. Hide the rest with a dark overlay. *Prompt: "Add a Fog of War mode. Cover all board squares with a dark overlay except those attacked or occupied by the player's pieces. Update dynamically each move."*
+
+**26. Chess Clock Overlay**
+Fullscreen mode with two big countdown timers, tap to switch. *Prompt: "Add a /clock page with two large countdown timers and a tap-to-switch mechanic. Let users set time per side. Works as a physical tournament clock."*
+
+**27. Puzzle Streak**
+Serve puzzles sequentially from your puzzle bank. Track streak. First wrong answer ends it. *Prompt: "Add a Puzzle Streak mode. Serve puzzles from hardest-to-easiest. Track consecutive correct answers. One wrong move ends the streak and shows the final score."*
+
+---
+
+## 🧩 Puzzles / Training
+
+**28. Puzzle Rush**
+3-minute countdown. Puzzles auto-advance on correct answer. Score = puzzles solved. *Prompt: "Add a Puzzle Rush mode — 3-minute timer, puzzles auto-advance on correct answer, wrong answer costs 10 seconds. Show final score and personal best."*
+
+**29. Opening Trainer**
+Hardcode 3-5 common openings as move trees. If player deviates, highlight the correct square. *Prompt: "Add an Opening Trainer. Offer 5 openings (e.g. Ruy Lopez, Italian, London). Walk the player through the moves. If they deviate, flash the correct destination square."*
+
+**30. Endgame Trainer**
+Load preset FEN positions (K+R vs K, K+Q vs K). Goal = checkmate within N moves. *Prompt: "Add an Endgame Trainer mode. Load 5 preset FEN endgame positions. Set a move limit for each. Win = checkmate within limit. Show a tip if stuck after 5 moves."*
+
+---
+
+## What your app is missing most
+
+Your current app already has bots, puzzles, micro-lessons, model games, progress stages, daily goals and a family section. I couldn’t find public-facing evidence yet of personalised game review, multiplayer, varied puzzle modes, opening repetition, bot personalities, quests, cosmetics or detailed family reports. ([Chess Kappa Five][1])
+
+The strongest ideas used elsewhere are:
+
+* **Chess.com:** personality bots, lessons, Puzzle Rush/Battle, analysis, game review and odds chess. ([Chess.com][2])
+* **Lichess:** Puzzle Streak/Storm/Racer, variants, studies, tournaments and extensive analysis. ([lichess.org][3])
+* **ChessKid:** quests, animated characters, coins, stars, avatar items and child-focused progression. The standalone Adventure app is no longer officially supported, but its ideas remain excellent. ([ChessKid Help Center][4])
+* **Shredder:** automatic difficulty adjustment, estimated Elo, mistake warnings and different engine personalities. ([Shredder Chess][5])
+* **Magnus Trainer, Chessable and Duolingo:** mini-games, bite-sized learning, spaced repetition, XP and mini-matches. ([App Store][6])
+
+# 30 ideas for Grandmaster Path
+
+## Core improvements
+
+1. **Merciful Puzzle Mode** — **Easy**
+   A wrong move explains the problem and lets you retry the exact same position. Include an optional one-strike “Hardcore Mode”.
+
+2. **Mistake Forge** — **Hard**
+   After each bot game, automatically turn the player’s three biggest mistakes into personalised puzzles.
+
+3. **Adventure Quest Map** — **Medium**
+   Replace the plain roadmap with forests, castles, caves and floating islands. Each node contains a lesson, puzzle, mini-game or boss.
+
+4. **Chess XP and Character Levels** — **Medium**
+   Earn XP for thoughtful play, puzzles, lessons and reviews—not merely wins. Level from Pawn Recruit through Knight, Captain, Archmage and Grandmaster.
+
+5. **Chess Classes** — **Medium**
+   Choose a class that represents a learning style:
+
+   * Paladin: defence and king safety
+   * Rogue: forks, traps and tactics
+   * Wizard: calculation and unusual moves
+   * Ranger: board vision
+   * Bard: creative positional play
+
+6. **Personal Skill Tree** — **Medium**
+   Separate branches for tactics, openings, endgames, calculation, defence and board vision. Actual performance unlocks nodes.
+
+## Fantasy RPG systems
+
+7. **Chess Spellbook** — **Easy–Medium**
+   Limited training abilities such as:
+
+   * **Detect Magic:** show attacked squares
+   * **True Sight:** reveal hanging pieces
+   * **Shield:** warn before a serious blunder
+   * **Time Stop:** pause a training clock
+   * **Rewind:** undo one move
+
+   Spells would be disabled in competitive modes.
+
+8. **Boss Battles** — **Medium**
+   Fight dragons, liches, goblin kings and enchanted queens. Bosses begin with unusual positions or special objectives rather than simply stronger engines.
+
+9. **Boss Health Bars** — **Medium**
+   Correct moves damage the boss. Blunders restore its health. Checkmate delivers the finishing strike.
+
+10. **Fantasy Bot Personalities** — **Medium**
+    Create bots with recognisable styles:
+
+* Goblin: chaotic and greedy
+* Dwarf: defensive and stubborn
+* Elf: positional and precise
+* Orc: aggressive attacks
+* Dragon: sacrifices material for initiative
+* Ancient Lich: endgame specialist
+
+11. **Loot and Equipment** — **Medium**
+    Earn boards, piece sets, capes, crowns, pets, spell effects and castle decorations. Keep rewards cosmetic so chess improvement remains central.
+
+12. **Daily Dungeon** — **Easy–Medium**
+    Five connected challenges: puzzle, board-vision test, short lesson, unusual position and boss fight. Completing the dungeon earns a chest.
+
+## Sylvie-friendly worlds
+
+13. **Fairy Garden Campaign** — **Medium**
+    Each completed puzzle restores flowers, fountains, butterflies and fairy homes to a magical garden.
+
+14. **Princess Rescue Story** — **Medium**
+    Solve age-appropriate chess challenges to open gates, cross bridges and rescue characters. Sometimes the princess rescues the knight.
+
+15. **Brick-Built Chess Kingdom** — **Medium**
+    Winning activities gives bricks used to build a castle, playground, spaceship or village.
+
+16. **Cheeky Blue-Heeler-Style Coach** — **Medium**
+    An original energetic dog family that celebrates moves, asks questions and turns mistakes into gentle jokes.
+
+17. **Chess Piece Pets** — **Medium**
+    Hatch a baby dragon, fairy horse, puppy, cat or unicorn. Pets gain experience when the player trains and can sit beside the board.
+
+18. **Storytime Chess Mode** — **Medium**
+    Narrated games where pieces become characters: “The brave knight jumped over the castle wall to protect the queen.”
+
+For a public app, use original characters and names rather than directly using **Bluey**, **LEGO** or official **D&D** artwork, terminology and characters.
+
+## Chess mini-games
+
+19. **Knight’s Journey** — **Easy**
+    Move a knight through a maze, collect stars and avoid enemy attack squares.
+
+20. **Pawn Parade** — **Easy**
+    Race pawns to promotion while learning opposition, passed pawns and pawn captures.
+
+21. **Castle Defence** — **Medium**
+    Protect a king against waves of attackers for a set number of moves.
+
+22. **Queen’s Laser Maze** — **Easy**
+    Use queens, rooks and bishops to hit targets while navigating blocked lines.
+
+23. **Vanishing Board** — **Medium**
+    Show a position briefly, hide some or all pieces, then ask where they were or what was attacked.
+
+24. **Capture the Treasure** — **Easy**
+    Find the shortest legal sequence for a piece to reach a treasure chest without entering attacked squares.
+
+## Competitive and replayable modes
+
+25. **Puzzle Rush** — **Medium**
+    Solve as many increasingly difficult puzzles as possible in three minutes.
+
+26. **Puzzle Streak with Saving Throws** — **Medium**
+    Continue until defeated, but earn a limited “saving throw” by maintaining high accuracy or completing daily quests.
+
+27. **Family Puzzle Duel** — **Medium**
+    Josh and Sylvie take turns solving the same child-friendly positions on one device. No public chat or strangers required.
+
+28. **Variant Arcade** — **Hard**
+    Add Chess960, Three-check, King of the Hill, Horde, Fog of War and simpler original variants such as “Protect the Fairy Queen”.
+
+29. **Private Family Multiplayer** — **Hard**
+    Create a private game link for family members, correspondence games and local pass-and-play. This provides social chess without building a public matchmaking community.
+
+30. **Opening Spellbook with Spaced Repetition** — **Medium–Hard**
+    Save a small repertoire, practise each line and automatically repeat forgotten positions. Present openings as collected magical scrolls rather than a large intimidating database.
+
+## The best first development slice
+
+I would build these three before anything else:
+
+1. **Merciful Puzzle Mode**
+2. **Adventure Quest Map with XP**
+3. **Mistake Forge**
+
+Together they fix the immediate puzzle frustration, give the whole app a distinctive fantasy identity, and make every played game generate meaningful personalised training. Avoid starting with multiplayer, dozens of variants or elaborate animated worlds—they could quickly turn this from a useful family chess project into endless infrastructure work.
+
+[1]: https://chess-kappa-five.vercel.app/play "Grandmaster Path Alpha"
+[2]: https://www.chess.com/article/view/all-the-training-resources-on-chess-com?utm_source=chatgpt.com "All The Training Resources On Chess.com"
+[3]: https://lichess.org/training/themes?utm_source=chatgpt.com "Puzzle Themes"
+[4]: https://support.chesskid.com/en/articles/12552532-how-do-stars-and-gems-work-on-chesskid?utm_source=chatgpt.com "How do Stars and Gems work on ChessKid?"
+[5]: https://www.shredderchess.com/online/play-chess-online.html?utm_source=chatgpt.com "Play Chess Online with Shredder"
+[6]: https://apps.apple.com/au/app/magnus-trainer-train-chess/id1097863089?utm_source=chatgpt.com "Magnus Trainer - Train Chess - App Store"
+
+Based on your existing setup, I’d treat this as **one expandable chess platform**, not 30 separate hacks. Your play page already has Stockfish bots, pass-and-play, hints, undo, PGN import, email sign-in and a local archive of 20 games. The first architectural change is moving progress and games from device-only storage into your existing Supabase account system. ([Chess Kappa Five][1])
+
+## 1. Build the shared foundation first
+
+Assuming your current stack is Next.js, TypeScript, Supabase, `chess.js` and Stockfish, organise it roughly like this:
+
+```text
+app/
+  play/
+  adventure/
+  arcade/
+  family/
+  review/[gameId]/
+  spellbook/
+  collection/
+  profile/
+
+components/
+  chess/
+    GameShell.tsx
+    ChessBoard.tsx
+    MoveList.tsx
+    CoachPanel.tsx
+    TrainingOverlays.tsx
+  progression/
+    XpBar.tsx
+    RewardModal.tsx
+    SkillTree.tsx
+  adventure/
+    QuestMap.tsx
+    BossBattle.tsx
+    StoryPanel.tsx
+  minigames/
+    KnightMaze.tsx
+    PawnParade.tsx
+    LaserMaze.tsx
+
+lib/
+  chess/
+    game-controller.ts
+    stockfish-client.ts
+    analysis.ts
+    bot-personalities.ts
+  progression/
+    award-xp.ts
+    unlocks.ts
+    skill-rating.ts
+  challenges/
+    challenge-runner.ts
+    objective-checker.ts
+  content/
+    campaign-loader.ts
+  supabase/
+    client.ts
+    server.ts
+```
+
+Create a common event system:
+
+```ts
+type ChessEvent =
+  | { type: "game_started"; gameId: string }
+  | { type: "move_played"; gameId: string; fen: string; san: string }
+  | { type: "hint_used"; gameId: string }
+  | { type: "game_completed"; gameId: string; result: string }
+  | { type: "puzzle_solved"; puzzleId: string; attempts: number }
+  | { type: "lesson_completed"; lessonId: string }
+  | { type: "reward_earned"; rewardId: string };
+```
+
+Every future feature listens to these events. That prevents the vibe coder from duplicating XP, saving, rewards and progress logic across 30 pages.
+
+## 2. Supabase structure
+
+Add migrations for these core tables:
+
+```text
+profiles
+- id
+- display_name
+- family_mode
+- selected_class
+- level
+- xp
+- coins
+- active_companion_id
+
+game_sessions
+- id
+- user_id
+- mode
+- starting_fen
+- final_pgn
+- result
+- opponent_id
+- completed_at
+- metadata jsonb
+
+game_moves
+- game_id
+- ply
+- fen_before
+- move_uci
+- move_san
+- evaluation_before
+- evaluation_after
+- classification
+
+puzzle_attempts
+- user_id
+- puzzle_id
+- attempt_number
+- first_move_correct
+- solved
+- hints_used
+- completed_at
+
+content_nodes
+- id
+- world
+- node_type
+- title
+- content jsonb
+- prerequisite_ids
+- xp_reward
+
+player_node_progress
+- user_id
+- node_id
+- status
+- stars
+- best_score
+
+skills
+player_skills
+quests
+player_quests
+reward_catalog
+player_inventory
+companions
+player_companions
+bot_personas
+opening_cards
+opening_reviews
+family_profiles
+multiplayer_rooms
+multiplayer_moves
+```
+
+Child profiles should sit underneath Josh’s account rather than requiring Sylvie to have her own email login.
+
+---
+
+# How each of the 30 features gets implemented
+
+## Puzzle and coaching systems
+
+### 1. Merciful Puzzle Mode
+
+Change the puzzle page from “one incorrect move means failure” into a state machine:
+
+```text
+LOADING
+→ PLAYER_TURN
+→ INCORRECT_MOVE
+→ EXPLANATION
+→ RETRY_SAME_POSITION
+→ SOLVED
+```
+
+On an incorrect move:
+
+1. Animate the piece back.
+2. Show why it failed.
+3. Highlight the tactical danger.
+4. Let the user retry.
+5. Only load another puzzle after **Solve**, **Show answer** or **Skip**.
+
+Store each attempt separately in `puzzle_attempts`. Add selectable rules:
+
+* Learning: unlimited retries.
+* Challenge: three lives.
+* Hardcore: one attempt.
+
+### 2. Mistake Forge
+
+At the end of a game:
+
+1. Save the PGN.
+2. Send each position to the Stockfish worker.
+3. Compare the evaluation before and after Josh’s move.
+4. Identify the largest evaluation losses.
+5. Save the position before each mistake.
+6. Ask Stockfish for the best continuation.
+7. Turn those positions into private puzzles.
+
+Create:
+
+```text
+/review/[gameId]
+/api/games/[gameId]/analyse
+/api/games/[gameId]/create-puzzles
+```
+
+Start with only the three biggest mistakes to avoid slow analysis and information overload.
+
+### 3. Adventure Quest Map
+
+Create `/adventure` using `content_nodes`.
+
+Each node contains:
+
+```json
+{
+  "type": "puzzle",
+  "world": "enchanted-forest",
+  "title": "The Forking Path",
+  "objective": {
+    "puzzleTheme": "fork",
+    "requiredWins": 3
+  },
+  "rewards": {
+    "xp": 40,
+    "coins": 15
+  }
+}
+```
+
+Nodes unlock when their prerequisites are complete. The same content engine can power the fairy garden, princess story and dungeon modes.
+
+### 4. Chess XP and levels
+
+Create one server-side function:
+
+```ts
+awardProgress({
+  userId,
+  source: "puzzle_solved",
+  sourceId: puzzleId,
+  xp: 15,
+  coins: 3
+});
+```
+
+Never calculate permanent rewards only in the browser, or refreshing and replaying requests could duplicate XP.
+
+Suggested rewards:
+
+* Complete puzzle: 10 XP.
+* Solve first try: extra 5 XP.
+* Review a mistake: 10 XP.
+* Complete lesson: 20 XP.
+* Finish a game: 25 XP.
+* Daily dungeon: 60 XP.
+
+Keep XP based mainly on participation and learning, not wins.
+
+### 5. Chess classes
+
+Add `selected_class` to `profiles`.
+
+Classes should change recommendations and presentation—not legal chess rules:
+
+* Guardian: king safety and defence.
+* Trickster: tactics and forks.
+* Seer: calculation and board vision.
+* Explorer: openings and development.
+* Champion: balanced pathway.
+
+A Guardian gets more defensive puzzles and a shield-themed profile. They should not receive unfair powers during normal games.
+
+### 6. Personal skill tree
+
+Create skill categories:
+
+```text
+board_vision
+hanging_pieces
+forks
+pins
+discovered_attacks
+calculation
+opening_principles
+king_safety
+pawn_endgames
+rook_endgames
+```
+
+Update skill scores after puzzles and analysed games. Unlock tree nodes based on demonstrated mastery rather than simply XP.
+
+Example:
+
+```text
+Fork Apprentice:
+Solve 5 fork puzzles at 70% accuracy.
+
+Fork Hunter:
+Solve 20 fork puzzles at 80% accuracy.
+
+Fork Master:
+Find a fork in a real game.
+```
+
+### 7. Chess Spellbook
+
+Build spells as training overlays inside `GameShell`:
+
+```ts
+interface TrainingSpell {
+  id: string;
+  usesPerGame: number;
+  allowedModes: string[];
+  activate: (context: GameContext) => SpellResult;
+}
+```
+
+Examples:
+
+* **True Sight:** highlight attacked and defended pieces.
+* **Danger Sense:** mark pieces that are hanging.
+* **Shield Charm:** warn before confirming a major blunder.
+* **Rewind:** undo one full move.
+* **Time Freeze:** pause the training timer.
+* **Oracle:** show two candidate moves.
+
+Disable these in ranked or competitive modes.
+
+### 8. Boss battles
+
+Bosses are scripted chess challenges, not merely very strong bots.
+
+A boss definition could contain:
+
+```json
+{
+  "id": "ember-dragon",
+  "startingFen": "...",
+  "engineLevel": 4,
+  "objective": "checkmate",
+  "startingHealth": 100,
+  "specialRules": {
+    "playerMayUseSpells": true
+  }
+}
+```
+
+Use normal legal chess underneath. Give each boss a particular weakness, opening style or starting position.
+
+### 9. Boss health bars
+
+Convert chess performance into presentation:
+
+* Best move: 15 damage.
+* Good move: 8 damage.
+* Inaccuracy: no damage.
+* Mistake: boss heals 5.
+* Blunder: boss special animation.
+* Checkmate: remaining health becomes zero.
+
+The chess result remains authoritative. The health bar is a visual representation, not a separate game result.
+
+### 10. Bot personalities
+
+Keep Stockfish but change how moves are selected.
+
+For each bot personality, configure:
+
+```ts
+interface BotPersona {
+  engineDepth: number;
+  candidateCount: number;
+  randomness: number;
+  preferredOpenings: string[];
+  mistakeFrequency: number;
+  style: "aggressive" | "defensive" | "greedy" | "positional";
+}
+```
+
+Rather than always selecting Stockfish’s first move, request several candidate lines and choose between them according to personality.
+
+Examples:
+
+* Goblin takes tempting material.
+* Knight Captain values development.
+* Castle Guardian prefers safe positions.
+* Fire Dragon favours aggressive candidate moves.
+* Ancient Sage plays strong endgames.
+
+### 11. Loot and equipment
+
+Create a `reward_catalog` containing:
+
+```text
+board_theme
+piece_set
+avatar_item
+profile_frame
+map_decoration
+spell_effect
+companion_accessory
+```
+
+Store owned items in `player_inventory`.
+
+Rewards must be cosmetic. Do not make Josh grind for stronger chess moves or better engine assistance.
+
+### 12. Daily Dungeon
+
+Generate one daily dungeon from a date seed:
+
+```ts
+const seed = `${userId}-${australianDate}`;
+```
+
+The dungeon contains:
+
+1. Warm-up puzzle.
+2. Mini-game.
+3. Lesson.
+4. Game position.
+5. Boss challenge.
+
+Persist the generated dungeon so refreshing does not replace difficult challenges with easier ones.
+
+---
+
+## Sylvie and family worlds
+
+### 13. Fairy Garden Campaign
+
+Create a garden scene made from unlockable slots:
+
+```text
+tree_slot
+flower_slot
+pond_slot
+fairy_house_slot
+butterfly_slot
+castle_slot
+```
+
+Puzzle and story completion unlocks decorations. The garden state is just inventory plus saved layout coordinates.
+
+The chess activities should initially be very simple:
+
+* Identify a piece.
+* Move a piece legally.
+* Capture an undefended piece.
+* Reach a target square.
+* Give check.
+
+### 14. Princess Rescue Story
+
+Use the same `content_nodes` system but wrap it in illustrated story chapters.
+
+Example chapter:
+
+```text
+Story panel
+→ Help the knight cross the bridge
+→ Solve knight movement activity
+→ Animated success
+→ Open the castle gate
+```
+
+Make the princess an active chess player rather than always someone needing rescue.
+
+### 15. Brick-Built Kingdom
+
+Award generic building bricks instead of copying branded LEGO visuals.
+
+Create a grid-based builder:
+
+```text
+/family/build
+```
+
+Every completed child activity awards several pieces. Sylvie places them onto a simple snap-to-grid canvas and saves the design as JSON.
+
+### 16. Original blue-heeler-style coach
+
+Create your own dog family with distinct names, colours, voices and designs.
+
+The coach component receives game events:
+
+```ts
+coachReact({
+  event: "piece_captured",
+  playerAgeMode: "young-child",
+  severity: "celebration"
+});
+```
+
+Prepare a bank of short reactions rather than generating every sentence live. This gives predictable, child-safe language.
+
+### 17. Chess piece pets
+
+Each companion has:
+
+```text
+name
+species
+stage
+xp
+mood
+accessories
+animation_set
+```
+
+Pets gain XP when the child completes activities. Evolution should unlock visual changes and encouragement, not chess advantages.
+
+### 18. Storytime Chess
+
+Create narrative templates based on real board events:
+
+```text
+The {piece} travelled from {fromSquare} to {toSquare}.
+It now protects {protectedPiece}.
+Watch out—the {enemyPiece} can attack it!
+```
+
+Add optional browser text-to-speech. Keep narration short and pause it automatically when another move begins.
+
+---
+
+## Mini-games
+
+### 19. Knight’s Journey
+
+Represent squares as a graph. Each square connects to all legal knight destinations.
+
+Generate:
+
+* Starting square.
+* Treasure squares.
+* Blocked squares.
+* Enemy attack squares.
+* Maximum move count.
+
+The player taps legal destinations until all treasure is collected.
+
+### 20. Pawn Parade
+
+Use small positions containing only kings and pawns.
+
+Modes:
+
+* Reach promotion.
+* Stop the enemy pawn.
+* Choose the correct capture.
+* Create a passed pawn.
+* Learn opposition.
+
+Use the normal chess rules engine wherever possible rather than inventing pawn legality separately.
+
+### 21. Castle Defence
+
+Load a preset FEN and give the player an objective:
+
+```text
+Survive six moves.
+Do not lose the queen.
+Prevent checkmate.
+Trade attacking pieces.
+Reach a safe king position.
+```
+
+Use `objective-checker.ts` after every move.
+
+### 22. Queen’s Laser Maze
+
+Calculate bishop, rook and queen attack rays from each square.
+
+Players rotate through positions and must:
+
+* Hit every target.
+* Avoid friendly blockers.
+* Use a limited number of moves.
+* Identify which squares are attacked.
+
+This can run without Stockfish.
+
+### 23. Vanishing Board
+
+Create timed phases:
+
+```text
+SHOW_POSITION
+→ HIDE_PIECES
+→ QUESTION
+→ ANSWER
+→ REVEAL
+```
+
+Questions include:
+
+* Where was the queen?
+* Which piece attacked e5?
+* How many black pawns were present?
+* Rebuild the position.
+
+Increase difficulty by hiding more pieces or shortening viewing time.
+
+### 24. Capture the Treasure
+
+Treat the board as a pathfinding challenge.
+
+The player selects a piece and must reach the treasure while avoiding attacked squares. Use breadth-first search internally to calculate the shortest possible legal path and award three stars for matching it.
+
+---
+
+## Repeatable modes
+
+### 25. Puzzle Rush
+
+Use the existing puzzle runner with:
+
+```text
+duration
+score
+currentPuzzleIndex
+difficultyBand
+correctAnswers
+incorrectAnswers
+```
+
+Start easy and increase difficulty after correct solutions. Load several puzzles ahead so network requests do not interrupt the timer.
+
+### 26. Puzzle Streak with second chances
+
+Keep solving until the run ends.
+
+A second-chance token can be earned through:
+
+* Seven correct answers.
+* A daily quest.
+* Completing a review lesson.
+
+After an error, offer:
+
+```text
+Use token and retry
+End run
+Study solution
+```
+
+Do not silently move to another puzzle.
+
+### 27. Family Puzzle Duel
+
+Use parent-managed local profiles:
+
+```text
+Josh
+Sylvie
+Elias
+Guest
+```
+
+The mode alternates turns on the same device. Each person receives a suitable difficulty band, meaning Josh and Sylvie can compete fairly without receiving identical puzzles.
+
+Add cooperative mode where both contribute to one shared family score.
+
+### 28. Variant Arcade
+
+Build this last because your normal chess rules engine may not support every variant.
+
+Start with variants that are close to standard chess:
+
+1. King of the Hill.
+2. Three-check.
+3. Chess960.
+4. Custom challenge positions.
+
+Create a rules adapter:
+
+```ts
+interface ChessRulesAdapter {
+  legalMoves(): Move[];
+  makeMove(move: Move): void;
+  isGameOver(): boolean;
+  getResult(): GameResult | null;
+}
+```
+
+Standard chess and each variant implement that interface. Do not bury variant rules directly inside `ChessBoard.tsx`.
+
+### 29. Private family multiplayer
+
+Create private rooms with unguessable invitation tokens:
+
+```text
+multiplayer_rooms
+- id
+- invite_token
+- white_user_id
+- black_user_id
+- current_fen
+- status
+- expires_at
+```
+
+The server must validate every move before writing it to the room.
+
+Use Supabase Realtime to broadcast:
+
+* Move accepted.
+* Opponent joined.
+* Resignation.
+* Draw offer.
+* Rematch.
+
+Start with private invitation links only. Avoid public chat, matchmaking and stranger interaction.
+
+### 30. Opening Spellbook
+
+Break openings into small position cards rather than teaching enormous move trees.
+
+```text
+opening_cards
+- opening_id
+- fen
+- expected_moves
+- explanation
+- difficulty
+```
+
+After each attempt, schedule the next review:
+
+* Incorrect: tomorrow.
+* Difficult: three days.
+* Correct: seven days.
+* Easy: fourteen days.
+
+Also detect when a saved game leaves one of Josh’s known opening lines and offer to review that position.
+
+---
+
+# Practical build order
+
+## Stage 1: Stop losing data
+
+1. Save games to Supabase.
+2. Save puzzles, progress and preferences.
+3. Introduce `GameShell`.
+4. Add the shared chess-event system.
+5. Add feature flags.
+
+## Stage 2: Fix and strengthen puzzles
+
+6. Merciful Puzzle Mode.
+7. Puzzle Streak.
+8. Puzzle Rush.
+9. Knight’s Journey.
+10. Queen’s Laser Maze.
+11. Capture the Treasure.
+12. Vanishing Board.
+
+This immediately improves the problem you identified with Lichess-style one-attempt puzzles.
+
+## Stage 3: Progression
+
+13. XP and levels.
+14. Rewards and inventory.
+15. Classes.
+16. Skill tree.
+17. Daily dungeon.
+18. Training spells.
+
+## Stage 4: Family identity
+
+19. Adventure map.
+20. Fairy garden.
+21. Princess story.
+22. Brick kingdom.
+23. Original dog coach.
+24. Pets.
+25. Storytime mode.
+26. Family Puzzle Duel.
+
+## Stage 5: Smarter chess
+
+27. Bot personalities.
+28. Mistake Forge.
+29. Opening Spellbook.
+30. Castle Defence and boss battles.
+
+## Stage 6: Isolated advanced systems
+
+31. Private multiplayer.
+32. Variant Arcade.
+
+Variants and online multiplayer should remain separate until the ordinary game, puzzle and account systems are reliable.
+
+# How the vibe-coding workflow should operate
+
+For each feature, give the coding agent **one ticket only**:
+
+1. Inspect the current implementation.
+2. List the existing files involved.
+3. Explain the smallest architecture change required.
+4. Add a feature flag.
+5. Add the database migration.
+6. Implement the server logic.
+7. Implement the UI.
+8. Add tests.
+9. Run lint, type-check and production build.
+10. Test existing play, puzzle, login and mobile behaviour.
+11. Commit that single feature.
+
+A ticket is not done merely because the page renders. It must survive refreshes, mobile screens, login/logout, invalid requests and repeat attempts.
+
+The best next move is **Merciful Puzzle Mode plus persistent puzzle attempts**. It solves the frustration you already experienced and creates the puzzle state system needed by Rush, Streak, Daily Dungeon, family duels and several mini-games.
+
+[1]: https://chess-kappa-five.vercel.app/play "Grandmaster Path Alpha"

@@ -128,8 +128,56 @@ html[data-theme="family"] .glass-panel {
   line-height: 1;
   opacity: 0.45;
   font-weight: 700;
-  pointer-events: none;
-  color: rgba(17,24,39,0.6);
+}
+
+.fairy-sparkle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(252, 211, 133, 0.95), transparent 55%);
+  filter: drop-shadow(0 0 8px rgba(248, 113, 255, 0.65));
+  opacity: 0.65;
+  animation: fairySparklePulse 2.2s infinite ease-in-out;
+}
+
+.fairy-sparkle::before,
+.fairy-sparkle::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  background: inherit;
+  opacity: 0.75;
+}
+
+.sparkle-top-left {
+  top: 8px;
+  left: 8px;
+  animation-delay: 0s;
+}
+
+.sparkle-top-right {
+  top: 8px;
+  right: 8px;
+  animation-delay: 0.4s;
+}
+
+.sparkle-bottom-left {
+  bottom: 8px;
+  left: 8px;
+  animation-delay: 0.8s;
+}
+
+.sparkle-bottom-right {
+  bottom: 8px;
+  right: 8px;
+  animation-delay: 1.2s;
+}
+
+@keyframes fairySparklePulse {
+  0%, 100% { opacity: 0.45; transform: translateY(0) scale(0.9); }
+  50% { opacity: 1; transform: translateY(-8px) scale(1.15); }
 }
 
 /* Respect users who prefer reduced motion: drop animations, transitions, smooth scroll. */

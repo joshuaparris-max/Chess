@@ -9,6 +9,12 @@ import type { LichessPuzzle } from '@/lib/lichessClient';
 import { tryPuzzleMove } from '@/lib/puzzles/attempt';
 import ReadAloudButton from './family/ReadAloudButton';
 import { duePuzzleIds, normalisePuzzleProgress, puzzleSolveStreak, recordPuzzleMiss, recordPuzzleSolve, type PuzzleProgress } from '@/lib/puzzles/progress';
+import {
+  appendPuzzleAttemptHistory,
+  normalisePuzzleAttemptHistory,
+  PUZZLE_ATTEMPT_HISTORY_KEY,
+  type PuzzleAttemptSource,
+} from '@/lib/puzzles/attemptHistory';
 
 // ── Progress ──────────────────────────────────────────────────────────────────
 
@@ -33,6 +39,22 @@ function loadProgress(): PuzzleProgress {
 
 function saveProgress(p: PuzzleProgress) {
   try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); } catch {}
+}
+
+function savePuzzleAttempt(entry: {
+  puzzleId: string;
+  source: PuzzleAttemptSource;
+  outcome: 'miss' | 'solved';
+  step: number;
+  attemptedMove?: string;
+  expectedMove?: string;
+}) {
+  try {
+    const raw = localStorage.getItem(PUZZLE_ATTEMPT_HISTORY_KEY);
+    const history = normalisePuzzleAttemptHistory(raw ? JSON.parse(raw) : []);
+    const next = appendPuzzleAttemptHistory(history, entry);
+    localStorage.setItem(PUZZLE_ATTEMPT_HISTORY_KEY, JSON.stringify(next));
+  } catch {}
 }
 
 function isDailyPuzzleSolvedToday(puzzleId: string): boolean {
@@ -277,6 +299,7 @@ export default function PuzzleTrainer() {
   const [progress, setProgress] = useState<PuzzleProgress>({});
   const [dailySolvedToday, setDailySolvedToday] = useState(false);
   const opponentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const attemptSource: PuzzleAttemptSource = sourceTab;
 
   useEffect(() => { setProgress(loadProgress()); }, []);
   const dueIds = useMemo(() => duePuzzleIds(progress), [progress]);
@@ -348,6 +371,13 @@ export default function PuzzleTrainer() {
       if (nextStep >= sol.length) {
         setSolved(true);
         setMessage('');
+        savePuzzleAttempt({
+          puzzleId: puzzle.id,
+          source: attemptSource,
+          outcome: 'solved',
+          step: nextStep,
+          expectedMove: sol[step],
+        });
         setProgress((current) => {
           const next = recordPuzzleSolve(current, puzzle.id);
           saveProgress(next);
@@ -389,8 +419,16 @@ export default function PuzzleTrainer() {
         return;
       }
       if (result.status === 'incorrect') {
-        setMessage('Not quite — try again.');
+        setMessage('Not quite. The board is back where it was, so try the same position again.');
         setSelectedSquare(null);
+        savePuzzleAttempt({
+          puzzleId: puzzle.id,
+          source: attemptSource,
+          outcome: 'miss',
+          step,
+          attemptedMove: `${selectedSquare}${square}`,
+          expectedMove: expected,
+        });
         const next = recordPuzzleMiss(progress, puzzle.id);
         setProgress(next);
         saveProgress(next);
@@ -406,6 +444,14 @@ export default function PuzzleTrainer() {
       if (nextStep >= puzzle.solution.length) {
         setSolved(true);
         setMessage('');
+        savePuzzleAttempt({
+          puzzleId: puzzle.id,
+          source: attemptSource,
+          outcome: 'solved',
+          step: nextStep,
+          attemptedMove: `${selectedSquare}${square}`,
+          expectedMove: expected,
+        });
         const next = recordPuzzleSolve(progress, puzzle.id);
         setProgress(next);
         saveProgress(next);
