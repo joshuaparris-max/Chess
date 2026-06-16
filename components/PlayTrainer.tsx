@@ -25,6 +25,7 @@ import {
   setChessSoundsEnabled,
 } from '@/lib/audio/chessSounds';
 import { recordGameCompleted } from '@/lib/progression/xp';
+import { buildCheckmateExplanation, explainRejectedMove } from '@/lib/chess/checkExplanation';
 import { useSectionVisibility } from '@/lib/settings/uiSettings';
 import {
   getSlots,
@@ -83,7 +84,7 @@ function gameStatus(game: Chess): string {
 
 function coachMessageFromGameState(game: Chess, gameMode: GameMode): string | null {
   if (gameMode === 'two-player') {
-    if (game.isCheckmate()) return `Checkmate — ${game.turn() === 'w' ? 'Black' : 'White'} wins!`;
+    if (game.isCheckmate()) return `Checkmate — ${game.turn() === 'w' ? 'Black' : 'White'} wins! ${buildCheckmateExplanation(game)}`;
     if (game.isStalemate()) return 'Stalemate — draw. The side to move has no legal move, but the king is not in check.';
     if (game.isThreefoldRepetition()) return 'Draw by threefold repetition. The same position occurred three times.';
     if (game.isInsufficientMaterial()) return 'Draw by insufficient material. Neither side has enough pieces to checkmate.';
@@ -95,9 +96,9 @@ function coachMessageFromGameState(game: Chess, gameMode: GameMode): string | nu
   if (game.isCheckmate()) {
     const playerWon = game.turn() === 'b';
     if (playerWon) {
-      return 'Checkmate — you win! ♔ Brilliant! The enemy king has no legal escape. Checkmate means the king is attacked and has no way to avoid capture.';
+      return `Checkmate — you win! ♔ Brilliant! ${buildCheckmateExplanation(game)}`;
     }
-    return 'Checkmate — the bot wins. Your king has no legal escape. That is checkmate. Every chess player gets checkmated while learning — use this to study defensive ideas.';
+    return `Checkmate — the bot wins. ${buildCheckmateExplanation(game)} Every chess player gets checkmated while learning — use this to study defensive ideas.`;
   }
   if (game.isStalemate()) return 'Stalemate — draw. The side to move has no legal move, but the king is not in check.';
   if (game.isThreefoldRepetition()) return 'Draw by threefold repetition. The same position occurred three times.';
@@ -449,7 +450,10 @@ export default function PlayTrainer() {
     }
 
     const ok = applyPlayerMove(selectedSquare, square);
-    if (!ok) setCoachNote('Illegal move. Slow down and check how that piece moves.');
+    if (!ok) {
+      const reason = explainRejectedMove(game, selectedSquare, square);
+      setCoachNote(reason ?? 'Illegal move. Slow down and check how that piece moves.');
+    }
   };
 
   useEffect(() => {
