@@ -3,6 +3,7 @@ import './globals.css';
 import BedtimeToggle from '@/components/BedtimeToggle';
 import LootModal from '@/components/LootModal';
 import StickerMilestones from '@/components/StickerMilestones';
+import QuestTracker from '@/components/QuestTracker';
 
 export const metadata: Metadata = {
   title: 'Grandmaster Path Alpha',
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <BedtimeToggle />
         <LootModal />
         <StickerMilestones />
+        <QuestTracker />
       </body>
     </html>
   );

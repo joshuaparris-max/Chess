@@ -35,12 +35,21 @@ function playTone(
   const oscillator = ctx.createOscillator();
   const gainNode = ctx.createGain();
 
+  // Bedtime mode plays everything at half volume for a calmer wind-down.
+  let bedtime = false;
+  try {
+    bedtime = window.localStorage.getItem('bedtimeMode') === 'true';
+  } catch {
+    bedtime = false;
+  }
+  const effectiveGain = Math.max(0.0001, gain * (bedtime ? 0.5 : 1));
+
   oscillator.type = type;
   oscillator.frequency.setValueAtTime(frequency, start);
   if (endFrequency) oscillator.frequency.exponentialRampToValueAtTime(endFrequency, end);
 
   gainNode.gain.setValueAtTime(0.0001, start);
-  gainNode.gain.exponentialRampToValueAtTime(gain, start + 0.01);
+  gainNode.gain.exponentialRampToValueAtTime(effectiveGain, start + 0.01);
   gainNode.gain.exponentialRampToValueAtTime(0.0001, end);
 
   oscillator.connect(gainNode);

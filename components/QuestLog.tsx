@@ -3,12 +3,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   loadDailyQuests,
-  recordQuestProgress,
   QUESTS_CHANGED_EVENT,
   type DailyQuests,
   type QuestState,
 } from '@/lib/quests/dailyQuests';
-import { XP_AWARDED_EVENT } from '@/lib/progression/xp';
 
 export default function QuestLog() {
   const [open, setOpen] = useState(false);
@@ -20,25 +18,19 @@ export default function QuestLog() {
   useEffect(() => {
     refresh();
 
-    const onXp = (event: Event) => {
-      const detail = (event as CustomEvent).detail as { reason?: string } | undefined;
-      const reason = detail?.reason;
-      if (!reason) return;
-      const completed = recordQuestProgress(reason);
-      refresh();
-      if (completed.length > 0) {
-        const quest = completed[0];
-        setToast(`Quest complete! +${quest.xpReward} XP 🎉`);
-        window.setTimeout(() => setToast(null), 2600);
-      }
-    };
     const onChanged = () => refresh();
+    const onComplete = (event: Event) => {
+      const quest = (event as CustomEvent).detail as { xpReward?: number } | undefined;
+      refresh();
+      setToast(`Quest complete! +${quest?.xpReward ?? 0} XP 🎉`);
+      window.setTimeout(() => setToast(null), 2600);
+    };
 
-    window.addEventListener(XP_AWARDED_EVENT, onXp as EventListener);
     window.addEventListener(QUESTS_CHANGED_EVENT, onChanged as EventListener);
+    window.addEventListener('gm-quest-complete', onComplete as EventListener);
     return () => {
-      window.removeEventListener(XP_AWARDED_EVENT, onXp as EventListener);
       window.removeEventListener(QUESTS_CHANGED_EVENT, onChanged as EventListener);
+      window.removeEventListener('gm-quest-complete', onComplete as EventListener);
     };
   }, [refresh]);
 

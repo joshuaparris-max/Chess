@@ -22,6 +22,8 @@ export default function LootModal() {
       const detail = (event as CustomEvent).detail as { reason?: string } | undefined;
       if (detail?.reason !== 'Game won vs bot') return;
       if (stage !== 'closed') return;
+      // Boss battles award their own reward modal; don't stack a loot chest on top.
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/bosses')) return;
       const loot = getRandomLoot(getOwnedCosmetics());
       setItem(loot);
       setApplied(false);

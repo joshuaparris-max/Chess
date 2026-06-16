@@ -142,7 +142,12 @@ export function recordQuestProgress(reason: string, now = new Date()): QuestStat
   }
   // Award XP for newly completed quests (avoid recursion: quest XP reasons are
   // prefixed and never match the pool predicates).
-  newlyComplete.forEach((quest) => awardXP(quest.xpReward, `Quest: ${quest.title}`));
+  newlyComplete.forEach((quest) => {
+    awardXP(quest.xpReward, `Quest: ${quest.title}`);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('gm-quest-complete', { detail: quest }));
+    }
+  });
   return newlyComplete;
 }
 

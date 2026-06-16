@@ -299,7 +299,7 @@ export default function PlayTrainer() {
     }
 
     if (game.history().length === 0) return;
-    if (!spendSpell('rewind')) {
+    if (gameMode === 'vs-computer' && !spendSpell('rewind')) {
       setCoachNote('⏪ Rewind recharges tomorrow ✨');
       return;
     }
@@ -628,7 +628,7 @@ export default function PlayTrainer() {
             </div>
             <div className="hidden sm:flex gap-2">
               <button onClick={resetGame} className="rounded-xl bg-teal-400 px-4 py-2 font-bold text-slate-950 hover:bg-teal-300">New game</button>
-              <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion) || (spellsOn && spellSlots.slots.rewind <= 0)} onClick={undoPair} className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm text-slate-100 hover:bg-slate-700/50 disabled:cursor-not-allowed disabled:opacity-40" title="Rewind spell">⏪ {twoPlayer ? 'Undo' : 'Undo pair'}{spellsOn ? ` (${spellSlots.slots.rewind})` : ''}</button>
+              <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion) || (!twoPlayer && spellsOn && spellSlots.slots.rewind <= 0)} onClick={undoPair} className="rounded-xl border border-slate-500/50 px-4 py-2 text-sm text-slate-100 hover:bg-slate-700/50 disabled:cursor-not-allowed disabled:opacity-40" title="Rewind spell">⏪ {twoPlayer ? 'Undo' : 'Undo pair'}{!twoPlayer && spellsOn ? ` (${spellSlots.slots.rewind})` : ''}</button>
               {!twoPlayer && <button disabled={Boolean(pendingPromotion) || game.isGameOver() || (spellsOn && spellSlots.slots.truesight <= 0)} onClick={showHint} className="rounded-xl border border-yellow-300/70 bg-yellow-200/10 px-4 py-2 text-sm text-yellow-100 hover:bg-yellow-200/20 disabled:cursor-not-allowed disabled:opacity-40" title="True Sight spell">🔮 True Sight{spellsOn ? ` (${spellSlots.slots.truesight})` : ''}</button>}
               {!twoPlayer && <button disabled={game.isGameOver() || game.history().length === 0 || (spellsOn && spellSlots.slots.shield <= 0)} onClick={castShield} className="rounded-xl border border-sky-300/70 bg-sky-200/10 px-4 py-2 text-sm text-sky-100 hover:bg-sky-200/20 disabled:cursor-not-allowed disabled:opacity-40" title="Shield spell — warns if your last piece is hanging">🛡️ Shield{spellsOn ? ` (${spellSlots.slots.shield})` : ''}</button>}
             </div>
@@ -766,7 +766,7 @@ export default function PlayTrainer() {
         {/* Mobile action bar */}
         <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
           <button onClick={resetGame} className="flex-1 rounded-2xl bg-teal-400 py-3 text-center font-bold text-slate-950">New</button>
-          <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion) || (spellsOn && spellSlots.slots.rewind <= 0)} onClick={undoPair} className="flex-1 rounded-2xl border border-slate-600 py-3 text-center text-sm text-slate-100 disabled:cursor-not-allowed disabled:opacity-40">⏪{spellsOn ? ` ${spellSlots.slots.rewind}` : ''}</button>
+          <button disabled={isThinking || (game.history().length === 0 && !pendingPromotion) || (!twoPlayer && spellsOn && spellSlots.slots.rewind <= 0)} onClick={undoPair} className="flex-1 rounded-2xl border border-slate-600 py-3 text-center text-sm text-slate-100 disabled:cursor-not-allowed disabled:opacity-40">⏪{!twoPlayer && spellsOn ? ` ${spellSlots.slots.rewind}` : ''}</button>
           <button disabled={Boolean(pendingPromotion) || game.isGameOver() || (!twoPlayer && spellsOn && spellSlots.slots.truesight <= 0)} onClick={twoPlayer ? () => setCoachNote('Hint: Look for checks, captures, and threats before each move.') : showHint} className="flex-1 rounded-2xl bg-yellow-200/10 py-3 text-center text-sm text-yellow-100 disabled:cursor-not-allowed disabled:opacity-40">🔮{!twoPlayer && spellsOn ? ` ${spellSlots.slots.truesight}` : ''}</button>
           {!twoPlayer && <button disabled={game.isGameOver() || game.history().length === 0 || (spellsOn && spellSlots.slots.shield <= 0)} onClick={castShield} className="flex-1 rounded-2xl bg-sky-200/10 py-3 text-center text-sm text-sky-100 disabled:cursor-not-allowed disabled:opacity-40">🛡️{spellsOn ? ` ${spellSlots.slots.shield}` : ''}</button>}
         </div>

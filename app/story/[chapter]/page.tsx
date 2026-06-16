@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Chess, type Square } from 'chess.js';
 import StoryCard from '@/components/story/StoryCard';
@@ -15,7 +15,7 @@ import {
 } from '@/lib/story/chapters';
 
 type ChapterPageProps = {
-  params: { chapter: string };
+  params: Promise<{ chapter: string }>;
 };
 
 function findChapter(id: number): StoryChapter | undefined {
@@ -28,13 +28,14 @@ function isMoveCorrect(move: { from: string; to: string }, solution: { from: str
 
 export default function ChapterPage({ params }: ChapterPageProps) {
   const router = useRouter();
-  const chapterId = Number(params.chapter);
+  const { chapter: chapterParam } = use(params);
+  const chapterId = Number(chapterParam);
   const chapter = findChapter(chapterId);
   const [progress, setProgress] = useState(loadStoryProgress());
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
   const [completed, setCompleted] = useState(false);
-  const [game, setGame] = useState(() => new Chess(chapter?.fen ?? '8/8/8/8/8/8/8/8 w - - 0 1'));
+  const [game, setGame] = useState(() => new Chess(chapter?.fen ?? 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'));
   const [hint, setHint] = useState('Tap a piece to begin the challenge.');
 
   useEffect(() => {
@@ -73,7 +74,13 @@ export default function ChapterPage({ params }: ChapterPageProps) {
       setHint('Tap another white piece or try the same piece again.');
       return;
     }
-    const move = game.move({ from: selectedSquare, to: square, promotion: 'q' as const });
+    const copy = new Chess(game.fen());
+    let move: ReturnType<typeof copy.move> | null = null;
+    try {
+      move = copy.move({ from: selectedSquare, to: square, promotion: 'q' as const });
+    } catch {
+      move = null;
+    }
     if (!move) {
       setSelectedSquare(null);
       setHint('That move is not legal from this square. Try again.');
@@ -83,6 +90,7 @@ export default function ChapterPage({ params }: ChapterPageProps) {
     setSelectedSquare(null);
     const correct = isMoveCorrect({ from: move.from, to: move.to }, chapter.solutionMove);
     if (correct) {
+      setGame(copy);
       const updated = completeStoryChapter(progress, chapter.id);
       const updatedWithSticker = awardSticker(updated, chapter.stickerId);
       setProgress(updatedWithSticker);

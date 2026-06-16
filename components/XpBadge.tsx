@@ -13,7 +13,15 @@ type LevelUp = {
 };
 
 export default function XpBadge() {
-  const [progress, setProgress] = useState(() => getPlayerProgress());
+  // Start from a stable default so server and client first render match; the
+  // real values load in the effect below (avoids a hydration mismatch).
+  const [progress, setProgress] = useState({
+    xp: 0,
+    level: 'Pawn',
+    symbol: '♟',
+    nextLevelXp: 100,
+    progressPercent: 0,
+  });
   const [toast, setToast] = useState<XpToast | null>(null);
   const [levelUp, setLevelUp] = useState<LevelUp | null>(null);
 

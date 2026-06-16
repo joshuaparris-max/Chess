@@ -44,9 +44,9 @@ export const chapters: StoryChapter[] = [
     emoji: '🏰',
     story:
       'The Fairy Queen is inside the castle! One magical move will set her free forever. Give checkmate!',
-    fen: '4k3/8/8/8/8/8/4Q3/4K3 w - - 0 1',
-    instruction: 'Move the White Queen from e2 to e8 to give checkmate and free the Fairy Queen!',
-    solutionMove: { from: 'e2', to: 'e8' },
+    fen: '4k3/8/4K3/8/8/8/Q7/8 w - - 0 1',
+    instruction: 'Move the White Queen from a2 to a8 to give checkmate and free the Fairy Queen!',
+    solutionMove: { from: 'a2', to: 'a8' },
     rewardEmoji: '👑',
     rewardName: 'Crown',
     stickerId: 'crown',
