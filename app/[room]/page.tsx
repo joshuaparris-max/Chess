@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Home from '../page';
 import type { AppMode } from '@/lib/types';
 
-const rooms: AppMode[] = ['play', 'puzzles', 'learn', 'watch', 'roadmap', 'family'];
+const rooms: AppMode[] = ['play', 'puzzles', 'learn', 'watch', 'roadmap', 'family', 'stickers'];
 
 export function generateStaticParams() {
   return rooms.map((room) => ({ room }));

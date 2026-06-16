@@ -8,6 +8,7 @@ import WatchRoom from '@/components/WatchRoom';
 import Roadmap from '@/components/Roadmap';
 import FamilyHub from '@/components/FamilyHub';
 import CloudSyncPanel from '@/components/CloudSyncPanel';
+import StickerBook from '@/components/StickerBook';
 import type { AppMode } from '@/lib/types';
 
 const modes: { id: AppMode; label: string; tagline: string }[] = [
@@ -17,6 +18,7 @@ const modes: { id: AppMode; label: string; tagline: string }[] = [
   { id: 'watch', label: 'Watch', tagline: 'Model-game ideas' },
   { id: 'roadmap', label: 'Roadmap', tagline: 'Beginner to advanced path' },
   { id: 'family', label: 'Family Chess', tagline: 'Play, learn & explore together' },
+  { id: 'stickers', label: 'Sticker Book', tagline: 'Collect story rewards' },
 ];
 
 function localDateKey(date = new Date()) {
@@ -40,6 +42,8 @@ function modeContent(mode: AppMode) {
       return <Roadmap />;
     case 'family':
       return <FamilyHub />;
+    case 'stickers':
+      return <StickerBook />;
   }
 }
 
@@ -151,7 +155,7 @@ export default function Home({ initialMode = 'play' }: { initialMode?: AppMode }
         </div>
       </header>
 
-      <nav className="my-5 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6" aria-label="Training modes">
+      <nav className="my-5 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7" aria-label="Training modes">
         {modes.map((item) => (
           <button key={item.id} onClick={() => chooseMode(item.id)} className={`rounded-3xl border p-4 text-left transition ${mode === item.id ? 'border-teal-300 bg-teal-300 text-slate-950' : 'border-slate-600/50 bg-slate-900/70 text-slate-100 hover:border-teal-200/70 hover:bg-slate-800'}`}>
             <span className="block text-lg font-black">{item.label}</span>
