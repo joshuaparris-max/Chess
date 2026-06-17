@@ -28,7 +28,34 @@ export default function PlayPage() {
   };
 
   if (showGame) {
-    return <PlayTrainer />;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+        <nav className="border-b border-slate-800/50 bg-slate-950/80 backdrop-blur">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+            <Link href="/" className="flex items-center gap-2 text-2xl font-black text-teal-300 transition hover:text-teal-200">
+              ♞ Grandmaster Path
+            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/dashboard" className="text-sm font-bold text-slate-300 transition hover:text-teal-300">
+                Advanced options
+              </Link>
+              <button
+                onClick={() => setShowGame(false)}
+                className="text-sm font-bold rounded-md bg-slate-800/60 px-3 py-2 text-slate-200 hover:bg-slate-700"
+              >
+                Exit to Home
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-slate-700 bg-slate-900/50 p-4">
+            <PlayTrainer />
+          </div>
+        </main>
+      </div>
+    );
   }
 
   return (
@@ -115,7 +142,10 @@ export default function PlayPage() {
       <BeginnerModal
         isOpen={showBeginnerModal && !showGame}
         onClose={() => setShowBeginnerModal(false)}
-        onStart={() => setShowGame(true)}
+        onStart={() => {
+          setShowBeginnerModal(false);
+          setShowGame(true);
+        }}
       />
     </div>
   );
