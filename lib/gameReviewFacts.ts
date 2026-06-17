@@ -61,7 +61,10 @@ export function buildGameSpecificFacts(gameData: GameData) {
   const sideToMove = chess.turn();
   const sideToMoveName = colorName(sideToMove);
   const winner = chess.isCheckmate() ? (sideToMove === 'w' ? 'Black' : 'White') : gameData.winner || 'none';
-  const endMethod = gameData.endBy || (chess.isCheckmate() ? 'checkmate' : chess.isStalemate() ? 'stalemate' : 'other');
+  // Prefer explicit endBy, then the declared result, then chess.js-detected endings.
+  const endMethod =
+    gameData.endBy ||
+    (gameData.result === 'draw' ? 'draw' : chess.isCheckmate() ? 'checkmate' : chess.isStalemate() ? 'stalemate' : chess.isDraw() ? 'draw' : 'other');
   const movedPiece = pieceName(lastMove?.piece);
   const promotedPiece = lastMove?.promotion ? pieceName(lastMove.promotion) : '';
   const finalMoveIsPromotion = Boolean(lastMove?.promotion || /=/.test(finalMove));
