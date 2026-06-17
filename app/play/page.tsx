@@ -7,7 +7,25 @@ import Link from 'next/link';
 
 export default function PlayPage() {
   const [showGame, setShowGame] = useState(false);
-  const [showBeginnerModal, setShowBeginnerModal] = useState(true);
+  const [showBeginnerModal, setShowBeginnerModal] = useState(false);
+
+  const applyTwoPlayerGameSettings = () => {
+    try {
+      const gameSettings = {
+        levelId: 'street-400',
+        playerColor: 'w',
+        timeControl: 'untimed',
+        boardFlipped: false,
+        gameMode: 'two-player',
+      };
+      localStorage.setItem('gm-play-settings-v1', JSON.stringify(gameSettings));
+      localStorage.setItem('gm-bot-style', 'gentle');
+      localStorage.setItem('gm-spells-enabled', 'false');
+    } catch {
+      // Ignore storage failure.
+    }
+    setShowGame(true);
+  };
 
   if (showGame) {
     return <PlayTrainer />;
@@ -65,17 +83,7 @@ export default function PlayPage() {
 
             {/* Two player */}
             <button
-              onClick={() => {
-                // Set game mode to two-player
-                try {
-                  const settings = JSON.parse(localStorage.getItem('gm-play-settings-v1') || '{}');
-                  settings.gameMode = 'two-player';
-                  localStorage.setItem('gm-play-settings-v1', JSON.stringify(settings));
-                } catch {
-                  // fallback
-                }
-                setShowGame(true);
-              }}
+              onClick={applyTwoPlayerGameSettings}
               className="group rounded-2xl border border-slate-700 bg-slate-900/50 p-8 text-left transition hover:border-teal-400 hover:bg-slate-900"
             >
               <div className="text-5xl mb-3">👥</div>

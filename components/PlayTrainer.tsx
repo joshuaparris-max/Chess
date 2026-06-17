@@ -203,12 +203,13 @@ export default function PlayTrainer() {
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(PLAY_SETTINGS_KEY) || '{}') as Partial<{
-        levelId: string; playerColor: PlayerColor; timeControl: TimeControl; boardFlipped: boolean;
+        levelId: string; playerColor: PlayerColor; timeControl: TimeControl; boardFlipped: boolean; gameMode: GameMode;
       }>;
       if (saved.levelId && botLevels.some((bot) => bot.id === saved.levelId)) setLevelId(saved.levelId);
       if (saved.playerColor === 'w' || saved.playerColor === 'b') setPlayerColor(saved.playerColor);
       if (saved.timeControl === 'untimed' || saved.timeControl === '10+0' || saved.timeControl === '5+0') setTimeControl(saved.timeControl);
       if (typeof saved.boardFlipped === 'boolean') setBoardFlipped(saved.boardFlipped);
+      if (saved.gameMode === 'two-player' || saved.gameMode === 'vs-computer') setGameMode(saved.gameMode);
       const savedSounds = localStorage.getItem(CHESS_SOUNDS_KEY);
       setChessSoundsEnabled(savedSounds === null ? true : savedSounds === 'true');
     } catch {
@@ -221,9 +222,12 @@ export default function PlayTrainer() {
   useEffect(() => {
     if (!settingsReady) return;
     try {
-      localStorage.setItem(PLAY_SETTINGS_KEY, JSON.stringify({ levelId, playerColor, timeControl, boardFlipped }));
+      localStorage.setItem(
+        PLAY_SETTINGS_KEY,
+        JSON.stringify({ levelId, playerColor, timeControl, boardFlipped, gameMode }),
+      );
     } catch {}
-  }, [settingsReady, levelId, playerColor, timeControl, boardFlipped]);
+  }, [settingsReady, levelId, playerColor, timeControl, boardFlipped, gameMode]);
 
   const closeOnboarding = () => {
     setShowOnboarding(false);
