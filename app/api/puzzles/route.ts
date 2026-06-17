@@ -1,17 +1,3 @@
-import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-
-export async function GET() {
-  try {
-    const file = path.join(process.cwd(), 'data', 'puzzles.json')
-    const raw = await fs.promises.readFile(file, 'utf-8')
-    const data = JSON.parse(raw)
-    return NextResponse.json({ ok: true, puzzles: data })
-  } catch (err: any) {
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
-  }
-}
 import { NextRequest, NextResponse } from 'next/server';
 import { getDailyLichessPuzzle, getRandomLichessPuzzle } from '@/lib/lichessClient';
 
@@ -21,12 +7,6 @@ import { getDailyLichessPuzzle, getRandomLichessPuzzle } from '@/lib/lichessClie
  *
  * Proxies the free Lichess puzzle API (no key, no account, no database) and returns a
  * puzzle with a reconstructed FEN. The daily puzzle is cached; random is always fresh.
- *
- * Resilience:
- * - Times out after 15s (Lichess API sometimes slow)
- * - Returns 503 on timeout (client can retry)
- * - Returns 429 if Lichess rate-limits us
- * - Validates FEN non-empty before returning
  */
 export async function GET(request: NextRequest) {
   try {

@@ -1,3 +1,4 @@
+"use client"
 import React, { useEffect, useState } from 'react'
 
 export default function PuzzlesPage() {
@@ -24,8 +25,4 @@ export default function PuzzlesPage() {
     </main>
   )
 }
-import Home from '../page-hub';
 
-export default function PuzzlesIndex() {
-  return <Home initialMode="puzzles" />;
-}
