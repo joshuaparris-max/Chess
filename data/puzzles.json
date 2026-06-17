@@ -1,0 +1,16 @@
+[
+  {
+    "id": "puzzle-1",
+    "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 4",
+    "solution": ["Bxf7+", "Kxf7", "Ng5+"],
+    "rating": 800,
+    "theme": "tactics"
+  },
+  {
+    "id": "puzzle-2",
+    "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 4",
+    "solution": ["Ng5", "Qxg5"],
+    "rating": 1200,
+    "theme": "fork"
+  }
+]

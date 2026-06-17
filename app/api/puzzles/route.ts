@@ -1,3 +1,17 @@
+import { NextResponse } from 'next/server'
+import fs from 'fs'
+import path from 'path'
+
+export async function GET() {
+  try {
+    const file = path.join(process.cwd(), 'data', 'puzzles.json')
+    const raw = await fs.promises.readFile(file, 'utf-8')
+    const data = JSON.parse(raw)
+    return NextResponse.json({ ok: true, puzzles: data })
+  } catch (err: any) {
+    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+  }
+}
 import { NextRequest, NextResponse } from 'next/server';
 import { getDailyLichessPuzzle, getRandomLichessPuzzle } from '@/lib/lichessClient';
 
