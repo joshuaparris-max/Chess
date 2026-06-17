@@ -30,7 +30,7 @@ function replayGame(gameData: GameData) {
   const chess = new Chess();
   let appliedMoves = 0;
 
-  if (gameData.moves?.length) {
+  if (Array.isArray(gameData.moves) && gameData.moves.length > 0) {
     for (const move of gameData.moves) {
       try {
         chess.move(move);
@@ -39,21 +39,29 @@ function replayGame(gameData: GameData) {
         break;
       }
     }
-  } else if (gameData.finalFEN) {
+  }
+
+  const allMovesApplied = Array.isArray(gameData.moves) && appliedMoves === gameData.moves.length;
+  if ((!Array.isArray(gameData.moves) || gameData.moves.length === 0 || !allMovesApplied) && gameData.finalFEN) {
     chess.load(gameData.finalFEN);
   }
 
-  return { chess, appliedMoves };
+  return { chess, appliedMoves, allMovesApplied };
 }
 
 export function buildGameSpecificFacts(gameData: GameData) {
-  const { chess, appliedMoves } = replayGame(gameData);
+  const { chess, appliedMoves, allMovesApplied } = replayGame(gameData);
   const history = chess.history({ verbose: true }) as VerboseMove[];
   const lastMove = history[history.length - 1];
-  const finalMove = lastMove?.san || gameData.finalMove || gameData.moves?.[gameData.moves.length - 1] || 'unknown';
+  const finalMove =
+    lastMove?.san ||
+    gameData.finalMove ||
+    (allMovesApplied && gameData.moves?.[gameData.moves.length - 1]) ||
+    'unknown';
   const sideToMove = chess.turn();
   const sideToMoveName = colorName(sideToMove);
   const winner = chess.isCheckmate() ? (sideToMove === 'w' ? 'Black' : 'White') : gameData.winner || 'none';
+  const endMethod = gameData.endBy || (chess.isCheckmate() ? 'checkmate' : chess.isStalemate() ? 'stalemate' : 'other');
   const movedPiece = pieceName(lastMove?.piece);
   const promotedPiece = lastMove?.promotion ? pieceName(lastMove.promotion) : '';
   const finalMoveIsPromotion = Boolean(lastMove?.promotion || /=/.test(finalMove));
@@ -83,6 +91,7 @@ export function buildGameSpecificFacts(gameData: GameData) {
     `Applied legal moves: ${appliedMoves}.`,
     `Final move: ${finalMove}.`,
     `Final moved piece: ${movedPiece}.`,
+    `Game end method: ${endMethod}.`,
     finalMoveIsPromotion ? `Promotion: yes${promotedPiece ? `, to a ${promotedPiece}` : ''}.` : 'Promotion: no.',
     `Main winning theme: ${mainTheme}.`,
     checkmateFact,

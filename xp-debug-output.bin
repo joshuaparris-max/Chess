@@ -1,0 +1,14 @@
+file:///c:/dev/Chess/github-current/node_modules/vitest/dist/chunks/cac.C9xsMMkH.js:406
+          throw new CACError(`Unknown option \`${name.length > 1 ? `--${name}` : `-${name}`}\``);
+                ^
+
+CACError: Unknown option `--debug`
+    at Command.checkUnknownOptions (file:///c:/dev/Chess/github-current/node_modules/vitest/dist/chunks/cac.C9xsMMkH.js:406:17)
+    at CAC.runMatchedCommand (file:///c:/dev/Chess/github-current/node_modules/vitest/dist/chunks/cac.C9xsMMkH.js:606:13)
+    at CAC.parse (file:///c:/dev/Chess/github-current/node_modules/vitest/dist/chunks/cac.C9xsMMkH.js:547:12)
+    at file:///c:/dev/Chess/github-current/node_modules/vitest/dist/cli.js:11:13
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:633:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.16.0

@@ -1,0 +1,69 @@
+﻿diff --git a/components/ChessBoard.tsx b/components/ChessBoard.tsx
+index 8c6fb21..c34fde7 100644
+--- a/components/ChessBoard.tsx
++++ b/components/ChessBoard.tsx
+@@ -3,7 +3,8 @@
+ import { useEffect, useMemo, useState } from "react";
+ import { type Chess, type Square } from "chess.js";
+ import ChessPiece from "./ChessPiece";
+-import { BOARD_THEME_OPTIONS, type BoardTheme } from "@/lib/chess/boardThemes";
++import { BOARD_THEME_OPTIONS } from '@/lib/chess/boardThemes';
++import { PIECE_SET_OPTIONS, getPieceSet } from '@/lib/chess/pieceSets';
+ import {
+   WhiteQueen,
+   BlackQueen,
+@@ -164,9 +165,9 @@ export default function ChessBoard({
+ 
+   useEffect(() => {
+     try {
+-      const saved = window.localStorage.getItem("gm-piece-set");
+-      if (saved && saved in PIECE_SETS) {
+-        setPieceSet(saved as PieceSetKey);
++      const savedPieceSet = getPieceSet();
++      if (PIECE_SET_OPTIONS.some((item) => item.id === savedPieceSet)) {
++        setPieceSet(savedPieceSet as PieceSetKey);
+       }
+       const savedTheme = window.localStorage.getItem("gm-board-theme");
+       if (savedTheme && BOARD_THEME_OPTIONS.some((item) => item.id === savedTheme)) {
+@@ -176,8 +177,6 @@ export default function ChessBoard({
+       // Ignore storage errors.
+     }
+ 
+-    // Live-apply when theme or piece style is changed elsewhere (Settings menu,
+-    // loot drops, boss rewards).
+     const onThemeChange = (event: Event) => {
+       const id = (event as CustomEvent).detail as string | undefined;
+       if (id && BOARD_THEME_OPTIONS.some((item) => item.id === id)) {
+@@ -186,7 +185,7 @@ export default function ChessBoard({
+     };
+     const onPieceChange = (event: Event) => {
+       const id = (event as CustomEvent).detail as string | undefined;
+-      if (id && id in PIECE_SETS) {
++      if (id && PIECE_SET_OPTIONS.some((item) => item.id === id)) {
+         setPieceSet(id as PieceSetKey);
+       }
+     };
+@@ -198,11 +197,6 @@ export default function ChessBoard({
+     };
+   }, []);
+ 
+-  const pieces: Record<string, string> = useMemo(
+-    () => PIECE_SETS[pieceSet].pieces,
+-    [pieceSet],
+-  );
+-
+   const getFairyPiece = (color: "w" | "b", type: string) => {
+     if (color === "w") {
+       switch (type) {
+diff --git a/next-env.d.ts b/next-env.d.ts
+index c4b7818..9edff1c 100644
+--- a/next-env.d.ts
++++ b/next-env.d.ts
+@@ -1,6 +1,6 @@
+ /// <reference types="next" />
+ /// <reference types="next/image-types/global" />
+-import "./.next/dev/types/routes.d.ts";
++import "./.next/types/routes.d.ts";
+ 
+ // NOTE: This file should not be edited
+ // see https://nextjs.org/docs/app/api-reference/config/typescript for more information.

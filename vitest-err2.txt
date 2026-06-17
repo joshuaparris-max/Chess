@@ -1,0 +1,9 @@
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/gameReviewFacts.test.ts [ tests/gameReviewFacts.test.ts ]
+TypeError: Cannot read properties of undefined (reading 'config')
+ ❯ tests/gameReviewFacts.test.ts:6:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

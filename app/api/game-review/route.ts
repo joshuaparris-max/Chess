@@ -1,10 +1,62 @@
 import { NextResponse } from 'next/server';
-import type { ReviewRequest, ReviewResponse } from '../../../lib/gameReviewTypes';
+import type { GameData, ReviewRequest, ReviewResponse } from '../../../lib/gameReviewTypes';
 import { buildCoachPrompt } from '../../../lib/gameReviewPrompts';
 import { buildGameSpecificFacts } from '../../../lib/gameReviewFacts';
 import { validateGameData, validateRequestSize } from '../../../lib/validation';
 import { getClientIP, checkRateLimit } from '../../../lib/rateLimiter';
 import { resilientFetch } from '../../../lib/groqResilience';
+
+function normalizeAssistantText(content: string) {
+  return content
+    .replace(/\*\*/g, '')
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/detail=true/g, '')
+    .replace(/\r\n/g, '\n')
+    .trim();
+}
+
+function hasRequiredReviewLabels(text: string) {
+  return /(^|\n)Result:\s*.+/i.test(text) && /(^|\n)Final move:\s*.+/i.test(text) && /(^|\n)Main theme:\s*.+/i.test(text);
+}
+
+function buildFallbackReview(gameData: GameData, gameFacts: ReturnType<typeof buildGameSpecificFacts>) {
+  const resultText =
+    gameData.result === 'win' ? 'You won' :
+    gameData.result === 'loss' ? 'You lost' :
+    gameData.result === 'draw' || gameData.result === 'stalemate' ? 'The game was a draw' :
+    `Result: ${gameData.result}`;
+
+  const finalMove = gameFacts.finalMove || gameData.finalMove || (Array.isArray(gameData.moves) ? gameData.moves[gameData.moves.length - 1] : 'unknown') || 'unknown';
+  const mainTheme = gameFacts.mainTheme || 'converting the final position into a clear result';
+
+  const didWell =
+    gameData.result === 'win'
+      ? `You finished the game with ${finalMove}.`
+      : gameData.result === 'loss'
+      ? 'You kept fighting to the end and can learn from the final position.'
+      : 'You reached a balanced result and can refine your final plans.';
+
+  const improve =
+    gameData.result === 'win'
+      ? 'Practice spotting the finishing move sooner.'
+      : gameData.result === 'loss'
+      ? 'Watch the opponent’s threats and keep your king safe.'
+      : 'Practice final position technique and basic endgame decisions.';
+
+  const nextPractice =
+    gameData.result === 'win'
+      ? 'Practice similar basic tactics and mate patterns.'
+      : gameData.result === 'loss'
+      ? 'Practice simple tactics and safe king play.'
+      : 'Practice endgame and drawing technique.';
+
+  return `Result: ${resultText}.
+Final move: ${finalMove}.
+Main theme: ${mainTheme}.
+Did well: ${didWell}
+Improve: ${improve}
+Next practice: ${nextPractice}`;
+}
 
 async function callGroq(messages: any[], key: string, model: string) {
   const res = await resilientFetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -43,7 +95,7 @@ export async function POST(req: Request) {
     }
 
     // Validate request payload
-    const gameValidation = validateGameData(body.gameData.moves, body.gameData.moveCount);
+    const gameValidation = validateGameData(body.gameData);
     if (!gameValidation.valid) {
       return NextResponse.json({ error: gameValidation.error }, { status: 400 });
     }
@@ -102,23 +154,22 @@ export async function POST(req: Request) {
           continue;
         }
 
-        // Basic sanitization: strip Markdown markers and accidental debug tokens
-        content = content.replace(/\*\*/g, '');
-        content = content.replace(/```[\s\S]*?```/g, '');
-        content = content.replace(/detail=true/g, '');
+        // Basic sanitization: strip Markdown markers and accidental debug tokens.
+        content = normalizeAssistantText(content);
 
-        const text = content.slice(0, 10000).trim();
-
-        // Return appropriate response based on mode
         if (isDetailMode) {
-          const response: ReviewResponse = { detail: text };
-          return NextResponse.json(response);
-        } else {
-          // Ensure summary is short — trim to first 1200 characters as a safeguard
-          const short = text.length > 1200 ? text.slice(0, 1200).trim() : text;
-          const response: ReviewResponse = { summary: short };
+          const detailText = content.slice(0, 10000).trim();
+          const response: ReviewResponse = { detail: detailText };
           return NextResponse.json(response);
         }
+
+        const short = content.length > 1200 ? content.slice(0, 1200).trim() : content;
+        const summary = hasRequiredReviewLabels(short)
+          ? short
+          : buildFallbackReview(body.gameData as GameData, gameFacts);
+
+        const response: ReviewResponse = { summary };
+        return NextResponse.json(response);
       } catch (e) {
         lastError = e;
         console.log(`Groq key index ${i} threw error:`, e instanceof Error ? e.message : e);

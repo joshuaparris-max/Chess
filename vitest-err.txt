@@ -1,0 +1,9 @@
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/xp.test.ts [ tests/xp.test.ts ]
+TypeError: Cannot read properties of undefined (reading 'config')
+ ❯ tests/xp.test.ts:4:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

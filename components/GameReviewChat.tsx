@@ -33,9 +33,9 @@ export default function GameReviewChat({ gameData, baseSummary }: { gameData: Ga
   }
 
   return (
-    <div style={{ borderTop: '1px solid rgba(148,163,184,0.08)', marginTop: 12, paddingTop: 12 }}>
+    <div style={{ borderTop: '1px solid rgba(148,163,184,0.08)', marginTop: 12, paddingTop: 12, minWidth: 0 }}>
       <div style={{ fontWeight: 600, marginBottom: 8, color: '#e6eef0' }}>Ask the coach about this game…</div>
-      <div style={{ maxHeight: 280, overflow: 'auto', padding: 8 }}>
+      <div style={{ maxHeight: 280, overflow: 'auto', padding: 8, minWidth: 0 }}>
         {messages.map((m, i) => (
           <div key={i} style={{ marginBottom: 10, display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
             <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>{m.role === 'user' ? 'You' : 'Coach'}</div>
@@ -43,9 +43,9 @@ export default function GameReviewChat({ gameData, baseSummary }: { gameData: Ga
           </div>
         ))}
       </div>
-      <div style={{ display: 'flex', marginTop: 8, gap: 8 }}>
-        <input value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="Why was that checkmate?" style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(148,163,184,0.08)', background: '#021016', color: '#e6eef0' }} />
-        <button onClick={sendQuestion} disabled={loading} style={{ padding: '0 16px', height: 48, borderRadius: 10 }}>{loading ? 'Coach is thinking…' : 'Ask'}</button>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+        <input value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="Why was that checkmate?" style={{ flex: 1, minWidth: 0, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(148,163,184,0.08)', background: '#021016', color: '#e6eef0' }} />
+        <button onClick={sendQuestion} disabled={loading} style={{ padding: '0 16px', height: 48, borderRadius: 10, minWidth: 0 }}>{loading ? 'Coach is thinking…' : 'Ask'}</button>
       </div>
     </div>
   );

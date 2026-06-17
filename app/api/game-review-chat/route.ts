@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     }
 
     // Validate request payload
-    const gameValidation = validateGameData(body.gameData.moves, body.gameData.moveCount);
+    const gameValidation = validateGameData(body.gameData);
     if (!gameValidation.valid) {
       return NextResponse.json({ error: gameValidation.error }, { status: 400 });
     }

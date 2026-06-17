@@ -1,0 +1,18 @@
+
+ RUN  v4.1.8 c:/dev/Chess/github-current
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  11:25:55
+   Duration  591ms (transform 77ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/gameReviewFacts.test.ts [ tests/gameReviewFacts.test.ts ]
+TypeError: Cannot read properties of undefined (reading 'config')
+ ❯ tests/gameReviewFacts.test.ts:6:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

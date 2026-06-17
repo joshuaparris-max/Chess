@@ -65,18 +65,18 @@ export default function PostGameReview({ gameData, autoRequest = false, onSummar
   }, [autoRequest]);
 
   return (
-    <div style={{ maxWidth: 680, width: '100%' }}>
-      <div style={{ marginBottom: 8 }}>
-        <button onClick={() => requestReview(false)} disabled={loading} style={{ marginRight: 8, padding: '8px 12px', borderRadius: 8 }}>
+    <div style={{ maxWidth: 680, width: '100%', minWidth: 0 }}>
+      <div style={{ marginBottom: 8, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+        <button onClick={() => requestReview(false)} disabled={loading} style={{ padding: '8px 12px', borderRadius: 8, minWidth: 0 }}>
           {loading ? 'Coach is reviewing your game…' : 'Review my game'}
         </button>
-        <span style={{ marginLeft: 12, fontSize: 12, color: '#9ca3af' }}>For review, the app sends this game's moves and basic game details. No personal information is sent.</span>
+        <span style={{ fontSize: 12, color: '#9ca3af', minWidth: 0 }}>For review, the app sends this game's moves and basic game details. No personal information is sent.</span>
       </div>
 
       {error && <div style={{ color: 'crimson' }}>{error}</div>}
 
       {summary && (
-        <div style={{ background: '#0f172a', color: '#e5e7eb', border: '1px solid rgba(148, 163, 184, 0.35)', borderRadius: 16, padding: 16 }}>
+        <div style={{ background: '#0f172a', color: '#e5e7eb', border: '1px solid rgba(148, 163, 184, 0.35)', borderRadius: 16, padding: 16, wordBreak: 'break-word', minWidth: 0 }}>
           <div style={{ fontWeight: 700, marginBottom: 8, color: '#2dd4bf' }}>Quick Review</div>
           <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>{summary}</div>
           <div style={{ marginTop: 12 }}>

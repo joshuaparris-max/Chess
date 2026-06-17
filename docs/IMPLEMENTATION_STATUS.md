@@ -1,6 +1,62 @@
 # Implementation Status
 
-Updated: 2026-06-15
+Updated: 2026-06-16
+
+## Integration QA Ledger
+
+Current role: Integration, QA and Release Manager. No new roadmap feature work should be implemented from this branch.
+
+Repository safety snapshot:
+- Working tree: `merge/main-all-features`
+- Separate worktree detected: `C:/dev/Chess/github-integration` on `integration/qa`
+- Current uncommitted changes: `components/ChessBoard.tsx`, generated `next-env.d.ts`, untracked `docs/ideas/settings.md`, and this status/recovery documentation
+- Uncommitted working-tree diff preserved at `docs/recovery/2026-06-16-uncommitted-working-tree.patch`
+- Current blocker: lint/build fail in the dirty working tree because `components/ChessBoard.tsx` has an incomplete local edit (`TS1128`, return outside component scope). Do not merge or push that local edit.
+
+Validation run from `C:\dev\Chess\github-current` on 2026-06-16:
+
+| Check | Result | Notes |
+|---|---:|---|
+| `npm.cmd run lint` | Failed | Blocked by uncommitted `components/ChessBoard.tsx` syntax error |
+| `npm.cmd test -- --run` | Passed | 21 files, 138 tests |
+| `npm.cmd run build` | Failed | Same uncommitted `components/ChessBoard.tsx` syntax error |
+| Live `/` HTTP smoke | Passed | `https://chess-kappa-five.vercel.app/` returned 200 |
+| Live `/play` HTTP smoke | Passed | returned 200 |
+| Live `/stickers` HTTP smoke | Passed | returned 200 |
+| Live `/story` HTTP smoke | Passed | returned 200 |
+
+Ticket tracker:
+
+| Ticket | Owner | Branch | Status | Dependencies | Build passed | Tests passed | Reviewed | Merged commit | Live deployment verified |
+|---|---|---|---|---|---:|---:|---:|---|---:|
+| 1.1 Fairy Piece Set | Codex | `origin/main` | Present on main; needs visual QA | None | Previously passed on clean `origin/main`; dirty tree blocked | Not specifically covered | Partial code audit | `7bcab20fd307f0a930b1c8a3d18fdbaa775943b7` | HTTP only; visual pending |
+| 1.2 Fairy Garden Board Theme | Claude | `origin/main` | Present on main; requires live verification | 1.1 optional visual pairing | Previously passed on clean `origin/main`; dirty tree blocked | Not specifically covered | Partial code audit | `7bcab20fd307f0a930b1c8a3d18fdbaa775943b7` / earlier `41fce37` | HTTP only; theme-switch visual pending |
+| 1.3 Magical Sounds | Codex | `origin/main` | Present on main; manual audio QA pending | None | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Partial code audit | `b3ceed952843db69c957ed796e28b3a24ebbe521` | HTTP only; browser/audio pending |
+| 1.4 Princess Story Mode | Claude | `origin/main`; overlap from prior recovery work | Present on main, but marked overlap-risk | Must compare prior WIP with Claude implementation | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Needs focused review | `3f7afc9daaab5ada27a5b07936210a79e454db33`, `18a767b6f8b834e0d32ebf5a645a6d559144d899` | HTTP route 200; full Done When pending |
+| 2.1 Sticker Book | Codex | `origin/main` | Present on main; final integration depends on Story rewards | 1.4 | Previously passed on clean `origin/main`; dirty tree blocked | `tests/stickerBook.test.ts` exists; full suite passed | Partial code audit | `cc32ba60895fafed723bf6e30955de3eb56ac20f` | HTTP route 200; storage QA pending |
+| 2.2 Bedtime Mode | Claude | `origin/main` | Present on main; needs review | 1.3 | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `89e9880` | Pending |
+| 2.3 Emoji Reactions | Codex | `origin/main` | Present on main; manual pass-and-play QA pending | None | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Partial code audit | `4d556e2b9d69bb0c7cfcc68bf63aa308567a9afc` | HTTP `/play` 200; browser interaction pending |
+| 2.4 Parent Report Card | Claude | `origin/main` | Present on main; needs review | Progress data | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `4474395` | Pending |
+| 3.1 XP and Levels | Codex | `origin/main` | Present on main; needs dependency review | Before 3.2, 4.3, 5.1 | Previously passed on clean `origin/main`; dirty tree blocked | `tests/xp.test.ts` exists; full suite passed | Pending | `3f7afc9` and later XP commits | Pending |
+| 3.2 Quest Log | Claude | `origin/main` | Present on main; needs review | 3.1 | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `8bb4707` | Pending |
+| 3.3 Loot Drops | Codex | `origin/main` | Present on main; needs review | 2.1, 3.1 | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `daa1a1b` | Pending |
+| 3.4 Puzzle Rush | Claude | `origin/main` | Present on main; needs review | Puzzle state | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `f10d79e` | Pending |
+| 3.5 Puzzle Streak | Codex | `origin/main` | Present on main; needs review | Puzzle state | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `04a2e97` | Pending |
+| 4.1 Spell Slots | Codex | `origin/main` | Present on main; needs review | Play controls | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `1c7295c` | Pending |
+| 4.2 Boss Battles | Claude | `origin/main` | Present on main; needs review | Progression | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `5364dd2` | Pending |
+| 4.3 Character Sheet | Codex | `origin/main` | Present on main; needs review | 3.1 | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `fb39150` | Pending |
+| 5.1 Family Leaderboard | Codex | `origin/main` | Present on main; needs review | 3.1 | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `d796cf6` | Pending |
+| 5.2 Family Puzzle Duel | Claude | `origin/main` | Present on main; needs review | 5.1 | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `74b5db5` | Pending |
+| 6.1 Navigation | Codex | `origin/main` | Present on main; must remain last integration layer | All feature routes | Previously passed on clean `origin/main`; dirty tree blocked | Existing full suite passed | Pending | `59f82e3` | Pending |
+
+Immediate QA findings:
+- Ticket 1.3 exact commit: `b3ceed952843db69c957ed796e28b3a24ebbe521`; reachable from `origin/main`.
+- Ticket 2.1 exact commit: `cc32ba60895fafed723bf6e30955de3eb56ac20f`; reachable from `origin/main`.
+- Ticket 2.3 exact commit: `4d556e2b9d69bb0c7cfcc68bf63aa308567a9afc`; reachable from `origin/main`.
+- Ticket 1.1/1.2 combined commit `7bcab20fd307f0a930b1c8a3d18fdbaa775943b7` is reachable from `origin/main`; Ticket 1.2 remains marked live-verification required.
+- Ticket 1.4-related committed files on main include `app/story/[chapter]/page.tsx`, `app/story/page.tsx`, `components/story/*`, and `lib/story/chapters.ts`.
+- Prior overlapping WIP commit `3f7afc9` also included non-1.4 files: `app/puzzles/rush/page.tsx`, `components/XpBadge.tsx`, `components/puzzles/PuzzleRushHUD.tsx`, `lib/progression/xp.ts`, `tests/xp.test.ts`, and edits to `PlayTrainer`, `PuzzleTrainer`, `lib/types`, and `app/page`.
+- Current uncommitted `components/ChessBoard.tsx` is unidentified/accidental until its author confirms; it is not on `origin/main`.
 
 ## Completed
 

@@ -597,7 +597,18 @@ export default function PlayTrainer() {
       winner: game.isCheckmate() ? (game.turn() === 'b' ? 'white' : 'black') : null,
       moveCount: moves.length,
       botLevel: twoPlayer ? undefined : botLevelValue,
-      endBy: game.isCheckmate() ? 'checkmate' : undefined,
+      endBy:
+        game.isCheckmate()
+          ? 'checkmate'
+          : game.isStalemate()
+          ? 'stalemate'
+          : game.isThreefoldRepetition()
+          ? 'threefold repetition'
+          : game.isInsufficientMaterial()
+          ? 'insufficient material'
+          : game.isDraw()
+          ? 'draw'
+          : undefined,
     };
   }
 
